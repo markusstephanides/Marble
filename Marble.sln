@@ -16,6 +16,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Messaging.Rabbit", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Messaging.Rabbit.Tests", "Marble.Messaging.Rabbit.Tests\Marble.Messaging.Rabbit.Tests.csproj", "{49DF38CE-3A0F-4899-94DA-9768FC57F54D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Utilities", "Marble.Utilities\Marble.Utilities.csproj", "{52AEB360-D588-460C-BC90-DDDFA4CBAFC4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Utilities.Test", "Marble.Utilities.Test\Marble.Utilities.Test.csproj", "{4093C394-3A96-4B43-8D4E-7EF3EBDDC003}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,5 +58,13 @@ Global
 		{49DF38CE-3A0F-4899-94DA-9768FC57F54D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{49DF38CE-3A0F-4899-94DA-9768FC57F54D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{49DF38CE-3A0F-4899-94DA-9768FC57F54D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52AEB360-D588-460C-BC90-DDDFA4CBAFC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52AEB360-D588-460C-BC90-DDDFA4CBAFC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52AEB360-D588-460C-BC90-DDDFA4CBAFC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52AEB360-D588-460C-BC90-DDDFA4CBAFC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4093C394-3A96-4B43-8D4E-7EF3EBDDC003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4093C394-3A96-4B43-8D4E-7EF3EBDDC003}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4093C394-3A96-4B43-8D4E-7EF3EBDDC003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4093C394-3A96-4B43-8D4E-7EF3EBDDC003}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

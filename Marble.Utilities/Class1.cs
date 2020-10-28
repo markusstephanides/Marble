@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Marble.Core
+namespace Marble.Utilities
 {
     public class Class1
     {
