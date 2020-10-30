@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Marble.Core.Builder
@@ -30,9 +31,15 @@ namespace Marble.Core.Builder
             return this;
         }
 
+        public IAppHostBuilder ProvideConfiguration(IConfiguration configuration)
+        {
+            this.buildingModel.Configuration = configuration;
+            return this;
+        }
+
         public AppHost BuildAndHost()
         {
-            throw new NotImplementedException();
+            return AppHostFactory.Create(this.buildingModel);
         }
     }
 }
