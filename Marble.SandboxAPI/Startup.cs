@@ -27,8 +27,6 @@ namespace Marble.SandboxAPI
         {
             services.AddControllers();
             services.AddSwaggerGen();
-
-            services.AddSingleton()
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

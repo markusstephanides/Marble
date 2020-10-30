@@ -8,6 +8,6 @@ namespace Marble.Core.Builder
     {
         public IServiceProvider ServiceProvider { get; set; }
         public IServiceCollection ServiceCollection { get; set; }
-        public IList<Action<IServiceCollection>> ServiceCollectionConfigurationActions { get; set; } = new List<Action<IServiceCollection>>();
+        public IList<Action<IServiceCollection>> ServiceCollectionConfigurationActions { get; } = new List<Action<IServiceCollection>>();
     }
 }

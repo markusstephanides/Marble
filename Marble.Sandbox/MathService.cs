@@ -6,10 +6,17 @@ namespace Marble.Sandbox
     // [MarbleController]
     public class MathService
     {
+        private readonly StupidDependency stupidDependency;
+
+        public MathService(StupidDependency stupidDependency)
+        {
+            this.stupidDependency = stupidDependency;
+        }
+
         // [MarbleProcedure]
         public int Add(int a, int b)
         {
-            return a + b;
+            return this.stupidDependency.StupidAdd(a, b);
         }
 
         // [MarbleProcedure]
@@ -19,9 +26,12 @@ namespace Marble.Sandbox
         }
 
         // [MarbleProcedure]
-        public MathResult Something()
+        public MathResult Something(int i)
         {
-            return new MathResult();
+            return new MathResult
+            {
+                SomeInt = i
+            };
         }
     }
 
