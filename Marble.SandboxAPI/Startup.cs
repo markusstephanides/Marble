@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Marble.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -27,6 +28,9 @@ namespace Marble.SandboxAPI
         {
             services.AddControllers();
             services.AddSwaggerGen();
+
+            // TODO Provide RabbitMQ Connection Config / instructions on how to connect
+            MarbleCore.Builder.ProvideServiceCollection(services);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -41,6 +45,8 @@ namespace Marble.SandboxAPI
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "CalculatorAPI V1"); });
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+
+            MarbleCore.Builder.ProvideServiceProvider(app.ApplicationServices).BuildAndHost();
         }
     }
 }
