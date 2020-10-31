@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Marble.Core.Declaration;
 
 namespace Marble.Sandbox
 {
-    // [MarbleController]
+    [MarbleController]
     public class MathService
     {
         private readonly StupidDependency stupidDependency;
@@ -13,19 +14,19 @@ namespace Marble.Sandbox
             this.stupidDependency = stupidDependency;
         }
 
-        // [MarbleProcedure]
+        [MarbleProcedure]
         public int Add(int a, int b)
         {
             return this.stupidDependency.StupidAdd(a, b);
         }
 
-        // [MarbleProcedure]
+        [MarbleProcedure]
         public Task<int> ComplexAdd(int a, int b)
         {
             return Task.FromResult(a + b);
         }
 
-        // [MarbleProcedure]
+        [MarbleProcedure]
         public MathResult Something(int i)
         {
             return new MathResult

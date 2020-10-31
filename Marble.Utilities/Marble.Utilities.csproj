@@ -5,4 +5,8 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Marble.Core\Marble.Core.csproj" />
+    </ItemGroup>
+
 </Project>

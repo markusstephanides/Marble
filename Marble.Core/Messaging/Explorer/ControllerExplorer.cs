@@ -11,7 +11,7 @@ namespace Marble.Core.Messaging.Explorer
         public IEnumerable<ControllerDescriptor> ScanAssembly(Assembly assembly)
         {
             return assembly.GetTypes()
-                .Where(type => Attribute.IsDefined(type, typeof(MarbleController)))
+                .Where(type => Attribute.IsDefined(type, typeof(MarbleControllerAttribute)))
                 .Select(
                     type => new ControllerDescriptor
                     {
@@ -24,7 +24,7 @@ namespace Marble.Core.Messaging.Explorer
         private IEnumerable<ProcedureDescriptor> ScanController(Type type)
         {
             return type.GetMethods()
-                .Where(method => method.GetCustomAttributes(typeof(MarbleProcedure), false).Any())
+                .Where(method => method.GetCustomAttributes(typeof(MarbleProcedureAttribute), false).Any())
                 .Select(method => new ProcedureDescriptor
                 {
                     Name = method.Name,
