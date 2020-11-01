@@ -16,11 +16,7 @@ namespace Marble.Core.Messaging
         private ILogger<MessagingFacade>? logger;
         private IMessagingClient messagingClient;
         private IDictionary<ControllerDescriptor, object> controllers;
-
-        public MessagingFacade()
-        {
-        }
-
+        
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
             this.controllers = new ConcurrentDictionary<ControllerDescriptor, object>(
@@ -43,7 +39,7 @@ namespace Marble.Core.Messaging
             foreach (var (descriptor, _) in this.controllers)
             {
                 this.controllers[descriptor] = serviceProvider.GetService(descriptor.Type);
-                this.logger?.LogInformation($"Found controller instance for {descriptor.ControllerName}");
+                this.logger?.LogInformation($"Found controller instance for {descriptor.ControllerName} with {descriptor.ProcedureDescriptors.Count()} procedures");
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using Marble.Core.Messaging;
 using Marble.Core.Messaging.Abstractions;
+using Marble.Core.Messaging.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,12 +17,31 @@ namespace Marble.Core.Builder
             return this;
         }
 
-        public IAppHostBuilder WithMessaging<TMessagingClient>() 
+        public IAppHostBuilder WithMessaging<TMessagingClient, TConfiguration>(
+            string configurationSection = "Messaging")
             where TMessagingClient : class, IMessagingClient
+            where TConfiguration : MessagingClientConfiguration
         {
             this.buildingModel.MessagingFacade = new MessagingFacade();
+            this.Configure<TConfiguration>(configuration => configuration.GetSection(configurationSection));
             this.ConfigureServices(this.buildingModel.MessagingFacade.ConfigureServices);
             this.ConfigureServices(services => services.AddSingleton<IMessagingClient, TMessagingClient>());
+            return this;
+        }
+
+        public IAppHostBuilder Configure<TOption>(Func<IConfiguration, IConfiguration> configurationAction)
+            where TOption : class
+        {
+            ConfigureServices(collection =>
+            {
+                collection.Configure<TOption>(configurationAction(buildingModel.Configuration));
+            });
+            return this;
+        }
+
+        public IAppHostBuilder Configure<TOption>(Action<TOption> optionConfigurationAction) where TOption : class
+        {
+            ConfigureServices(collection => { collection.Configure(optionConfigurationAction); });
             return this;
         }
 
