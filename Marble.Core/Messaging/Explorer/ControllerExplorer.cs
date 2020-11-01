@@ -17,7 +17,7 @@ namespace Marble.Core.Messaging.Explorer
                     {
                         ControllerName = type.FullName,
                         Type = type,
-                        ProcedureDescriptors = this.ScanController(type)
+                        ProcedureDescriptors = this.ScanController(type).ToList()
                     });
         }
 

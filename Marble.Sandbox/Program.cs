@@ -1,5 +1,7 @@
 using Marble.Core;
-using Microsoft.Extensions.DependencyInjection;
+using Marble.Logging;
+using Marble.Messaging.Rabbit.Extensions;
+using Marble.Utilities.Extensions;
 
 namespace Marble.Sandbox
 {
@@ -8,7 +10,9 @@ namespace Marble.Sandbox
         public static void Main(string[] args)
         {
             MarbleCore.Builder
-                .ConfigureServices(collection => collection.AddSingleton<StupidDependency>())
+                .AddSingleton<StupidDependency>()
+                .WithRabbitMessaging()
+                .WithLogging()
                 .BuildAndHost();
         }
     }

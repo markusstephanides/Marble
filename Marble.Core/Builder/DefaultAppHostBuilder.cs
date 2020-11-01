@@ -1,4 +1,6 @@
 ﻿using System;
+using Marble.Core.Messaging;
+using Marble.Core.Messaging.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -7,16 +9,20 @@ namespace Marble.Core.Builder
     public class DefaultAppHostBuilder : IAppHostBuilder
     {
         private readonly AppHostBuildingModel buildingModel = new AppHostBuildingModel();
-        
+
         public IAppHostBuilder ConfigureServices(Action<IServiceCollection> configurationAction)
         {
             this.buildingModel.ServiceCollectionConfigurationActions.Add(configurationAction);
             return this;
         }
 
-        public IAppHostBuilder WithMessaging()
+        public IAppHostBuilder WithMessaging<TMessagingClient>() 
+            where TMessagingClient : class, IMessagingClient
         {
-            throw new NotImplementedException();
+            this.buildingModel.MessagingFacade = new MessagingFacade();
+            this.ConfigureServices(this.buildingModel.MessagingFacade.ConfigureServices);
+            this.ConfigureServices(services => services.AddSingleton<IMessagingClient, TMessagingClient>());
+            return this;
         }
 
         public IAppHostBuilder ProvideServiceCollection(IServiceCollection serviceCollection)
