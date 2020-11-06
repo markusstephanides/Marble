@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
 using Marble.Core.Messaging;
 using Marble.Core.Messaging.Abstractions;
 using Marble.Core.Messaging.Models;
@@ -48,6 +50,8 @@ namespace Marble.Core.Builder
         public IAppHostBuilder ProvideServiceCollection(IServiceCollection serviceCollection)
         {
             this.buildingModel.ServiceCollection = serviceCollection;
+            this.buildingModel.ServiceCollectionConfigurationActions.ToList()
+                .ForEach(action => action(this.buildingModel.ServiceCollection));
             return this;
         }
 
@@ -66,6 +70,19 @@ namespace Marble.Core.Builder
         public AppHost BuildAndHost()
         {
             return AppHostFactory.Create(this.buildingModel);
+        }
+
+        public IAppHostBuilder KeepRunning()
+        {
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                }
+            }).Start();
+
+            return this;
         }
     }
 }

@@ -24,7 +24,6 @@ namespace Marble.Core.Builder
             if (model.MessagingFacade == null) return;
             
             model.MessagingFacade.Initialize(model.ServiceProvider);
-            model.ServiceProvider.GetService<IMessagingClient>().Connect();
         }
 
         private static void SetupConfiguration(AppHostBuildingModel buildingModel)

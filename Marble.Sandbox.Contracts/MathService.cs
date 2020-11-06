@@ -22,17 +22,17 @@ namespace Marble.Sandbox.Contracts
 
         public Task<int> Add(int a, int b)
         {
-            return messagingClient.SendAsync<int>(new RequestMessage("MathGod", "Add", a, b));
+            return messagingClient.SendAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "Add", a, b));
         }
 
         public Task<int> ComplexAdd(int a, int b)
         {
-            return messagingClient.SendAsync<int>(new RequestMessage("MathGod", "ComplexAdd", a,b));
+            return messagingClient.SendAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "ComplexAdd", a,b));
         }
 
         public Task<MathResult> Something()
         {
-            return messagingClient.SendAsync<MathResult>(new RequestMessage("MathGod", "Something", 1, 2));
+            return messagingClient.SendAsync<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "Something", 1, 2));
         }
     }
 

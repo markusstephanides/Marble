@@ -13,22 +13,28 @@ namespace Marble.Core.Messaging.Explorer
             return assembly.GetTypes()
                 .Where(type => Attribute.IsDefined(type, typeof(MarbleControllerAttribute)))
                 .Select(
-                    type => new ControllerDescriptor
+                    type =>
                     {
-                        ControllerName = type.FullName,
-                        Type = type,
-                        ProcedureDescriptors = this.ScanController(type).ToList()
+                        var descriptor = new ControllerDescriptor
+                        {
+                            ControllerName = type.FullName,
+                            Type = type
+                        };
+
+                        descriptor.ProcedureDescriptors = this.ScanController(type, descriptor).ToList();
+                        return descriptor;
                     });
         }
 
-        private IEnumerable<ProcedureDescriptor> ScanController(Type type)
+        private IEnumerable<ProcedureDescriptor> ScanController(Type type, ControllerDescriptor controllerDescriptor)
         {
             return type.GetMethods()
                 .Where(method => method.GetCustomAttributes(typeof(MarbleProcedureAttribute), false).Any())
                 .Select(method => new ProcedureDescriptor
                 {
                     Name = method.Name,
-                    MethodInfo = method
+                    MethodInfo = method,
+                    ControllerDescriptor = controllerDescriptor
                 });
         }
     }

@@ -6,5 +6,12 @@ namespace Marble.Core.Declaration
     {
         public string Name { get; set; }
         public MethodInfo MethodInfo { get; set; }
+
+        public ControllerDescriptor ControllerDescriptor { get; set; }
+
+        public override string ToString()
+        {
+            return $"{this.ControllerDescriptor.ControllerName}:{this.Name}";
+        }
     }
 }

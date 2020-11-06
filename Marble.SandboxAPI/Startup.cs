@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Marble.Core;
+using Marble.Logging;
+using Marble.Messaging.Rabbit.Extensions;
+using Marble.Sandbox.Contracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -28,9 +31,13 @@ namespace Marble.SandboxAPI
         {
             services.AddControllers();
             services.AddSwaggerGen();
+            services.AddTransient<IMathService, DefaultMathServiceClient>();
 
-            // TODO Provide RabbitMQ Connection Config / instructions on how to connect
-            MarbleCore.Builder.ProvideServiceCollection(services);
+            MarbleCore.Builder
+                .WithRabbitMessaging()
+                .WithLogging()
+                .ProvideConfiguration(Configuration)
+                .ProvideServiceCollection(services);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -42,11 +49,15 @@ namespace Marble.SandboxAPI
             app.UseAuthorization();
 
             app.UseSwagger();
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "CalculatorAPI V1"); });
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "CalculatorAPI V1");
+                c.ConfigObject.DisplayRequestDuration = true;
+            });
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
-            MarbleCore.Builder.ProvideServiceProvider(app.ApplicationServices).BuildAndHost();
+            MarbleCore.Builder
+                .ProvideServiceProvider(app.ApplicationServices)
+                .BuildAndHost();
         }
     }
 }
