@@ -14,41 +14,38 @@ namespace Marble.Core.Messaging
 {
     public class MessagingFacade
     {
+        private IDictionary<ControllerDescriptor, object> controllers;
         private ILogger<MessagingFacade>? logger;
         private IMessagingClient messagingClient;
-        private IDictionary<ControllerDescriptor, object> controllers;
 
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
-            this.controllers = new ConcurrentDictionary<ControllerDescriptor, object>(
+            controllers = new ConcurrentDictionary<ControllerDescriptor, object>(
                 new ControllerExplorer().ScanAssembly(Assembly.GetEntryAssembly()).Select(
                     controller => new KeyValuePair<ControllerDescriptor, object>(controller, null)
                 )
             );
 
-            foreach (var entry in this.controllers)
-            {
-                serviceCollection.AddSingleton(entry.Key.Type);
-            }
+            foreach (var entry in controllers) serviceCollection.AddSingleton(entry.Key.Type);
         }
 
         public void Initialize(IServiceProvider serviceProvider)
         {
-            this.messagingClient = serviceProvider.GetService<IMessagingClient>();
-            this.messagingClient.Connect(this, this.controllers.Keys);
-            this.logger = serviceProvider.GetService<ILogger<MessagingFacade>>();
+            messagingClient = serviceProvider.GetService<IMessagingClient>();
+            messagingClient.Connect(this, controllers.Keys);
+            logger = serviceProvider.GetService<ILogger<MessagingFacade>>();
 
-            foreach (var (descriptor, _) in this.controllers)
+            foreach (var (descriptor, _) in controllers)
             {
-                this.controllers[descriptor] = serviceProvider.GetService(descriptor.Type);
-                this.logger?.LogInformation(
+                controllers[descriptor] = serviceProvider.GetService(descriptor.Type);
+                logger?.LogInformation(
                     $"Found controller instance for {descriptor.ControllerName} with {descriptor.ProcedureDescriptors.Count()} procedures");
             }
         }
 
-        public Task<object?> InvokeProcedure(string controllerName, string procedureName, object[]? parameters)
+        public object? InvokeProcedure(string controllerName, string procedureName, object[]? parameters)
         {
-            var (key, value) = this.controllers.First(controllerDescriptor =>
+            var (key, value) = controllers.First(controllerDescriptor =>
                 controllerDescriptor.Key.ControllerName == controllerName);
             var procedureMethodInfo =
                 key.ProcedureDescriptors.First(procedureDescriptor =>
@@ -62,9 +59,7 @@ namespace Marble.Core.Messaging
                     var parameter = parameters[i];
                     var parameterInfo = parameterInfos[i];
                     if (parameter.GetType() != parameterInfo.ParameterType)
-                    {
                         parameters[i] = Convert.ChangeType(parameter, parameterInfo.ParameterType);
-                    }
                 }
             }
 
@@ -72,11 +67,9 @@ namespace Marble.Core.Messaging
 
             if (procedureMethodInfo.ReturnType.IsGenericType &&
                 procedureMethodInfo.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
-            {
-                return (Task<object?>)rawReturnValue;
-            }
+                return ((dynamic) rawReturnValue).Result;
 
-            return Task.FromResult(rawReturnValue);
+            return rawReturnValue;
         }
     }
 }

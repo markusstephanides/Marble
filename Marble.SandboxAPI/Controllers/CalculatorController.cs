@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Marble.Sandbox.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -22,11 +23,17 @@ namespace Marble.SandboxAPI.Controllers
         }
 
         [HttpGet("add")]
-        public async Task<ActionResult<int>> GetSummationAsync([FromQuery] int a, [FromQuery] int b)
+        public async Task<ActionResult<int>> GetAdditionAsync([FromQuery] int a, [FromQuery] int b)
         {
-            var result = await this.mathService.Add(a, b);
-            logger.LogInformation($"Got summation request {a}+{b} = {result}");
-            return this.Ok(result);
+            try
+            {
+                var result = await mathService.ComplexAdd(a, b).ConfigureAwait(false);
+                return Ok(new {result});
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new {message = e.Message});
+            }
         }
     }
 }

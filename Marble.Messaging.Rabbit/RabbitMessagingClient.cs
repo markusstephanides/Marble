@@ -8,37 +8,35 @@ using Marble.Core.Messaging;
 using Marble.Core.Messaging.Abstractions;
 using Marble.Core.Messaging.Models;
 using Marble.Messaging.Rabbit.Models;
+using Marble.Utilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RPT.MicroMan.Utilities;
 
 namespace Marble.Messaging.Rabbit
 {
     public class RabbitMessagingClient : IMessagingClient
     {
-        private IConnection connection;
-        private IModel channel;
+        private readonly RabbitClientConfiguration configuration;
 
         private readonly ILogger<RabbitMessagingClient> logger;
-        private readonly RabbitClientConfiguration configuration;
-        private readonly IDictionary<string, MessageMetaData> metaData;
-        private readonly IDictionary<string, TaskCompletionSource<object>> rpcCompletionSources;
+        private readonly IDictionary<string, ResponseAwaitation> responseAwaitations;
+        private IModel channel;
+        private IConnection connection;
         private MessagingFacade messagingFacade;
 
         public RabbitMessagingClient(IOptions<RabbitClientConfiguration> configurationOption,
             ILogger<RabbitMessagingClient> logger)
         {
             this.logger = logger;
-            this.metaData = new Dictionary<string, MessageMetaData>();
-            this.rpcCompletionSources = new Dictionary<string, TaskCompletionSource<object>>();
-            this.configuration = configurationOption.Value;
+            responseAwaitations = new Dictionary<string, ResponseAwaitation>();
+            configuration = configurationOption.Value;
         }
 
         public async Task<TResult> SendAsync<TResult>(RequestMessage requestMessage)
         {
-            return (TResult) await this.SendRoutedMessage(new RabbitRoutedMessage
+            return (TResult) await SendRoutedMessage(new RabbitRoutedMessage
             {
                 Exchange = Utilities.AmqDirectExchange,
                 MessageType = MessageType.RpcRequest,
@@ -49,17 +47,17 @@ namespace Marble.Messaging.Rabbit
                     {"Controller", requestMessage.Controller},
                     {"Procedure", requestMessage.Procedure}
                 },
-                Payload = requestMessage.Arguments,
+                Payload = requestMessage.Arguments
             });
         }
 
         public Task SendAndForgetAsync(RequestMessage requestMessage)
         {
-            return this.SendRoutedMessage(new RabbitRoutedMessage
+            return SendRoutedMessage(new RabbitRoutedMessage
             {
                 Exchange = Utilities.AmqDirectExchange,
                 RoutingKey = requestMessage.ResolveQueueName(),
-                Headers = new Dictionary<string, object>()
+                Headers = new Dictionary<string, object>
                 {
                     {"Controller", requestMessage.Controller},
                     {"Procedure", requestMessage.Procedure}
@@ -71,44 +69,38 @@ namespace Marble.Messaging.Rabbit
         public void Connect(MessagingFacade messagingFacade, IEnumerable<ControllerDescriptor> controllerDescriptors)
         {
             this.messagingFacade = messagingFacade;
-            this.logger.LogInformation($"Connecting to {this.configuration.ConnectionString}");
-            if (this.connection != null)
-            {
-                throw new InvalidOperationException("Client is already connected!");
-            }
+            logger.LogInformation($"Connecting to {configuration.ConnectionString}");
+            if (connection != null) throw new InvalidOperationException("Client is already connected!");
 
             var factory = new ConnectionFactory
             {
-                Uri = new Uri(this.configuration.ConnectionString)
+                Uri = new Uri(configuration.ConnectionString)
             };
 
-            this.connection = factory.CreateConnection();
-            this.channel = connection.CreateModel();
+            connection = factory.CreateConnection();
+            channel = connection.CreateModel();
 
-            this.logger.LogInformation("Connected to RabbitMQ Broker");
-            this.SetUpQos();
-            this.RegisterQueues(controllerDescriptors);
+            logger.LogInformation("Connected to RabbitMQ Broker");
+            SetUpQos();
+            RegisterQueues(controllerDescriptors);
         }
 
         private Task<object?> SendRoutedMessage(RabbitRoutedMessage message)
         {
             return Task.Run(() =>
             {
-                var props = this.channel.CreateBasicProperties();
+                var props = channel.CreateBasicProperties();
                 props.CorrelationId = message.CorrelationId;
                 props.Headers = message.Headers;
                 props.Headers["MessageType"] = (int) message.MessageType;
-            
+
                 if (message.MessageType == MessageType.RpcRequest)
                 {
-                    this.metaData[message.CorrelationId] = new MessageMetaData
+                    responseAwaitations[message.CorrelationId] = new ResponseAwaitation
                     {
-                        CorrelationId = message.CorrelationId,
-                        ReplyToQueue = Utilities.AmqDirectReplyToQueue
+                        TaskCompletionSource = new TaskCompletionSource<object>(),
+                        StartTicks = DateTime.Now.Ticks
                     };
-                
-                    this.rpcCompletionSources[message.CorrelationId] = new TaskCompletionSource<object>();
-
                     props.ReplyTo = Utilities.AmqDirectReplyToQueue;
                 }
 
@@ -121,37 +113,41 @@ namespace Marble.Messaging.Rabbit
 
                 props.Type = payloadType;
 
-                this.channel.BasicPublish(exchange, routingKey, props, messageBytes);
+                channel.BasicPublish(exchange, routingKey, props, messageBytes);
 
                 if (message.MessageType == MessageType.RpcRequest)
                 {
-                    var task = this.rpcCompletionSources[message.CorrelationId].Task;
+                    var awaitation = responseAwaitations[message.CorrelationId];
+                    var task = awaitation.TaskCompletionSource.Task;
                     task.Wait(Utilities.DefaultTimeout);
-                    
-                    if (task.IsCompletedSuccessfully)
-                    {
-                        return task;
-                    }
-                    
-                    throw new TimeoutException("Timeout while waiting for a response when calling " + message.RoutingKey);
+
+                    responseAwaitations.Remove(message.CorrelationId);
+                    var duration = (DateTime.Now.Ticks - awaitation.StartTicks) / TimeSpan.TicksPerMillisecond;
+                    if (!task.IsCompletedSuccessfully)
+                        throw new TimeoutException(
+                            $"Timeout after {duration}ms while waiting for a response when calling {message.RoutingKey}");
+
+                    logger.LogInformation(
+                        $"Successfully processed request to {message.RoutingKey} in {duration}ms");
+                    return task;
                 }
-            
+
                 return Task.FromResult<object>(null);
             });
         }
 
         private void SetUpQos()
         {
-            this.logger.LogInformation("Setting Qos properties");
-            this.channel.BasicQos(0, 1, false);
+            logger.LogInformation("Setting Qos properties");
+            channel.BasicQos(0, 1, false);
         }
 
         private void SetUpConsumer(string queue, bool autoAck = false)
         {
-            this.logger.LogInformation($"Creating consumer for queue {queue}");
-            var consumer = new EventingBasicConsumer(this.channel);
-            consumer.Received += this.OnMessageReceived;
-            this.channel.BasicConsume(queue, autoAck, consumer);
+            logger.LogInformation($"Creating consumer for queue {queue}");
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += OnMessageReceived;
+            channel.BasicConsume(queue, autoAck, consumer);
         }
 
         private void OnMessageReceived(object? sender, BasicDeliverEventArgs e)
@@ -168,13 +164,9 @@ namespace Marble.Messaging.Rabbit
                 var payload = Serialization.Deserialize(payloadString, payloadType);
 
                 if (messageType == MessageType.RpcRequest)
-                {
-                    this.ProcessRpcRequest(properties, e.DeliveryTag, payload);
-                }
+                    ProcessRpcRequest(properties, e.DeliveryTag, payload);
                 else if (messageType == MessageType.RpcResponse)
-                {
-                    this.rpcCompletionSources[properties.CorrelationId].SetResult(payload);
-                }
+                    responseAwaitations[properties.CorrelationId].TaskCompletionSource.SetResult(payload);
             });
         }
 
@@ -184,15 +176,14 @@ namespace Marble.Messaging.Rabbit
             var headers = properties.Headers;
             var controller = Encoding.UTF8.GetString(headers["Controller"] as byte[]);
             var procedure = Encoding.UTF8.GetString(headers["Procedure"] as byte[]);
-                    
-            var result = await this.messagingFacade.InvokeProcedure(controller, procedure, (object[]) payload)
-                .ConfigureAwait(false);
-
-            this.channel.BasicAck(deliveryTag, false);
 
             try
             {
-                await this.SendRoutedMessage(new RabbitRoutedMessage
+                var result = messagingFacade.InvokeProcedure(controller, procedure, (object[]) payload);
+
+                channel.BasicAck(deliveryTag, false);
+
+                await SendRoutedMessage(new RabbitRoutedMessage
                 {
                     Exchange = Utilities.AmqDirectExchange,
                     RoutingKey = properties.ReplyTo,
@@ -203,29 +194,25 @@ namespace Marble.Messaging.Rabbit
             }
             catch (Exception exception)
             {
-                this.logger.LogError(exception, "Failed to execute " + controller + ":" + procedure + "!");
+                logger.LogError(exception, "Failed to execute " + controller + ":" + procedure + "!");
                 throw;
             }
 
-            this.logger.LogInformation(
+            logger.LogInformation(
                 $"Responded to {controller}:{procedure} in {stopwatch.ElapsedMilliseconds} ms");
         }
 
         private void RegisterQueues(IEnumerable<ControllerDescriptor> descriptors)
         {
             foreach (var controllerDescriptor in descriptors)
+            foreach (var procedureDescriptor in controllerDescriptor.ProcedureDescriptors)
             {
-                foreach (var procedureDescriptor in controllerDescriptor.ProcedureDescriptors)
-                {
-                    var queueName = procedureDescriptor.ToString();
-                    this.channel.QueueDeclare(queueName, false, false);
-                    this.SetUpConsumer(queueName, false);
-                }
+                var queueName = procedureDescriptor.ToString();
+                channel.QueueDeclare(queueName, false, false);
+                SetUpConsumer(queueName);
             }
 
-            this.logger.LogInformation("Declared RPC queues");
-            this.SetUpConsumer(Utilities.AmqDirectReplyToQueue, true);
-            this.logger.LogInformation("Declared RPC reply queue");
+            SetUpConsumer(Utilities.AmqDirectReplyToQueue, true);
         }
     }
 }

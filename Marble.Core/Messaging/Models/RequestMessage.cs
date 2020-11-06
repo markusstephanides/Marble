@@ -1,11 +1,7 @@
-﻿namespace Marble.Core.Messaging.Abstractions
+﻿namespace Marble.Core.Messaging.Models
 {
     public sealed class RequestMessage
     {
-        public string Controller { get; }
-        public string Procedure { get; }
-        public object[]? Arguments { get; }
-
         public RequestMessage(string controller, string procedure, params object[]? arguments)
         {
             Controller = controller;
@@ -13,9 +9,13 @@
             Arguments = arguments;
         }
 
+        public string Controller { get; }
+        public string Procedure { get; }
+        public object[]? Arguments { get; }
+
         public string ResolveQueueName()
         {
-            return $"{this.Controller}:{this.Procedure}";
+            return $"{Controller}:{Procedure}";
         }
     }
 }

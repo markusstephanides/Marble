@@ -40,7 +40,8 @@ namespace Marble.Logging
             if (logLevel == LogLevel.Info) return ConsoleOutputColor.Cyan;
             if (logLevel == LogLevel.Warn) return ConsoleOutputColor.Yellow;
             if (logLevel == LogLevel.Trace) return ConsoleOutputColor.Magenta;
-            if (logLevel == LogLevel.Fatal) return ConsoleOutputColor.Red;
+            if (logLevel == LogLevel.Error) return ConsoleOutputColor.Red;
+            if (logLevel == LogLevel.Fatal) return ConsoleOutputColor.DarkRed;
 
             return ConsoleOutputColor.NoChange;
         }

@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace RPT.MicroMan.Utilities
+namespace Marble.Utilities
 {
     public class Serialization
     {

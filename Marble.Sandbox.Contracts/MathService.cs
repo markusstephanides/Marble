@@ -1,6 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Marble.Core.Messaging.Abstractions;
+using Marble.Core.Messaging.Models;
 
 namespace Marble.Sandbox.Contracts
 {
@@ -10,10 +10,10 @@ namespace Marble.Sandbox.Contracts
         public Task<int> ComplexAdd(int a, int b);
         public Task<MathResult> Something();
     }
-    
+
     public class DefaultMathServiceClient : IMathService
     {
-        private IMessagingClient messagingClient;
+        private readonly IMessagingClient messagingClient;
 
         public DefaultMathServiceClient(IMessagingClient messagingClient)
         {
@@ -27,12 +27,13 @@ namespace Marble.Sandbox.Contracts
 
         public Task<int> ComplexAdd(int a, int b)
         {
-            return messagingClient.SendAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "ComplexAdd", a,b));
+            return messagingClient.SendAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "ComplexAdd", a, b));
         }
 
         public Task<MathResult> Something()
         {
-            return messagingClient.SendAsync<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "Something", 1, 2));
+            return messagingClient.SendAsync<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "Something",
+                1, 2));
         }
     }
 
