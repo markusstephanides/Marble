@@ -119,13 +119,15 @@ namespace Marble.Messaging.Rabbit
                 {
                     var awaitation = responseAwaitations[message.CorrelationId];
                     var task = awaitation.TaskCompletionSource.Task;
-                    task.Wait(Utilities.DefaultTimeout);
 
+                    task.Wait(Utilities.DefaultTimeout);
                     responseAwaitations.Remove(message.CorrelationId);
+
                     var duration = (DateTime.Now.Ticks - awaitation.StartTicks) / TimeSpan.TicksPerMillisecond;
                     if (!task.IsCompletedSuccessfully)
                         throw new TimeoutException(
                             $"Timeout after {duration}ms while waiting for a response when calling {message.RoutingKey}");
+
 
                     logger.LogInformation(
                         $"Successfully processed request to {message.RoutingKey} in {duration}ms");

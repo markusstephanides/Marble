@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Utilities.Test", "Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Sandbox.Contracts", "Marble.Sandbox.Contracts\Marble.Sandbox.Contracts.csproj", "{81DFBA9B-E28F-4E92-BFD1-B8372B6B53CA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Generator", "Marble.Generator\Marble.Generator.csproj", "{D5745BD1-21EB-4A83-80D8-E10AB67A3005}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,5 +74,9 @@ Global
 		{81DFBA9B-E28F-4E92-BFD1-B8372B6B53CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81DFBA9B-E28F-4E92-BFD1-B8372B6B53CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81DFBA9B-E28F-4E92-BFD1-B8372B6B53CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5745BD1-21EB-4A83-80D8-E10AB67A3005}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5745BD1-21EB-4A83-80D8-E10AB67A3005}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5745BD1-21EB-4A83-80D8-E10AB67A3005}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5745BD1-21EB-4A83-80D8-E10AB67A3005}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Marble.Core.Messaging.Abstractions;
 using Marble.Core.Messaging.Models;
 
@@ -6,9 +6,9 @@ namespace Marble.Sandbox.Contracts
 {
     public interface IMathService
     {
-        public Task<int> Add(int a, int b);
-        public Task<int> ComplexAdd(int a, int b);
-        public Task<MathResult> Something();
+        Task<int> Add(int a, int b);
+        Task<Task<int>> ComplexAdd(int a, int b);
+        Task<MathResult> Something(int i);
     }
 
     public class DefaultMathServiceClient : IMathService
@@ -22,23 +22,17 @@ namespace Marble.Sandbox.Contracts
 
         public Task<int> Add(int a, int b)
         {
-            return messagingClient.SendAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "Add", a, b));
+            return messagingClient.SendAsync<int>(new RequestMessage("MathService", "Add", a, b));
         }
 
-        public Task<int> ComplexAdd(int a, int b)
+        public Task<Task<int>> ComplexAdd(int a, int b)
         {
-            return messagingClient.SendAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "ComplexAdd", a, b));
+            return messagingClient.SendAsync<Task<int>>(new RequestMessage("MathService", "ComplexAdd", a, b));
         }
 
-        public Task<MathResult> Something()
+        public Task<MathResult> Something(int i)
         {
-            return messagingClient.SendAsync<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "Something",
-                1, 2));
+            return messagingClient.SendAsync<MathResult>(new RequestMessage("MathService", "Something", i));
         }
-    }
-
-    public class MathResult
-    {
-        public int SomeInt { get; set; }
     }
 }
