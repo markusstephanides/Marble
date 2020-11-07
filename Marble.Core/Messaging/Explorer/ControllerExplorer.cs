@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Marble.Core.Declaration;
+using Marble.Core.Transformers;
 
 namespace Marble.Core.Messaging.Explorer
 {
@@ -15,9 +16,12 @@ namespace Marble.Core.Messaging.Explorer
                 .Select(
                     type =>
                     {
+                        var controllerAttribute =
+                            (MarbleControllerAttribute) type.GetCustomAttributes(typeof(MarbleControllerAttribute),
+                                true)[0];
                         var descriptor = new ControllerDescriptor
                         {
-                            ControllerName = type.FullName,
+                            Name = controllerAttribute.Name ?? ControllerName.FromType(type),
                             Type = type
                         };
 
@@ -30,11 +34,17 @@ namespace Marble.Core.Messaging.Explorer
         {
             return type.GetMethods()
                 .Where(method => method.GetCustomAttributes(typeof(MarbleProcedureAttribute), false).Any())
-                .Select(method => new ProcedureDescriptor
+                .Select(method =>
                 {
-                    Name = method.Name,
-                    MethodInfo = method,
-                    ControllerDescriptor = controllerDescriptor
+                    var controllerAttribute =
+                        (MarbleControllerAttribute) type.GetCustomAttributes(typeof(MarbleControllerAttribute),
+                            true)[0];
+                    return new ProcedureDescriptor
+                    {
+                        Name = controllerAttribute.Name ?? ProcedureName.FromMethodInfo(method),
+                        MethodInfo = method,
+                        ControllerDescriptor = controllerDescriptor
+                    };
                 });
         }
     }

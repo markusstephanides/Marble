@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -42,14 +43,14 @@ namespace Marble.Core.Messaging
             {
                 this.controllers[descriptor] = serviceProvider.GetService(descriptor.Type);
                 this.logger?.LogInformation(
-                    $"Found controller instance for {descriptor.ControllerName} with {descriptor.ProcedureDescriptors.Count()} procedures");
+                    $"Found controller instance for {descriptor.Name} with {descriptor.ProcedureDescriptors.Count()} procedures");
             }
         }
 
         public object? InvokeProcedure(string controllerName, string procedureName, object[]? parameters)
         {
             var (key, value) = this.controllers.First(controllerDescriptor =>
-                controllerDescriptor.Key.ControllerName == controllerName);
+                controllerDescriptor.Key.Name == controllerName);
             var procedureMethodInfo =
                 key.ProcedureDescriptors.First(procedureDescriptor =>
                     procedureDescriptor.Name == procedureName).MethodInfo;
@@ -69,11 +70,18 @@ namespace Marble.Core.Messaging
                 }
             }
 
+            var sw = Stopwatch.StartNew();
+
+
             var rawReturnValue = procedureMethodInfo.Invoke(value, parameters);
+            Console.WriteLine(sw.ElapsedMilliseconds);
+
+            sw.Restart();
 
             if (procedureMethodInfo.ReturnType.IsGenericType &&
                 procedureMethodInfo.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
             {
+                Console.WriteLine(sw.ElapsedMilliseconds);
                 return ((dynamic) rawReturnValue).Result;
             }
 

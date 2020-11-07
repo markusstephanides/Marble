@@ -31,6 +31,18 @@ namespace Marble.Sandbox
             return Task.FromResult(a + b);
         }
 
+        [MarbleProcedure]
+        public Task VoidAddTask(int a, int b)
+        {
+            return Task.FromResult(a + b);
+        }
+
+        [MarbleProcedure]
+        public void VoidAdd(int a, int b)
+        {
+            var result = a + b;
+        }
+
         // [MarbleProcedure]
         // public MathResult Something(int i)
         // {

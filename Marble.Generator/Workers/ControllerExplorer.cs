@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Marble.Core.Declaration;
+using Marble.Core.Transformers;
 using Marble.Generator.Models;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -51,12 +53,17 @@ namespace Marble.Generator
             {
                 if (attributeSyntax.Name.ToString() == this.marbleControllerAttributeName)
                 {
-                    var namespaceName = (classDeclarationSyntax.Parent as NamespaceDeclarationSyntax).Name.ToString();
+                    // argumentlist null
+                    var nameArgument = attributeSyntax.ArgumentList?
+                        .Arguments.FirstOrDefault(argument => argument?.NameEquals?.Name.Identifier.Text ==
+                                                              nameof(MarbleControllerAttribute.Name));
+                    var controllerName = nameArgument?.Expression.ToString() ??
+                                         ControllerName.FromClassName(classDeclarationSyntax.Identifier.Text);
 
                     return new ControllerDescriptor
                     {
-                        ClassName = classDeclarationSyntax.Identifier.Text,
-                        Name = $"{namespaceName}.{classDeclarationSyntax.Identifier.Text}",
+                        ClassName = controllerName,
+                        Name = controllerName,
                         ProcedureDescriptors = this.FindProcedures(classDeclarationSyntax)
                     };
                 }
@@ -74,19 +81,12 @@ namespace Marble.Generator
             foreach (var attributeListSyntax in methodDeclarationSyntax.AttributeLists)
             foreach (var attributeSyntax in attributeListSyntax.Attributes)
             {
-                if (attributeSyntax.Name.ToString() != this.marbleProcedureAttributeName)
+                if (attributeSyntax.Name.ToString() != this.marbleProcedureAttributeName ||
+                    methodDeclarationSyntax.Modifiers.All(token => token.Text != "public"))
                 {
                     continue;
                 }
 
-                var isPublic = methodDeclarationSyntax.Modifiers.Any(token => token.Text == "public");
-
-                if (!isPublic)
-                {
-                    continue;
-                }
-
-                var returnType = methodDeclarationSyntax.ReturnType.ToString();
                 var arguments = methodDeclarationSyntax.ParameterList.Parameters
                     .Select(parameterListParameter => new ProcedureArgument
                     {
@@ -94,15 +94,36 @@ namespace Marble.Generator
                         Type = parameterListParameter.Type.ToString()
                     }).ToList();
 
+                var nameArgument = attributeSyntax.ArgumentList?
+                    .Arguments.FirstOrDefault(argument => argument?.NameEquals?.Name.Identifier.Text ==
+                                                          nameof(MarbleProcedureAttribute.Name));
+                var procedureName = nameArgument?.Expression.ToString() ??
+                                    ProcedureName.FromMethodName(methodDeclarationSyntax.Identifier.Text);
+
                 procedureDescriptor.Add(new ProcedureDescriptor
                 {
-                    Name = methodDeclarationSyntax.Identifier.Text,
-                    ReturnType = returnType,
+                    Name = procedureName,
+                    MethodName = methodDeclarationSyntax.Identifier.Text,
+                    ReturnType = this.AdjustReturnType(methodDeclarationSyntax.ReturnType.ToString()),
                     Arguments = arguments
                 });
             }
 
             return procedureDescriptor;
+        }
+
+        private string AdjustReturnType(string originalReturnType)
+        {
+            if (originalReturnType == "void" || originalReturnType == "Task")
+            {
+                return null;
+            }
+
+            var pattern = @"Task<(.*)>";
+            var options = RegexOptions.Singleline;
+            var matches = Regex.Matches(originalReturnType, pattern, options);
+
+            return matches.Count > 0 ? matches[0].Groups[1].Value : originalReturnType;
         }
     }
 }

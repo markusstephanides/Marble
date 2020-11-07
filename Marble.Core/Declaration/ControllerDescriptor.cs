@@ -5,7 +5,7 @@ namespace Marble.Core.Declaration
 {
     public class ControllerDescriptor
     {
-        public string ControllerName { get; set; }
+        public string Name { get; set; }
         public Type Type { get; set; }
         public IEnumerable<ProcedureDescriptor> ProcedureDescriptors { get; set; }
     }

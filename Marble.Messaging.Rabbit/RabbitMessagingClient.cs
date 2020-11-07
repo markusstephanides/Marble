@@ -193,7 +193,6 @@ namespace Marble.Messaging.Rabbit
             try
             {
                 var result = this.messagingFacade.InvokeProcedure(controller, procedure, (object[]) payload);
-
                 this.channel.BasicAck(deliveryTag, false);
 
                 await this.SendRoutedMessage(new RabbitRoutedMessage

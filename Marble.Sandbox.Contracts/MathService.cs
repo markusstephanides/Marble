@@ -7,7 +7,9 @@ namespace Marble.Sandbox.Contracts
     public interface IMathService
     {
         Task<int> Add(int a, int b);
-        Task<Task<int>> ComplexAdd(int a, int b);
+        Task<int> ComplexAdd(int a, int b);
+        Task VoidAddTask(int a, int b);
+        Task VoidAdd(int a, int b);
     }
 
     public class DefaultMathServiceClient : IMathService
@@ -21,13 +23,22 @@ namespace Marble.Sandbox.Contracts
 
         public Task<int> Add(int a, int b)
         {
-            return this.messagingClient.SendAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "Add", a, b));
+            return this.messagingClient.SendAsync<int>(new RequestMessage("MathService", "Add", a, b));
         }
 
-        public Task<Task<int>> ComplexAdd(int a, int b)
+        public Task<int> ComplexAdd(int a, int b)
         {
-            return this.messagingClient.SendAsync<Task<int>>(new RequestMessage("Marble.Sandbox.MathService",
-                "ComplexAdd", a, b));
+            return this.messagingClient.SendAsync<int>(new RequestMessage("MathService", "ComplexAdd", a, b));
+        }
+
+        public Task VoidAddTask(int a, int b)
+        {
+            return this.messagingClient.SendAndForgetAsync(new RequestMessage("MathService", "VoidAddTask", a, b));
+        }
+
+        public Task VoidAdd(int a, int b)
+        {
+            return this.messagingClient.SendAndForgetAsync(new RequestMessage("MathService", "VoidAdd", a, b));
         }
     }
 }

@@ -15,9 +15,14 @@ namespace Marble.Generator.Templates
                 accessModifier += " ";
             }
 
+            var shouldReceive = procedureDescriptor.ReturnType != null;
+            var methodReturnType = !shouldReceive
+                ? "Task"
+                : $"Task<{procedureDescriptor.ReturnType}>";
+
             var methodTemplateBuilder =
                 new StringBuilder(
-                    $"{linePrefix}{accessModifier}Task<{procedureDescriptor.ReturnType}> {procedureDescriptor.Name}(");
+                    $"{linePrefix}{accessModifier}{methodReturnType} {procedureDescriptor.MethodName}(");
 
             foreach (var argument in procedureDescriptor.Arguments)
             {
@@ -47,8 +52,10 @@ namespace Marble.Generator.Templates
                 }
             }
 
+            var methodName = shouldReceive ? $"SendAsync<{procedureDescriptor.ReturnType}>" : "SendAndForgetAsync";
+
             var messagingClientCall =
-                $"return this.messagingClient.SendAsync<{procedureDescriptor.ReturnType}>(new RequestMessage(\"{controllerDescriptor.Name}\", \"{procedureDescriptor.Name}\"{parameterString}));";
+                $"return this.messagingClient.{methodName}(new RequestMessage(\"{controllerDescriptor.Name}\", \"{procedureDescriptor.Name}\"{parameterString}));";
 
             methodTemplateBuilder.AppendLine(messagingClientCall);
 

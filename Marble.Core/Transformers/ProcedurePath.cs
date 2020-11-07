@@ -7,7 +7,7 @@ namespace Marble.Core.Transformers
     {
         public static string FromProcedureDescriptor(ProcedureDescriptor procedureDescriptor)
         {
-            return FromStrings(procedureDescriptor.ControllerDescriptor.ControllerName,
+            return FromStrings(procedureDescriptor.ControllerDescriptor.Name,
                 procedureDescriptor.Name);
         }
 
