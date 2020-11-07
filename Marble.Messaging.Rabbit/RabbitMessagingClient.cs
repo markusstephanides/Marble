@@ -7,6 +7,7 @@ using Marble.Core.Declaration;
 using Marble.Core.Messaging;
 using Marble.Core.Messaging.Abstractions;
 using Marble.Core.Messaging.Models;
+using Marble.Core.Transformers;
 using Marble.Messaging.Rabbit.Models;
 using Marble.Utilities;
 using Microsoft.Extensions.Logging;
@@ -19,9 +20,9 @@ namespace Marble.Messaging.Rabbit
     public class RabbitMessagingClient : IMessagingClient
     {
         private readonly RabbitClientConfiguration configuration;
-
         private readonly ILogger<RabbitMessagingClient> logger;
         private readonly IDictionary<string, ResponseAwaitation> responseAwaitations;
+
         private IModel channel;
         private IConnection connection;
         private MessagingFacade messagingFacade;
@@ -30,33 +31,33 @@ namespace Marble.Messaging.Rabbit
             ILogger<RabbitMessagingClient> logger)
         {
             this.logger = logger;
-            responseAwaitations = new Dictionary<string, ResponseAwaitation>();
-            configuration = configurationOption.Value;
+            this.responseAwaitations = new Dictionary<string, ResponseAwaitation>();
+            this.configuration = configurationOption.Value;
         }
 
         public async Task<TResult> SendAsync<TResult>(RequestMessage requestMessage)
         {
-            return (TResult) await SendRoutedMessage(new RabbitRoutedMessage
+            return (TResult) await this.SendRoutedMessage(new RabbitRoutedMessage
             {
                 Exchange = Utilities.AmqDirectExchange,
                 MessageType = MessageType.RpcRequest,
-                RoutingKey = requestMessage.ResolveQueueName(),
+                RoutingKey = ProcedurePath.FromRequestMessage(requestMessage),
                 CorrelationId = Guid.NewGuid().ToString(),
+                Payload = requestMessage.Arguments,
                 Headers = new Dictionary<string, object>
                 {
                     {"Controller", requestMessage.Controller},
                     {"Procedure", requestMessage.Procedure}
-                },
-                Payload = requestMessage.Arguments
+                }
             });
         }
 
         public Task SendAndForgetAsync(RequestMessage requestMessage)
         {
-            return SendRoutedMessage(new RabbitRoutedMessage
+            return this.SendRoutedMessage(new RabbitRoutedMessage
             {
                 Exchange = Utilities.AmqDirectExchange,
-                RoutingKey = requestMessage.ResolveQueueName(),
+                RoutingKey = ProcedurePath.FromRequestMessage(requestMessage),
                 Headers = new Dictionary<string, object>
                 {
                     {"Controller", requestMessage.Controller},
@@ -69,34 +70,38 @@ namespace Marble.Messaging.Rabbit
         public void Connect(MessagingFacade messagingFacade, IEnumerable<ControllerDescriptor> controllerDescriptors)
         {
             this.messagingFacade = messagingFacade;
-            logger.LogInformation($"Connecting to {configuration.ConnectionString}");
-            if (connection != null) throw new InvalidOperationException("Client is already connected!");
+            this.logger.LogInformation($"Connecting to {this.configuration.ConnectionString}");
+
+            if (this.connection != null)
+            {
+                throw new InvalidOperationException("Client is already connected!");
+            }
 
             var factory = new ConnectionFactory
             {
-                Uri = new Uri(configuration.ConnectionString)
+                Uri = new Uri(this.configuration.ConnectionString)
             };
 
-            connection = factory.CreateConnection();
-            channel = connection.CreateModel();
+            this.connection = factory.CreateConnection();
+            this.channel = this.connection.CreateModel();
 
-            logger.LogInformation("Connected to RabbitMQ Broker");
-            SetUpQos();
-            RegisterQueues(controllerDescriptors);
+            this.logger.LogInformation("Connected to RabbitMQ Broker");
+            this.SetUpQos();
+            this.RegisterQueues(controllerDescriptors);
         }
 
         private Task<object?> SendRoutedMessage(RabbitRoutedMessage message)
         {
             return Task.Run(() =>
             {
-                var props = channel.CreateBasicProperties();
+                var props = this.channel.CreateBasicProperties();
                 props.CorrelationId = message.CorrelationId;
                 props.Headers = message.Headers;
                 props.Headers["MessageType"] = (int) message.MessageType;
 
                 if (message.MessageType == MessageType.RpcRequest)
                 {
-                    responseAwaitations[message.CorrelationId] = new ResponseAwaitation
+                    this.responseAwaitations[message.CorrelationId] = new ResponseAwaitation
                     {
                         TaskCompletionSource = new TaskCompletionSource<object>(),
                         StartTicks = DateTime.Now.Ticks
@@ -113,23 +118,25 @@ namespace Marble.Messaging.Rabbit
 
                 props.Type = payloadType;
 
-                channel.BasicPublish(exchange, routingKey, props, messageBytes);
+                this.channel.BasicPublish(exchange, routingKey, props, messageBytes);
 
                 if (message.MessageType == MessageType.RpcRequest)
                 {
-                    var awaitation = responseAwaitations[message.CorrelationId];
+                    var awaitation = this.responseAwaitations[message.CorrelationId];
                     var task = awaitation.TaskCompletionSource.Task;
 
                     task.Wait(Utilities.DefaultTimeout);
-                    responseAwaitations.Remove(message.CorrelationId);
+                    this.responseAwaitations.Remove(message.CorrelationId);
 
                     var duration = (DateTime.Now.Ticks - awaitation.StartTicks) / TimeSpan.TicksPerMillisecond;
                     if (!task.IsCompletedSuccessfully)
+                    {
                         throw new TimeoutException(
                             $"Timeout after {duration}ms while waiting for a response when calling {message.RoutingKey}");
+                    }
 
 
-                    logger.LogInformation(
+                    this.logger.LogInformation(
                         $"Successfully processed request to {message.RoutingKey} in {duration}ms");
                     return task;
                 }
@@ -140,16 +147,16 @@ namespace Marble.Messaging.Rabbit
 
         private void SetUpQos()
         {
-            logger.LogInformation("Setting Qos properties");
-            channel.BasicQos(0, 1, false);
+            this.logger.LogInformation("Setting Qos properties");
+            this.channel.BasicQos(0, 1, false);
         }
 
         private void SetUpConsumer(string queue, bool autoAck = false)
         {
-            logger.LogInformation($"Creating consumer for queue {queue}");
-            var consumer = new EventingBasicConsumer(channel);
-            consumer.Received += OnMessageReceived;
-            channel.BasicConsume(queue, autoAck, consumer);
+            this.logger.LogInformation($"Creating consumer for queue {queue}");
+            var consumer = new EventingBasicConsumer(this.channel);
+            consumer.Received += this.OnMessageReceived;
+            this.channel.BasicConsume(queue, autoAck, consumer);
         }
 
         private void OnMessageReceived(object? sender, BasicDeliverEventArgs e)
@@ -166,9 +173,13 @@ namespace Marble.Messaging.Rabbit
                 var payload = Serialization.Deserialize(payloadString, payloadType);
 
                 if (messageType == MessageType.RpcRequest)
-                    ProcessRpcRequest(properties, e.DeliveryTag, payload);
+                {
+                    this.ProcessRpcRequest(properties, e.DeliveryTag, payload);
+                }
                 else if (messageType == MessageType.RpcResponse)
-                    responseAwaitations[properties.CorrelationId].TaskCompletionSource.SetResult(payload);
+                {
+                    this.responseAwaitations[properties.CorrelationId].TaskCompletionSource.SetResult(payload);
+                }
             });
         }
 
@@ -181,11 +192,11 @@ namespace Marble.Messaging.Rabbit
 
             try
             {
-                var result = messagingFacade.InvokeProcedure(controller, procedure, (object[]) payload);
+                var result = this.messagingFacade.InvokeProcedure(controller, procedure, (object[]) payload);
 
-                channel.BasicAck(deliveryTag, false);
+                this.channel.BasicAck(deliveryTag, false);
 
-                await SendRoutedMessage(new RabbitRoutedMessage
+                await this.SendRoutedMessage(new RabbitRoutedMessage
                 {
                     Exchange = Utilities.AmqDirectExchange,
                     RoutingKey = properties.ReplyTo,
@@ -196,11 +207,11 @@ namespace Marble.Messaging.Rabbit
             }
             catch (Exception exception)
             {
-                logger.LogError(exception, "Failed to execute " + controller + ":" + procedure + "!");
+                this.logger.LogError(exception, "Failed to execute " + controller + ":" + procedure + "!");
                 throw;
             }
 
-            logger.LogInformation(
+            this.logger.LogInformation(
                 $"Responded to {controller}:{procedure} in {stopwatch.ElapsedMilliseconds} ms");
         }
 
@@ -210,11 +221,11 @@ namespace Marble.Messaging.Rabbit
             foreach (var procedureDescriptor in controllerDescriptor.ProcedureDescriptors)
             {
                 var queueName = procedureDescriptor.ToString();
-                channel.QueueDeclare(queueName, false, false);
-                SetUpConsumer(queueName);
+                this.channel.QueueDeclare(queueName, false, false);
+                this.SetUpConsumer(queueName);
             }
 
-            SetUpConsumer(Utilities.AmqDirectReplyToQueue, true);
+            this.SetUpConsumer(Utilities.AmqDirectReplyToQueue, true);
         }
     }
 }
