@@ -8,7 +8,6 @@ namespace Marble.Sandbox.Contracts
     {
         Task<int> Add(int a, int b);
         Task<Task<int>> ComplexAdd(int a, int b);
-        Task<MathResult> Something(int i);
     }
 
     public class DefaultMathServiceClient : IMathService
@@ -28,11 +27,6 @@ namespace Marble.Sandbox.Contracts
         public Task<Task<int>> ComplexAdd(int a, int b)
         {
             return messagingClient.SendAsync<Task<int>>(new RequestMessage("MathService", "ComplexAdd", a, b));
-        }
-
-        public Task<MathResult> Something(int i)
-        {
-            return messagingClient.SendAsync<MathResult>(new RequestMessage("MathService", "Something", i));
         }
     }
 }

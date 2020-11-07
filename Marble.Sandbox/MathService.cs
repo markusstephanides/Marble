@@ -31,14 +31,14 @@ namespace Marble.Sandbox
             return Task.FromResult(a + b);
         }
 
-        [MarbleProcedure]
-        public MathResult Something(int i)
-        {
-            return new MathResult
-            {
-                SomeInt = i
-            };
-        }
+        // [MarbleProcedure]
+        // public MathResult Something(int i)
+        // {
+        //     return new MathResult
+        //     {
+        //         SomeInt = i
+        //     };
+        // }
     }
 
     public class MathResult
