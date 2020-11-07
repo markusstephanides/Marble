@@ -10,7 +10,10 @@ namespace Marble.Generator.Templates
             string linePrefix,
             string accessModifier = "", bool withBody = false)
         {
-            if (!string.IsNullOrEmpty(accessModifier)) accessModifier += " ";
+            if (!string.IsNullOrEmpty(accessModifier))
+            {
+                accessModifier += " ";
+            }
 
             var methodTemplateBuilder =
                 new StringBuilder(
@@ -19,10 +22,16 @@ namespace Marble.Generator.Templates
             foreach (var argument in procedureDescriptor.Arguments)
             {
                 methodTemplateBuilder.Append($"{argument.Type} {argument.Name}");
-                if (argument != procedureDescriptor.Arguments.Last()) methodTemplateBuilder.Append(", ");
+                if (argument != procedureDescriptor.Arguments.Last())
+                {
+                    methodTemplateBuilder.Append(", ");
+                }
             }
 
-            if (!withBody) return methodTemplateBuilder.Append(");").ToString();
+            if (!withBody)
+            {
+                return methodTemplateBuilder.Append(");").ToString();
+            }
 
             methodTemplateBuilder.AppendLine("){");
             methodTemplateBuilder.Append(linePrefix + "\t");
@@ -32,7 +41,10 @@ namespace Marble.Generator.Templates
             foreach (var argument in procedureDescriptor.Arguments)
             {
                 parameterString.Append(argument.Name);
-                if (procedureDescriptor.Arguments.Last() != argument) parameterString.Append(", ");
+                if (procedureDescriptor.Arguments.Last() != argument)
+                {
+                    parameterString.Append(", ");
+                }
             }
 
             var messagingClientCall =

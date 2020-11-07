@@ -21,12 +21,13 @@ namespace Marble.Sandbox.Contracts
 
         public Task<int> Add(int a, int b)
         {
-            return messagingClient.SendAsync<int>(new RequestMessage("MathService", "Add", a, b));
+            return this.messagingClient.SendAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "Add", a, b));
         }
 
         public Task<Task<int>> ComplexAdd(int a, int b)
         {
-            return messagingClient.SendAsync<Task<int>>(new RequestMessage("MathService", "ComplexAdd", a, b));
+            return this.messagingClient.SendAsync<Task<int>>(new RequestMessage("Marble.Sandbox.MathService",
+                "ComplexAdd", a, b));
         }
     }
 }

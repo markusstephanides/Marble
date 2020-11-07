@@ -34,16 +34,16 @@ namespace Marble.Core.Builder
         public IAppHostBuilder Configure<TOption>(Func<IConfiguration, IConfiguration> configurationAction)
             where TOption : class
         {
-            ConfigureServices(collection =>
+            this.ConfigureServices(collection =>
             {
-                collection.Configure<TOption>(configurationAction(buildingModel.Configuration));
+                collection.Configure<TOption>(configurationAction(this.buildingModel.Configuration));
             });
             return this;
         }
 
         public IAppHostBuilder Configure<TOption>(Action<TOption> optionConfigurationAction) where TOption : class
         {
-            ConfigureServices(collection => { collection.Configure(optionConfigurationAction); });
+            this.ConfigureServices(collection => { collection.Configure(optionConfigurationAction); });
             return this;
         }
 

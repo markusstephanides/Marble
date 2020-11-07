@@ -15,9 +15,9 @@ namespace Marble.Generator
 
         public IEnumerable<string> Find()
         {
-            var rootPath = new FileInfo(projectFile).Directory!.FullName;
+            var rootPath = new FileInfo(this.projectFile).Directory!.FullName;
             var fileList = new List<string>();
-            index(rootPath, ref fileList);
+            this.index(rootPath, ref fileList);
             return fileList;
         }
 
@@ -33,7 +33,7 @@ namespace Marble.Generator
                     .GetFiles(directoryPath)
                     .Where(filePath => filePath.EndsWith(".cs")));
 
-                index(directoryPath, ref list);
+                this.index(directoryPath, ref list);
             }
         }
     }

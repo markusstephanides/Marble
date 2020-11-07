@@ -2,9 +2,8 @@
 
 namespace Marble.Core.Declaration
 {
-    [AttributeUsage(AttributeTargets.Class)] 
+    [AttributeUsage(AttributeTargets.Class)]
     public class MarbleControllerAttribute : Attribute
     {
-        
     }
 }

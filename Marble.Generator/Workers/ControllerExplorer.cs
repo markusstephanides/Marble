@@ -25,15 +25,15 @@ namespace Marble.Generator
         public ControllerExplorer(string projectPath)
         {
             this.projectPath = projectPath;
-            classFileFinder = new ClassFileFinder(this.projectPath);
+            this.classFileFinder = new ClassFileFinder(this.projectPath);
         }
 
         public IEnumerable<ControllerDescriptor> Find()
         {
-            var classFiles = classFileFinder.Find();
+            var classFiles = this.classFileFinder.Find();
 
             return classFiles
-                .Select(GetControllerDescriptorIfExists)
+                .Select(this.GetControllerDescriptorIfExists)
                 .Where(descriptor => descriptor != null)
                 .ToList();
         }
@@ -48,12 +48,19 @@ namespace Marble.Generator
             foreach (var classDeclarationSyntax in classes)
             foreach (var attributeListSyntax in classDeclarationSyntax.AttributeLists)
             foreach (var attributeSyntax in attributeListSyntax.Attributes)
-                if (attributeSyntax.Name.ToString() == marbleControllerAttributeName)
+            {
+                if (attributeSyntax.Name.ToString() == this.marbleControllerAttributeName)
+                {
+                    var namespaceName = (classDeclarationSyntax.Parent as NamespaceDeclarationSyntax).Name.ToString();
+
                     return new ControllerDescriptor
                     {
-                        Name = classDeclarationSyntax.Identifier.Text,
-                        ProcedureDescriptors = FindProcedures(classDeclarationSyntax)
+                        ClassName = classDeclarationSyntax.Identifier.Text,
+                        Name = $"{namespaceName}.{classDeclarationSyntax.Identifier.Text}",
+                        ProcedureDescriptors = this.FindProcedures(classDeclarationSyntax)
                     };
+                }
+            }
 
             return null;
         }
@@ -67,11 +74,17 @@ namespace Marble.Generator
             foreach (var attributeListSyntax in methodDeclarationSyntax.AttributeLists)
             foreach (var attributeSyntax in attributeListSyntax.Attributes)
             {
-                if (attributeSyntax.Name.ToString() != marbleProcedureAttributeName) continue;
+                if (attributeSyntax.Name.ToString() != this.marbleProcedureAttributeName)
+                {
+                    continue;
+                }
 
                 var isPublic = methodDeclarationSyntax.Modifiers.Any(token => token.Text == "public");
 
-                if (!isPublic) continue;
+                if (!isPublic)
+                {
+                    continue;
+                }
 
                 var returnType = methodDeclarationSyntax.ReturnType.ToString();
                 var arguments = methodDeclarationSyntax.ParameterList.Parameters

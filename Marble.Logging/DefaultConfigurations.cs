@@ -3,6 +3,7 @@ using NLog.Conditions;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
+using NLog.Targets.Wrappers;
 
 namespace Marble.Logging
 {
@@ -31,17 +32,42 @@ namespace Marble.Logging
                 consoleTarget.WordHighlightingRules.Add(highlightRule);
             }
 
-            ConsoleTargetConfiguration.AddRule(LogLevel.Debug, LogLevel.Fatal, consoleTarget);
+            var asyncWrapper = new AsyncTargetWrapper(consoleTarget);
+
+            ConsoleTargetConfiguration.AddRule(LogLevel.Debug, LogLevel.Fatal, asyncWrapper);
         }
 
         private static ConsoleOutputColor LogLevelToColor(LogLevel logLevel)
         {
-            if (logLevel == LogLevel.Debug) return ConsoleOutputColor.Green;
-            if (logLevel == LogLevel.Info) return ConsoleOutputColor.Cyan;
-            if (logLevel == LogLevel.Warn) return ConsoleOutputColor.Yellow;
-            if (logLevel == LogLevel.Trace) return ConsoleOutputColor.Magenta;
-            if (logLevel == LogLevel.Error) return ConsoleOutputColor.Red;
-            if (logLevel == LogLevel.Fatal) return ConsoleOutputColor.DarkRed;
+            if (logLevel == LogLevel.Debug)
+            {
+                return ConsoleOutputColor.Green;
+            }
+
+            if (logLevel == LogLevel.Info)
+            {
+                return ConsoleOutputColor.Cyan;
+            }
+
+            if (logLevel == LogLevel.Warn)
+            {
+                return ConsoleOutputColor.Yellow;
+            }
+
+            if (logLevel == LogLevel.Trace)
+            {
+                return ConsoleOutputColor.Magenta;
+            }
+
+            if (logLevel == LogLevel.Error)
+            {
+                return ConsoleOutputColor.Red;
+            }
+
+            if (logLevel == LogLevel.Fatal)
+            {
+                return ConsoleOutputColor.DarkRed;
+            }
 
             return ConsoleOutputColor.NoChange;
         }

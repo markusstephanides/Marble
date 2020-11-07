@@ -6,5 +6,6 @@ namespace Marble.Generator.Models
     {
         public string Name { get; set; }
         public IEnumerable<ProcedureDescriptor> ProcedureDescriptors { get; set; }
+        public string ClassName { get; set; }
     }
 }

@@ -27,12 +27,12 @@ namespace Marble.SandboxAPI.Controllers
         {
             try
             {
-                var result = await mathService.ComplexAdd(a, b).ConfigureAwait(false);
-                return Ok(new {result});
+                var result = await this.mathService.Add(a, b).ConfigureAwait(false);
+                return this.Ok(new {result});
             }
             catch (Exception e)
             {
-                return StatusCode(500, new {message = e.Message});
+                return this.StatusCode(500, new {message = e.Message});
             }
         }
     }

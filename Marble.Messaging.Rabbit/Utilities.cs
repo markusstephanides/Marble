@@ -1,6 +1,4 @@
-﻿using Marble.Core.Messaging.Abstractions;
-
-namespace Marble.Messaging.Rabbit
+﻿namespace Marble.Messaging.Rabbit
 {
     public static class Utilities
     {

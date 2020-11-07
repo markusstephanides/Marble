@@ -20,37 +20,41 @@ namespace Marble.Core.Messaging
 
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
-            controllers = new ConcurrentDictionary<ControllerDescriptor, object>(
+            this.controllers = new ConcurrentDictionary<ControllerDescriptor, object>(
                 new ControllerExplorer().ScanAssembly(Assembly.GetEntryAssembly()).Select(
                     controller => new KeyValuePair<ControllerDescriptor, object>(controller, null)
                 )
             );
 
-            foreach (var entry in controllers) serviceCollection.AddSingleton(entry.Key.Type);
+            foreach (var entry in this.controllers)
+            {
+                serviceCollection.AddSingleton(entry.Key.Type);
+            }
         }
 
         public void Initialize(IServiceProvider serviceProvider)
         {
-            messagingClient = serviceProvider.GetService<IMessagingClient>();
-            messagingClient.Connect(this, controllers.Keys);
-            logger = serviceProvider.GetService<ILogger<MessagingFacade>>();
+            this.messagingClient = serviceProvider.GetService<IMessagingClient>();
+            this.messagingClient.Connect(this, this.controllers.Keys);
+            this.logger = serviceProvider.GetService<ILogger<MessagingFacade>>();
 
-            foreach (var (descriptor, _) in controllers)
+            foreach (var (descriptor, _) in this.controllers)
             {
-                controllers[descriptor] = serviceProvider.GetService(descriptor.Type);
-                logger?.LogInformation(
+                this.controllers[descriptor] = serviceProvider.GetService(descriptor.Type);
+                this.logger?.LogInformation(
                     $"Found controller instance for {descriptor.ControllerName} with {descriptor.ProcedureDescriptors.Count()} procedures");
             }
         }
 
         public object? InvokeProcedure(string controllerName, string procedureName, object[]? parameters)
         {
-            var (key, value) = controllers.First(controllerDescriptor =>
+            var (key, value) = this.controllers.First(controllerDescriptor =>
                 controllerDescriptor.Key.ControllerName == controllerName);
             var procedureMethodInfo =
                 key.ProcedureDescriptors.First(procedureDescriptor =>
                     procedureDescriptor.Name == procedureName).MethodInfo;
             // TODO: do all this logic when the controllers load and not everytime a procedure needs to be invoked
+
             if (parameters != null)
             {
                 var parameterInfos = procedureMethodInfo.GetParameters();
@@ -59,7 +63,9 @@ namespace Marble.Core.Messaging
                     var parameter = parameters[i];
                     var parameterInfo = parameterInfos[i];
                     if (parameter.GetType() != parameterInfo.ParameterType)
+                    {
                         parameters[i] = Convert.ChangeType(parameter, parameterInfo.ParameterType);
+                    }
                 }
             }
 
@@ -67,7 +73,9 @@ namespace Marble.Core.Messaging
 
             if (procedureMethodInfo.ReturnType.IsGenericType &&
                 procedureMethodInfo.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
+            {
                 return ((dynamic) rawReturnValue).Result;
+            }
 
             return rawReturnValue;
         }

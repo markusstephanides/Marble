@@ -4,6 +4,5 @@ namespace Marble.Messaging.Rabbit.Models
 {
     public class RabbitClientConfiguration : MessagingClientConfiguration
     {
-        
     }
 }

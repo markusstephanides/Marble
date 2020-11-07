@@ -21,8 +21,8 @@ namespace Marble.Sandbox
         [MarbleProcedure]
         public int Add(int a, int b)
         {
-            logger.LogInformation($"Addition request incoming with params {a}+{b}!");
-            return stupidDependency.StupidAdd(a, b);
+            this.logger.LogInformation($"Addition request incoming with params {a}+{b}!");
+            return this.stupidDependency.StupidAdd(a, b);
         }
 
         [MarbleProcedure]

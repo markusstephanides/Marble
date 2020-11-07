@@ -26,7 +26,8 @@ namespace Marble.Generator
             foreach (var controllerDescriptor in controllers)
             {
                 var generatedCode = ClientFileTemplate.Render(targetInformation, controllerDescriptor);
-                var targetFilePath = Path.Join(targetFileInfo.Directory.FullName, controllerDescriptor.Name + ".cs");
+                var targetFilePath =
+                    Path.Join(targetFileInfo.Directory.FullName, controllerDescriptor.ClassName + ".cs");
                 File.WriteAllText(targetFilePath, generatedCode);
                 Console.WriteLine($"Created {controllerDescriptor.Name} client");
             }

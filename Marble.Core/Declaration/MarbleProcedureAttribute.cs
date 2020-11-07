@@ -2,9 +2,8 @@
 
 namespace Marble.Core.Declaration
 {
-    [AttributeUsage(AttributeTargets.Method)] 
+    [AttributeUsage(AttributeTargets.Method)]
     public class MarbleProcedureAttribute : Attribute
     {
-        
     }
 }

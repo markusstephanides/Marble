@@ -212,7 +212,7 @@ namespace Marble.Messaging.Rabbit
             }
 
             this.logger.LogInformation(
-                $"Responded to {controller}:{procedure} in {stopwatch.ElapsedMilliseconds} ms");
+                $"Responded to {ProcedurePath.FromStrings(controller, procedure)} in {stopwatch.ElapsedMilliseconds} ms");
         }
 
         private void RegisterQueues(IEnumerable<ControllerDescriptor> descriptors)
@@ -220,7 +220,7 @@ namespace Marble.Messaging.Rabbit
             foreach (var controllerDescriptor in descriptors)
             foreach (var procedureDescriptor in controllerDescriptor.ProcedureDescriptors)
             {
-                var queueName = procedureDescriptor.ToString();
+                var queueName = ProcedurePath.FromProcedureDescriptor(procedureDescriptor);
                 this.channel.QueueDeclare(queueName, false, false);
                 this.SetUpConsumer(queueName);
             }

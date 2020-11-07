@@ -13,7 +13,9 @@ namespace Marble.Utilities
             {
                 var t = assembly.GetType(typeName, false);
                 if (t != null)
+                {
                     return t;
+                }
             }
 
             throw new ArgumentException(

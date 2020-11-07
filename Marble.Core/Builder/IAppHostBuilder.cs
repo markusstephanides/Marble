@@ -13,10 +13,13 @@ namespace Marble.Core.Builder
         IAppHostBuilder WithMessaging<TMessagingClient, TConfiguration>(string configurationSection = "Messaging")
             where TMessagingClient : class, IMessagingClient
             where TConfiguration : MessagingClientConfiguration;
+
         IAppHostBuilder Configure<TOption>(Func<IConfiguration, IConfiguration> configurationAction)
             where TOption : class;
+
         IAppHostBuilder Configure<TOption>(Action<TOption> optionConfigurationAction)
             where TOption : class;
+
         IAppHostBuilder ProvideServiceCollection(IServiceCollection serviceCollection);
         IAppHostBuilder ProvideServiceProvider(IServiceProvider serviceProvider);
         IAppHostBuilder ProvideConfiguration(IConfiguration configuration);
