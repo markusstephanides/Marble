@@ -29,4 +29,4 @@ jobs:
         nupkg-path:  '*.nupkg'
         repo-owner:  'markusstephanides'
         gh-user:  'markusstephanides'
-        token:  ${{ secrets.GITHUB_TOKEN }}
+        token:  ${{ secrets.REPO_KEY }}
