@@ -1,9 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Marble.Core;
+using Marble.Logging;
+using Marble.Messaging.Rabbit.Extensions;
+using Marble.Utilities.Extensions;
 
 namespace Marble.Sandbox
 {
@@ -11,11 +9,12 @@ namespace Marble.Sandbox
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            MarbleCore.Builder
+                .AddSingleton<StupidDependency>()
+                .WithRabbitMessaging()
+                .WithLogging()
+                .KeepRunning()
+                .BuildAndHost();
         }
-
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hostContext, services) => { services.AddHostedService<Worker>(); });
     }
 }

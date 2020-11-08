@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
+using Marble.Sandbox.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -9,17 +11,29 @@ namespace Marble.SandboxAPI.Controllers
     public class CalculatorController : ControllerBase
     {
         private readonly ILogger<CalculatorController> logger;
+        private readonly IMathService mathService;
 
-        public CalculatorController(ILogger<CalculatorController> logger)
+        public CalculatorController(
+            ILogger<CalculatorController> logger,
+            IMathService mathService
+        )
         {
             this.logger = logger;
+            this.mathService = mathService;
         }
 
         [HttpGet("add")]
-        public async Task<ActionResult<decimal>> GetSummationAsync([FromQuery] decimal a, [FromQuery] decimal b)
+        public async Task<ActionResult<int>> GetAdditionAsync([FromQuery] int a, [FromQuery] int b)
         {
-            logger.LogInformation($"Got summation request {a}+{b}");
-            return this.Ok(a + b);
+            try
+            {
+                var result = await this.mathService.Add(a, b).ConfigureAwait(false);
+                return this.Ok(new {result});
+            }
+            catch (Exception e)
+            {
+                return this.StatusCode(500, new {message = e.Message});
+            }
         }
     }
 }

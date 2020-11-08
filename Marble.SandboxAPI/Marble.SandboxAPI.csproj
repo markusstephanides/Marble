@@ -9,5 +9,12 @@
       <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Marble.Core\Marble.Core.csproj" />
+      <ProjectReference Include="..\Marble.Logging\Marble.Logging.csproj" />
+      <ProjectReference Include="..\Marble.Messaging.Rabbit\Marble.Messaging.Rabbit.csproj" />
+      <ProjectReference Include="..\Marble.Sandbox.Contracts\Marble.Sandbox.Contracts.csproj" />
+    </ItemGroup>
+
 
 </Project>
