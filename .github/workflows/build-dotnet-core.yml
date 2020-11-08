@@ -23,8 +23,3 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-restore --verbosity normal
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2.2.0
-      with:
-        name: nupkg
-        path: /*/bin/Release/*.nupkg
