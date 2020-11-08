@@ -23,10 +23,5 @@ jobs:
       run: dotnet test --no-restore --verbosity normal
     - name: Pack
       run: dotnet pack --no-build --configuration Release Marble.sln --output .
-    - name: Publish to NuGet
-      uses: tanaka-takayoshi/nuget-publish-to-github-packages-action@v2.1
-      with:
-        nupkg-path:  '*.nupkg'
-        repo-owner:  'markusstephanides'
-        gh-user:  'markusstephanides'
-        token:  ${{ secrets.REPO_KEY }}
+    - name: Publish to GitHub packages
+      run: dotnet nuget push *.nupkg --source github --skip-duplicate -k {{ secrets.REPO_KEY }}
