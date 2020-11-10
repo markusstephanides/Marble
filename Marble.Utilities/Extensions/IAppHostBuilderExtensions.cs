@@ -18,6 +18,13 @@ namespace Marble.Utilities.Extensions
         {
             return builder.ConfigureServices(collection => collection.AddSingleton(instance));
         }
+        
+        public static IAppHostBuilder AddSingleton<TAbstraction, TImplementation>(this IAppHostBuilder builder)
+            where TAbstraction : class
+            where TImplementation : class, TAbstraction
+        {
+            return builder.ConfigureServices(collection => collection.AddSingleton<TAbstraction, TImplementation>());
+        }
 
         public static IAppHostBuilder AddSingleton<TService>(this IAppHostBuilder builder,
             Func<TService, TService> factory)
