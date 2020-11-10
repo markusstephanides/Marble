@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Marble.Core.Declaration;
+using Marble.Sandbox.Contracts;
+using Marble.Sandbox.Contracts.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Marble.Sandbox
@@ -51,10 +53,16 @@ namespace Marble.Sandbox
         //         SomeInt = i
         //     };
         // }
+        //
+        // [MarbleProcedure]
+        // public ModelMathResult Something2(int i)
+        // {
+        //     return new ModelMathResult
+        //     {
+        //         MathResult = i
+        //     };
+        // }
     }
 
-    public class MathResult
-    {
-        public int SomeInt { get; set; }
-    }
+   
 }

@@ -38,6 +38,13 @@ namespace Marble.Utilities.Extensions
         {
             return builder.ConfigureServices(collection => collection.AddTransient<TService>());
         }
+        
+        public static IAppHostBuilder AddTransient<TAbstraction, TImplementation>(this IAppHostBuilder builder)
+            where TAbstraction : class
+            where TImplementation : class, TAbstraction
+        {
+            return builder.ConfigureServices(collection => collection.AddTransient<TAbstraction, TImplementation>());
+        }
 
         public static IAppHostBuilder AddTransient<TService>(this IAppHostBuilder builder,
             Func<IServiceProvider, TService> factory)
