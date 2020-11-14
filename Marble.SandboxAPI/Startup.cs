@@ -28,7 +28,6 @@ namespace Marble.SandboxAPI
 
             MarbleCore.Builder
                 .WithRabbitMessaging()
-                .WithLogging()
                 .ProvideConfiguration(this.Configuration)
                 .ProvideServiceCollection(services);
         }

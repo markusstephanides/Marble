@@ -1,5 +1,4 @@
 using Marble.Core;
-using Marble.Logging;
 using Marble.Messaging.Rabbit.Extensions;
 using Marble.Utilities.Extensions;
 
@@ -12,7 +11,6 @@ namespace Marble.Sandbox
             MarbleCore.Builder
                 .AddSingleton<StupidDependency>()
                 .WithRabbitMessaging()
-                .WithLogging()
                 .BuildAndHost();
         }
     }

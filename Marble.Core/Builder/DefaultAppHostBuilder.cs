@@ -2,8 +2,11 @@
 using System.Linq;
 using Marble.Core.Builder.Abstractions;
 using Marble.Core.Builder.Models;
+using Marble.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 
 namespace Marble.Core.Builder
 {
@@ -55,6 +58,17 @@ namespace Marble.Core.Builder
 
         public AppHost BuildAndHost(bool keepRunning = true)
         {
+            // Move this
+            this.ConfigureServices(collection =>
+            {
+                collection.AddLogging(loggingBuilder =>
+                {
+                    loggingBuilder.ClearProviders();
+                    loggingBuilder.SetMinimumLevel(LogLevel.Debug);
+                    loggingBuilder.AddNLog(DefaultConfigurations.ConsoleTargetConfiguration);
+                });
+            });
+            
             this.BuildingModel.KeepRunning = keepRunning;
             return AppHostFactory.Create(this.BuildingModel);
         }
