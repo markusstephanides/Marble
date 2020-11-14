@@ -1,4 +1,5 @@
 ﻿using Marble.Core.Builder;
+using Marble.Core.Builder.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;

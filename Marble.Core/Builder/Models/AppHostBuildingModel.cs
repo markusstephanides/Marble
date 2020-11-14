@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Marble.Core.Builder
+namespace Marble.Core.Builder.Models
 {
     public class AppHostBuildingModel
     {

@@ -1,8 +1,9 @@
 ﻿using System;
+using Marble.Core.Builder.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Marble.Core.Builder
+namespace Marble.Core.Builder.Abstractions
 {
     public interface IAppHostBuilder
     {

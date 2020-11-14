@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Marble.Core.Builder
+namespace Marble.Core.Builder.Models
 {
     public class AppHost
     {

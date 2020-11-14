@@ -1,5 +1,6 @@
 ﻿using System;
 using Marble.Core.Builder;
+using Marble.Core.Builder.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Marble.Utilities.Extensions

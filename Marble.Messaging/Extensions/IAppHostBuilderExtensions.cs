@@ -1,4 +1,5 @@
 ﻿using Marble.Core.Builder;
+using Marble.Core.Builder.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Configuration;
 using Marble.Messaging.Services;
