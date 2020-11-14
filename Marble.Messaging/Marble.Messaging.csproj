@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Marble.Core\Marble.Core.csproj" />
+      <ProjectReference Include="..\Marble.Messaging.Contracts\Marble.Messaging.Contracts.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0-rc.2.20475.5" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0-rc.2.20475.5" />
+    </ItemGroup>
+
+</Project>

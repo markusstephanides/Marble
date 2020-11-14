@@ -1,8 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Marble.Core.Builder
 {
@@ -13,10 +15,13 @@ namespace Marble.Core.Builder
             RunPreBuildActions(model);
             SetupConfiguration(model);
             ConfigureDependencyInjection(model);
-            // InitializeMessaging(model);
             RunPostBuildActions(model);
             StartBackgroundThread(model);
 
+            var logger = model.ServiceProvider.GetService<ILogger<AppHostFactory>>();
+            var elapsedTimeMs = (int)(DateTime.Now - model.CreationTime).TotalMilliseconds;
+            logger.LogInformation($"Startup completed in {elapsedTimeMs} ms");
+            
             return new AppHost
             {
                 ServiceProvider = model.ServiceProvider

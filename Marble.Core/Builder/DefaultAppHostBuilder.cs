@@ -51,7 +51,7 @@ namespace Marble.Core.Builder
             return this;
         }
 
-        public AppHost BuildAndHost(bool keepRunning = false)
+        public AppHost BuildAndHost(bool keepRunning = true)
         {
             this.BuildingModel.KeepRunning = keepRunning;
             return AppHostFactory.Create(this.BuildingModel);

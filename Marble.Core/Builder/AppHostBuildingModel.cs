@@ -7,6 +7,7 @@ namespace Marble.Core.Builder
 {
     public class AppHostBuildingModel
     {
+        public DateTime CreationTime { get; set; } = DateTime.Now;
         public IServiceProvider? ServiceProvider { get; set; }
         public IServiceCollection? ServiceCollection { get; set; }
         public IConfiguration? Configuration { get; set; }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
+using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models;
 using Marble.Messaging.Models;
@@ -17,7 +18,7 @@ using RabbitMQ.Client.Events;
 
 namespace Marble.Messaging.Rabbit
 {
-    public class RabbitMessagingClient : IMessagingClient
+    public class RabbitMessagingClient : IConnectableMessagingClient
     {
         private readonly RabbitClientConfiguration configuration;
         private readonly ILogger<RabbitMessagingClient> logger;

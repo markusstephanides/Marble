@@ -17,6 +17,6 @@ namespace Marble.Core.Builder
         IAppHostBuilder ProvideServiceCollection(IServiceCollection serviceCollection);
         IAppHostBuilder ProvideServiceProvider(IServiceProvider serviceProvider);
         IAppHostBuilder ProvideConfiguration(IConfiguration configuration);
-        AppHost BuildAndHost(bool keepRunning = false);
+        AppHost BuildAndHost(bool keepRunning = true);
     }
 }
