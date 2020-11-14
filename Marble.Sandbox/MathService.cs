@@ -1,7 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Marble.Core.Declaration;
-using Marble.Sandbox.Contracts;
-using Marble.Sandbox.Contracts.Models;
+using Marble.Messaging.Contracts.Declaration;
 using Microsoft.Extensions.Logging;
 
 namespace Marble.Sandbox
@@ -63,6 +61,4 @@ namespace Marble.Sandbox
         //     };
         // }
     }
-
-   
 }

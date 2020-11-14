@@ -1,4 +1,4 @@
-﻿namespace Marble.Core.Messaging.Models
+﻿namespace Marble.Messaging.Contracts.Models
 {
     public enum MessageType
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Marble.Core.Declaration
+namespace Marble.Messaging.Models
 {
     public class ControllerDescriptor
     {

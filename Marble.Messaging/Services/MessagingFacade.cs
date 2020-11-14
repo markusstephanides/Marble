@@ -5,19 +5,20 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Marble.Core.Declaration;
-using Marble.Core.Messaging.Abstractions;
-using Marble.Core.Messaging.Explorer;
+using Marble.Messaging.Abstractions;
+using Marble.Messaging.Contracts.Abstractions;
+using Marble.Messaging.Explorer;
+using Marble.Messaging.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Marble.Core.Messaging
+namespace Marble.Messaging.Services
 {
     public class MessagingFacade
     {
         private IDictionary<ControllerDescriptor, object> controllers;
         private ILogger<MessagingFacade>? logger;
-        private IMessagingClient messagingClient;
+        private IConnectableMessagingClient messagingClient;
 
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
@@ -35,7 +36,7 @@ namespace Marble.Core.Messaging
 
         public void Initialize(IServiceProvider serviceProvider)
         {
-            this.messagingClient = serviceProvider.GetService<IMessagingClient>();
+            this.messagingClient = (IConnectableMessagingClient) serviceProvider.GetService<IMessagingClient>();
             this.messagingClient.Connect(this, this.controllers.Keys);
             this.logger = serviceProvider.GetService<ILogger<MessagingFacade>>();
 

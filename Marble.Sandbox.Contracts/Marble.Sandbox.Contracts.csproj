@@ -7,6 +7,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Marble.Core\Marble.Core.csproj" />
+      <ProjectReference Include="..\Marble.Messaging.Contracts\Marble.Messaging.Contracts.csproj"/>
     </ItemGroup>
 
 </Project>

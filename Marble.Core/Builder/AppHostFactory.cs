@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Linq;
+using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,9 +10,12 @@ namespace Marble.Core.Builder
     {
         public static AppHost Create(AppHostBuildingModel model)
         {
+            RunPreBuildActions(model);
             SetupConfiguration(model);
             ConfigureDependencyInjection(model);
-            InitializeMessaging(model);
+            // InitializeMessaging(model);
+            RunPostBuildActions(model);
+            StartBackgroundThread(model);
 
             return new AppHost
             {
@@ -18,14 +23,30 @@ namespace Marble.Core.Builder
             };
         }
 
-        private static void InitializeMessaging(AppHostBuildingModel model)
+        private static void RunPostBuildActions(AppHostBuildingModel model)
         {
-            if (model.MessagingFacade == null)
+            model.PostBuildActions.ToList().ForEach(action => action(model));
+        }
+
+        private static void RunPreBuildActions(AppHostBuildingModel model)
+        {
+            model.PreBuildActions.ToList().ForEach(action => action(model));
+        }
+
+        private static void StartBackgroundThread(AppHostBuildingModel model)
+        {
+            if (!model.KeepRunning)
             {
                 return;
             }
 
-            model.MessagingFacade.Initialize(model.ServiceProvider);
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                }
+            }).Start();
         }
 
         private static void SetupConfiguration(AppHostBuildingModel buildingModel)

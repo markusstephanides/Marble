@@ -1,7 +1,7 @@
-﻿using Marble.Core.Declaration;
-using Marble.Core.Messaging.Models;
+﻿using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Models;
 
-namespace Marble.Core.Transformers
+namespace Marble.Messaging.Transformers
 {
     public class ProcedurePath
     {

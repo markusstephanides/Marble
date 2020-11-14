@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Marble.Core.Declaration
+namespace Marble.Messaging.Contracts.Declaration
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class MarbleControllerAttribute : Attribute

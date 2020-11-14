@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Marble.Core.Transformers
+namespace Marble.Messaging.Transformers
 {
     public class ProcedureName
     {

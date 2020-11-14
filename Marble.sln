@@ -24,6 +24,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Sandbox.Contracts", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Generator", "Marble.Generator\Marble.Generator.csproj", "{D5745BD1-21EB-4A83-80D8-E10AB67A3005}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Messaging", "Marble.Messaging\Marble.Messaging.csproj", "{F7176D83-1DE4-4AF6-93C9-CC6D5CDCDE95}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Messaging.Contracts", "Marble.Messaging.Contracts\Marble.Messaging.Contracts.csproj", "{5830E371-75E2-4465-8891-FBFB6798CC1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,5 +82,13 @@ Global
 		{D5745BD1-21EB-4A83-80D8-E10AB67A3005}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5745BD1-21EB-4A83-80D8-E10AB67A3005}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5745BD1-21EB-4A83-80D8-E10AB67A3005}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7176D83-1DE4-4AF6-93C9-CC6D5CDCDE95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7176D83-1DE4-4AF6-93C9-CC6D5CDCDE95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7176D83-1DE4-4AF6-93C9-CC6D5CDCDE95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7176D83-1DE4-4AF6-93C9-CC6D5CDCDE95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5830E371-75E2-4465-8891-FBFB6798CC1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5830E371-75E2-4465-8891-FBFB6798CC1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5830E371-75E2-4465-8891-FBFB6798CC1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5830E371-75E2-4465-8891-FBFB6798CC1A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

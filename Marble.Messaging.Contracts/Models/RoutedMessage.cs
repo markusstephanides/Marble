@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Marble.Core.Messaging.Models
+namespace Marble.Messaging.Contracts.Models
 {
     public class RoutedMessage
     {

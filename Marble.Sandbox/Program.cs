@@ -13,7 +13,6 @@ namespace Marble.Sandbox
                 .AddSingleton<StupidDependency>()
                 .WithRabbitMessaging()
                 .WithLogging()
-                .KeepRunning()
                 .BuildAndHost();
         }
     }

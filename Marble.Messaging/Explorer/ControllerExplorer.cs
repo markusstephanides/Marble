@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Marble.Core.Declaration;
-using Marble.Core.Transformers;
+using Marble.Messaging.Contracts.Declaration;
+using Marble.Messaging.Models;
+using Marble.Messaging.Transformers;
 
-namespace Marble.Core.Messaging.Explorer
+namespace Marble.Messaging.Explorer
 {
     public class ControllerExplorer
     {

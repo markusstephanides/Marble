@@ -1,4 +1,5 @@
 ﻿using Marble.Core.Builder;
+using Marble.Messaging.Extensions;
 using Marble.Messaging.Rabbit.Models;
 
 namespace Marble.Messaging.Rabbit.Extensions

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace Marble.Generator
+namespace Marble.Generator.Workers
 {
     public class ClassFileFinder
     {
