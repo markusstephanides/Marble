@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models;
 using Marble.Messaging.Extensions;
 using Marble.Messaging.Utilities;
+using Newtonsoft.Json;
 
 namespace Marble.Messaging.Services
 {
@@ -18,11 +20,12 @@ namespace Marble.Messaging.Services
         private readonly IObservable<RemoteMessage> messageFeed;
         private readonly IStreamManager streamManager;
 
-        public DefaultMessagingClient(IMessagingAdapter messagingAdapter, ISerializationAdapter serializationAdapter, IControllerRegistry controllerRegistry)
+        public DefaultMessagingClient(IMessagingAdapter messagingAdapter, ISerializationAdapter serializationAdapter, IControllerRegistry controllerRegistry, IStreamManager streamManager)
         {
             this.messagingAdapter = messagingAdapter;
             this.serializationAdapter = serializationAdapter;
             this.controllerRegistry = controllerRegistry;
+            this.streamManager = streamManager;
             this.messageFeed = this.messagingAdapter.MessageFeed;
         }
 
@@ -39,6 +42,7 @@ namespace Marble.Messaging.Services
         public Task<TResult> InvokeProcedureAsync<TResult>(RequestMessage requestMessage)
         {
             return this.InvokeProcedureStream<TResult>(requestMessage)
+                .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(Constants.DefaultTimeoutSeconds))
                 .ToTask();
         }

@@ -14,6 +14,20 @@ namespace Marble.Core.Builder
     {
         public AppHostBuildingModel BuildingModel { get; } = new AppHostBuildingModel();
 
+        public DefaultAppHostBuilder()
+        {
+            // TODO: Move this
+            this.ConfigureServices(collection =>
+            {
+                collection.AddLogging(loggingBuilder =>
+                {
+                    loggingBuilder.ClearProviders();
+                    loggingBuilder.SetMinimumLevel(LogLevel.Debug);
+                    loggingBuilder.AddNLog(DefaultConfigurations.ConsoleTargetConfiguration);
+                });
+            });
+        }
+
         public IAppHostBuilder ConfigureServices(Action<IServiceCollection> configurationAction)
         {
             this.BuildingModel.ServiceCollectionConfigurationActions.Add(configurationAction);
@@ -63,17 +77,6 @@ namespace Marble.Core.Builder
 
         public AppHost BuildAndHost(bool keepRunning = true)
         {
-            // Move this
-            this.ConfigureServices(collection =>
-            {
-                collection.AddLogging(loggingBuilder =>
-                {
-                    loggingBuilder.ClearProviders();
-                    loggingBuilder.SetMinimumLevel(LogLevel.Debug);
-                    loggingBuilder.AddNLog(DefaultConfigurations.ConsoleTargetConfiguration);
-                });
-            });
-            
             this.BuildingModel.KeepRunning = keepRunning;
             return AppHostFactory.Create(this.BuildingModel);
         }

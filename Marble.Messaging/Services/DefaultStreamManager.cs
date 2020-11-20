@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -23,10 +24,19 @@ namespace Marble.Messaging.Services
                     switch (streamEvent.EventType)
                     {
                         case StreamEventType.Notification:
-                            observer.OnNext((T)streamEvent.Payload);
+                            if (streamEvent.Payload != null)
+                            {
+                                // TODO: This is a heavy workaround because Json serialization assumes Int64 for numbers
+                                var payload = (T) Convert.ChangeType(streamEvent.Payload, typeof(T), CultureInfo.InvariantCulture);
+                                observer.OnNext(payload);
+                            }
                             break;
                         case StreamEventType.Completion:
-                            if (streamEvent.Payload != null) observer.OnNext((T)streamEvent.Payload);
+                            if (streamEvent.Payload != null)
+                            {
+                                var payload = (T) Convert.ChangeType(streamEvent.Payload, typeof(T), CultureInfo.InvariantCulture);
+                                observer.OnNext(payload);
+                            }
                             observer.OnCompleted();
                             break;
                         case StreamEventType.Error:

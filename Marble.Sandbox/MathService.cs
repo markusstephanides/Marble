@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Marble.Messaging.Contracts.Declaration;
+using Marble.Sandbox.Contracts;
 using Microsoft.Extensions.Logging;
 
 namespace Marble.Sandbox
@@ -41,6 +42,15 @@ namespace Marble.Sandbox
         public void VoidAdd(int a, int b)
         {
             var result = a + b;
+        }
+        
+        [MarbleProcedure]
+        public MathResult AddToMathResult(MathResult a, int b)
+        {
+            return new MathResult
+            {
+                SomeInt = a.SomeInt + b
+            };
         }
 
         // [MarbleProcedure]

@@ -2,7 +2,7 @@
 
 namespace Marble.Messaging.Rabbit.Models
 {
-    public class RabbitClientConfiguration : MessagingClientConfiguration
+    public class RabbitConfiguration : MessagingConfiguration
     {
     }
 }

@@ -2,7 +2,7 @@
 {
     public sealed class RequestMessage
     {
-        public string Correlation { get; set; }
+        public string? Correlation { get; set; }
         public string Controller { get; set; }
         public string Procedure { get; set; }
         public object[]? Arguments { get; set; }
