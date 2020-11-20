@@ -7,23 +7,21 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Marble.Messaging.Extensions
 {
-    public static class IAppHostBuilderExtensions
+    public static class AppHostBuilderExtensions
     {
         public static IAppHostBuilder WithMessaging<TMessagingClient, TConfiguration>(
             this IAppHostBuilder appHostBuilder, string configurationSection = "Messaging")
-            where TMessagingClient : class, IMessagingClient
+            where TMessagingClient : class, IMessagingAdapter
             where TConfiguration : MessagingClientConfiguration
         {
-            var messagingFacade = new MessagingFacade();
+            var messagingFacade = new DefaultMessagingFacade<TMessagingClient>();
             var builder = (IAppHostBuilderWithExposedModel) appHostBuilder;
 
-            builder.BuildingModel.PostBuildActions.Add(model => { messagingFacade.Initialize(model.ServiceProvider); });
+            builder.BuildingModel.PostBuildActions.Add(model => { messagingFacade.OnServiceProviderAvailable(model.ServiceProvider); });
 
             return builder
-                // Injection the required configuration
                 .Configure<TConfiguration>(configuration => configuration.GetSection(configurationSection))
-                .ConfigureServices(messagingFacade.ConfigureServices)
-                .ConfigureServices(services => services.AddSingleton<IMessagingClient, TMessagingClient>());
+                .ConfigureServices(messagingFacade.ConfigureServices);
         }
     }
 }

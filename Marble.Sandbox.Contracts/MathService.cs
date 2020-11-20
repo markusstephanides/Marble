@@ -14,31 +14,31 @@ namespace Marble.Sandbox.Contracts
 
     public class DefaultMathServiceClient : IMathService
     {
-        private readonly IMessagingClient messagingClient;
+        private readonly IMessagingAdapter messagingAdapter;
 
-        public DefaultMathServiceClient(IMessagingClient messagingClient)
+        public DefaultMathServiceClient(IMessagingAdapter messagingAdapter)
         {
-            this.messagingClient = messagingClient;
+            this.messagingAdapter = messagingAdapter;
         }
 
         public Task<int> Add(int a, int b)
         {
-            return this.messagingClient.SendAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "Add", a, b));
+            return this.messagingAdapter.SendAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "Add", a, b));
         }
 
         public Task<int> ComplexAdd(int a, int b)
         {
-            return this.messagingClient.SendAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "ComplexAdd", a, b));
+            return this.messagingAdapter.SendAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "ComplexAdd", a, b));
         }
 
         public Task VoidAddTask(int a, int b)
         {
-            return this.messagingClient.SendAndForgetAsync(new RequestMessage("Marble.Sandbox.MathService", "VoidAddTask", a, b));
+            return this.messagingAdapter.SendAndForgetAsync(new RequestMessage("Marble.Sandbox.MathService", "VoidAddTask", a, b));
         }
 
         public Task VoidAdd(int a, int b)
         {
-            return this.messagingClient.SendAndForgetAsync(new RequestMessage("MathService", "VoidAdd", a, b));
+            return this.messagingAdapter.SendAndForgetAsync(new RequestMessage("MathService", "VoidAdd", a, b));
         }
     }
 }

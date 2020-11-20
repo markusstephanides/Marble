@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Marble.Messaging.Abstractions;
-using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Explorer;
 using Marble.Messaging.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,11 +13,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Marble.Messaging.Services
 {
-    public class MessagingFacade
+    public class DefaultControllerRegistry : IControllerRegistry
     {
+        private ILogger<DefaultControllerRegistry> logger;
         private IDictionary<ControllerDescriptor, object> controllers;
-        private ILogger<MessagingFacade>? logger;
-        private IConnectableMessagingClient messagingClient;
+
+        public DefaultControllerRegistry()
+        {
+        }
 
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
@@ -34,17 +36,15 @@ namespace Marble.Messaging.Services
             }
         }
 
-        public void Initialize(IServiceProvider serviceProvider)
+        public void OnServiceProviderAvailable(IServiceProvider serviceProvider)
         {
-            this.messagingClient = (IConnectableMessagingClient) serviceProvider.GetService<IMessagingClient>();
-            this.messagingClient.Connect(this, this.controllers.Keys);
-            this.logger = serviceProvider.GetService<ILogger<MessagingFacade>>();
-
+            this.logger = serviceProvider.GetService<ILogger<DefaultControllerRegistry>>();
+            
             foreach (var (descriptor, _) in this.controllers)
             {
                 this.controllers[descriptor] = serviceProvider.GetService(descriptor.Type);
-                this.logger?.LogInformation(
-                    $"Found controller instance for {descriptor.Name} with {descriptor.ProcedureDescriptors.Count()} procedures");
+                this.logger.LogInformation(
+                    $"Found controller instance for {descriptor.Name} containing {descriptor.ProcedureDescriptors.Count()} procedures");
             }
         }
 

@@ -10,7 +10,7 @@ namespace Marble.Messaging.Rabbit.Extensions
         public static IAppHostBuilder WithRabbitMessaging(this IAppHostBuilder builder,
             string configurationSection = "Messaging")
         {
-            return builder.WithMessaging<RabbitMessagingClient, RabbitClientConfiguration>(configurationSection);
+            return builder.WithMessaging<RabbitMessagingAdapter, RabbitClientConfiguration>(configurationSection);
         }
     }
 }

@@ -18,19 +18,20 @@ using RabbitMQ.Client.Events;
 
 namespace Marble.Messaging.Rabbit
 {
-    public class RabbitMessagingClient : IConnectableMessagingClient
+    public class RabbitMessagingAdapter : IConnectableMessagingAdapter
     {
         private readonly RabbitClientConfiguration configuration;
-        private readonly ILogger<RabbitMessagingClient> logger;
+        private readonly ILogger<RabbitMessagingAdapter> logger;
         private readonly IDictionary<string, ResponseAwaitation> responseAwaitations;
 
         private IModel channel;
         private IConnection connection;
-        private MessagingFacade messagingFacade;
+        private DefaultMessagingFacade defaultMessagingFacade;
 
-        public RabbitMessagingClient(IOptions<RabbitClientConfiguration> configurationOption,
-            ILogger<RabbitMessagingClient> logger)
+        public RabbitMessagingAdapter(IOptions<RabbitClientConfiguration> configurationOption,
+            ILogger<RabbitMessagingAdapter> logger)
         {
+            
             this.logger = logger;
             this.responseAwaitations = new Dictionary<string, ResponseAwaitation>();
             this.configuration = configurationOption.Value;
@@ -42,7 +43,7 @@ namespace Marble.Messaging.Rabbit
             {
                 Exchange = Utilities.AmqDirectExchange,
                 MessageType = MessageType.RpcRequest,
-                RoutingKey = ProcedurePath.FromRequestMessage(requestMessage),
+                Target = ProcedurePath.FromRequestMessage(requestMessage),
                 CorrelationId = Guid.NewGuid().ToString(),
                 Payload = requestMessage.Arguments,
                 Headers = new Dictionary<string, object>
@@ -58,7 +59,7 @@ namespace Marble.Messaging.Rabbit
             return this.SendRoutedMessage(new RabbitRoutedMessage
             {
                 Exchange = Utilities.AmqDirectExchange,
-                RoutingKey = ProcedurePath.FromRequestMessage(requestMessage),
+                Target = ProcedurePath.FromRequestMessage(requestMessage),
                 Headers = new Dictionary<string, object>
                 {
                     {"Controller", requestMessage.Controller},
@@ -68,9 +69,9 @@ namespace Marble.Messaging.Rabbit
             });
         }
 
-        public void Connect(MessagingFacade messagingFacade, IEnumerable<ControllerDescriptor> controllerDescriptors)
+        public void Connect(DefaultMessagingFacade defaultMessagingFacade, IEnumerable<ControllerDescriptor> controllerDescriptors)
         {
-            this.messagingFacade = messagingFacade;
+            this.defaultMessagingFacade = defaultMessagingFacade;
             this.logger.LogInformation($"Connecting to {this.configuration.ConnectionString}");
 
             if (this.connection != null)
@@ -110,7 +111,7 @@ namespace Marble.Messaging.Rabbit
                     props.ReplyTo = Utilities.AmqDirectReplyToQueue;
                 }
 
-                var routingKey = message.RoutingKey;
+                var routingKey = message.Target;
                 var exchange = message.Exchange;
 
                 var payloadString = Serialization.Serialize(message.Payload);
@@ -133,12 +134,12 @@ namespace Marble.Messaging.Rabbit
                     if (!task.IsCompletedSuccessfully)
                     {
                         throw new TimeoutException(
-                            $"Timeout after {duration}ms while waiting for a response when calling {message.RoutingKey}");
+                            $"Timeout after {duration}ms while waiting for a response when calling {message.Target}");
                     }
 
 
                     this.logger.LogInformation(
-                        $"Successfully processed request to {message.RoutingKey} in {duration}ms");
+                        $"Successfully processed request to {message.Target} in {duration}ms");
                     return task;
                 }
 
@@ -193,13 +194,13 @@ namespace Marble.Messaging.Rabbit
 
             try
             {
-                var result = this.messagingFacade.InvokeProcedure(controller, procedure, (object[]) payload);
+                var result = this.defaultMessagingFacade.InvokeProcedure(controller, procedure, (object[]) payload);
                 this.channel.BasicAck(deliveryTag, false);
 
                 await this.SendRoutedMessage(new RabbitRoutedMessage
                 {
                     Exchange = Utilities.AmqDirectExchange,
-                    RoutingKey = properties.ReplyTo,
+                    Target = properties.ReplyTo,
                     CorrelationId = properties.CorrelationId,
                     Payload = result,
                     MessageType = MessageType.RpcResponse

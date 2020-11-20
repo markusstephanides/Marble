@@ -1,8 +1,10 @@
-﻿namespace Marble.Messaging.Contracts.Models
+﻿using Marble.Messaging.Contracts.Models.Stream;
+
+namespace Marble.Messaging.Contracts.Models
 {
     public class ResponseMessage
     {
-        public string CorrelationId { get; set; }
-        public object Payload { get; set; }
+        public string Correlation { get; set; }
+        public BasicStream Stream { get; set; }
     }
 }

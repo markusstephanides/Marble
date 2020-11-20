@@ -36,6 +36,11 @@ namespace Marble.Core.Builder
             return this;
         }
 
+        public IAppHostBuilder AddClients()
+        {
+            throw new NotImplementedException();
+        }
+
         public IAppHostBuilder ProvideServiceCollection(IServiceCollection serviceCollection)
         {
             this.BuildingModel.ServiceCollection = serviceCollection;
