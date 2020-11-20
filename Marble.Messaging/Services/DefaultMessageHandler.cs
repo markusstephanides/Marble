@@ -6,7 +6,6 @@ using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models;
 using Marble.Messaging.Contracts.Models.Stream;
 using Marble.Messaging.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Marble.Messaging.Services
@@ -63,7 +62,7 @@ namespace Marble.Messaging.Services
                         responseMessage.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
                     
                     this.logger.LogInformation(
-                        $"Handled request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms with result of {result.GetType()}.");
+                        $"Handled request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms with result of {result.GetType().Name}.");
                 }
                 else
                 {

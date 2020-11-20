@@ -81,19 +81,13 @@ namespace Marble.Messaging.Services
                     }
                 }
             }
-
-            var sw = Stopwatch.StartNew();
-
+            
 
             var rawReturnValue = procedureMethodInfo.Invoke(value, parameters);
-            Console.WriteLine(sw.ElapsedMilliseconds);
-
-            sw.Restart();
 
             if (procedureMethodInfo.ReturnType.IsGenericType &&
                 procedureMethodInfo.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
             {
-                Console.WriteLine(sw.ElapsedMilliseconds);
                 return ((dynamic) rawReturnValue).Result;
             }
 

@@ -17,13 +17,11 @@ namespace Marble.Core.Serialization
 
         public byte[] Serialize(object obj)
         {
-            Console.WriteLine(JsonConvert.SerializeObject(obj, this.jsonSerializerSettings));
             return this.defaultEncoding.GetBytes(JsonConvert.SerializeObject(obj, this.jsonSerializerSettings));
         }
 
         public object? Deserialize(byte[] bytes, Type type)
         {
-            Console.WriteLine("DES:" +this.defaultEncoding.GetString(bytes));
             return JsonConvert.DeserializeObject(this.defaultEncoding.GetString(bytes), type,
                 this.jsonSerializerSettings);
         }

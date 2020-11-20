@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Marble.Messaging.Contracts.Declaration;
 using Marble.Sandbox.Contracts;
 using Microsoft.Extensions.Logging;
@@ -51,6 +53,16 @@ namespace Marble.Sandbox
             {
                 SomeInt = a.SomeInt + b
             };
+        }
+
+        public IObservable<int> StartMathStream(int start)
+        {
+            return Observable.Timer(TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(1000)).Select(
+                (t, index) =>
+                {
+                    Console.WriteLine($"t {t}, index {index}");
+                    return start + index;
+                });
         }
 
         // [MarbleProcedure]

@@ -14,7 +14,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Messaging.Rabbit.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Utilities", "Marble.Utilities\Marble.Utilities.csproj", "{52AEB360-D588-460C-BC90-DDDFA4CBAFC4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Utilities.Test", "Marble.Utilities.Test\Marble.Utilities.Test.csproj", "{4093C394-3A96-4B43-8D4E-7EF3EBDDC003}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Utilities.Tests", "Marble.Utilities.Tests\Marble.Utilities.Tests.csproj", "{4093C394-3A96-4B43-8D4E-7EF3EBDDC003}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble.Sandbox.Contracts", "Marble.Sandbox.Contracts\Marble.Sandbox.Contracts.csproj", "{81DFBA9B-E28F-4E92-BFD1-B8372B6B53CA}"
 EndProject

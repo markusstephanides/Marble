@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models;
@@ -12,6 +13,8 @@ namespace Marble.Sandbox.Contracts
         Task VoidAdd(int a, int b);
 
         Task<MathResult> AddToMathResult(MathResult mathResult, int a);
+
+        IObservable<int> StartMathStream(int start);
     }
 
     public class DefaultMathServiceClient : IMathService
@@ -46,6 +49,11 @@ namespace Marble.Sandbox.Contracts
         public Task<MathResult> AddToMathResult(MathResult mathResult, int a)
         {
             return this.messagingClient.InvokeProcedureAsync<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "AddToMathResult", mathResult, a));
+        }
+        
+        public IObservable<int> StartMathStream(int start)
+        {
+            return this.messagingClient.InvokeProcedureStream<int>(new RequestMessage("Marble.Sandbox.MathService", "StartMathStream", start));
         }
     }
 }
