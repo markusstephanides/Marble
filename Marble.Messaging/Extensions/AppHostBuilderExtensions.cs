@@ -20,7 +20,10 @@ namespace Marble.Messaging.Extensions
 
             return builder
                 .Configure<TConfiguration>(configuration => configuration.GetSection(configurationSection))
-                .Configure<TConfiguration>(configuration => ConfigurationMerger.Merge(configuration, defaultConfiguration))
+                .Configure<TConfiguration>(configuration =>
+                {
+                    ConfigurationMerger.Merge(configuration, defaultConfiguration);
+                })
                 .ConfigureServices(messagingFacade.ConfigureServices);
         }
     }

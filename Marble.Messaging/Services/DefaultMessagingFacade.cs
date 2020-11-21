@@ -5,6 +5,7 @@ using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Marble.Messaging.Services
 {
@@ -31,16 +32,12 @@ namespace Marble.Messaging.Services
         {
             serviceCollection.AddSingleton(_ => this.controllerRegistry);
             serviceCollection.Configure<TMessagingConfiguration>(configuration =>
+                configuration.KnownProcedurePaths = this.controllerRegistry.AvailableProcedurePaths);
+            // TODO: This looks more like a workaround
+            serviceCollection.AddSingleton(provider =>
             {
-                configuration.KnownProcedurePaths = this.controllerRegistry.AvailableProcedurePaths;
-            });
-            // TODO: This is more like a workaround
-            serviceCollection.AddSingleton<ISerializationAdapter>(provider =>
-            {
-                // TODO: Make this work
-                // var configuration = provider.GetService<IOptions<TMessagingConfiguration>>();
-                // return (ISerializationAdapter) Activator.CreateInstance(configuration.Value.SerializationAdapterType);
-                return new DefaultJsonSerializationAdapter();
+                var config = provider.GetRequiredService<IOptions<TMessagingConfiguration>>().Value;
+                return (ISerializationAdapter) Activator.CreateInstance(config.SerializationAdapterType);
             });
             serviceCollection.AddSingleton<IMessagingAdapter, TMessagingAdapter>();
             serviceCollection.AddSingleton<IMessagingClient, DefaultMessagingClient>();
@@ -53,13 +50,14 @@ namespace Marble.Messaging.Services
         public void OnServiceProviderAvailable(IServiceProvider serviceProvider)
         {
             this.controllerRegistry.OnServiceProviderAvailable(serviceProvider);
-            
-            this.logger = serviceProvider.GetService<ILogger<DefaultMessagingFacade<TMessagingAdapter, TMessagingConfiguration>>>();
+
+            this.logger = serviceProvider
+                .GetService<ILogger<DefaultMessagingFacade<TMessagingAdapter, TMessagingConfiguration>>>();
             this.messagingConfiguration =
                 (MessagingConfiguration) serviceProvider.GetService(this.messagingConfigurationType);
             this.messagingAdapter = serviceProvider.GetService<IMessagingAdapter>();
             this.messageHandler = serviceProvider.GetService<IMessageHandler>();
-            
+
             this.messageHandler.Initialize();
             this.messagingAdapter.Connect();
         }

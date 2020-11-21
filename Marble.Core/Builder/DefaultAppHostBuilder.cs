@@ -16,7 +16,7 @@ namespace Marble.Core.Builder
 
         public DefaultAppHostBuilder()
         {
-            // TODO: Move this
+            // TODO: Move this to a defaults hook or something like that
             this.ConfigureServices(collection =>
             {
                 collection.AddLogging(loggingBuilder =>

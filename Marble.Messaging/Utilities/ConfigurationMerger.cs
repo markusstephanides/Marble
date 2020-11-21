@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Marble.Core.Serialization;
 using Marble.Messaging.Contracts.Configuration;
 
@@ -13,25 +14,31 @@ namespace Marble.Messaging.Utilities
             DefaultTimeoutInSeconds = 5
         };
 
-        public static TConfiguration Merge<TConfiguration>(TConfiguration fileConfiguration,
+        public static void Merge<TConfiguration>(TConfiguration originalConfiguration,
             TConfiguration codeConfiguration)
             where TConfiguration : MessagingConfiguration
         {
-            if (fileConfiguration == null && codeConfiguration != null) return codeConfiguration;
-            if (fileConfiguration != null && codeConfiguration == null) return fileConfiguration;
-            if (fileConfiguration == null && codeConfiguration == null) return null;
-            
+            var genericDefaultConfig = MapToGenericConfig<TConfiguration>(defaultConfiguration);
+            if (originalConfiguration == null && codeConfiguration != null)
+            {
+                MergeWith(codeConfiguration,genericDefaultConfig);
+                return;
+            }
+            if (codeConfiguration == null)
+            {
+                MergeWith(originalConfiguration,genericDefaultConfig);
+                return;
+            }
+
             // Merge default with code config (code > default)
-            var resultingConfig = MergeWith(codeConfiguration,
-                MapToGenericConfig<TConfiguration>(defaultConfiguration));
-            return MergeWith(fileConfiguration, resultingConfig);
+            MergeWith(codeConfiguration, genericDefaultConfig);
+            // Merge code config with file config (file > code)
+            MergeWith(originalConfiguration, codeConfiguration);
         }
 
-        private static TConfiguration MergeWith<TConfiguration>(TConfiguration primary, TConfiguration secondary)
+        private static void MergeWith<TConfiguration>(TConfiguration primary, TConfiguration secondary)
             where TConfiguration : MessagingConfiguration
         {
-            var resultingConfig = Activator.CreateInstance<TConfiguration>();
-
             foreach (var pi in typeof(TConfiguration).GetProperties())
             {
                 var primaryValue = pi.GetGetMethod().Invoke(primary, null);
@@ -40,15 +47,13 @@ namespace Marble.Messaging.Utilities
                 if (primaryValue == null || pi.PropertyType.IsValueType &&
                     primaryValue.Equals(Activator.CreateInstance(pi.PropertyType)))
                 {
-                    pi.GetSetMethod().Invoke(resultingConfig, new[] {secondaryValue});
+                    pi.GetSetMethod().Invoke(primary, new[] {secondaryValue});
                 }
                 else
                 {
-                    pi.GetSetMethod().Invoke(resultingConfig, new[] {primaryValue});
+                    pi.GetSetMethod().Invoke(primary, new[] {primaryValue});
                 }
             }
-
-            return resultingConfig;
         }
 
         private static TConfiguration MapToGenericConfig<TConfiguration>(MessagingConfiguration messagingConfiguration)
