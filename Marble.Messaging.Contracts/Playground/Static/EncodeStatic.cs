@@ -2,11 +2,14 @@
 
 namespace Marble.Messaging.Contracts.Playground.Static
 {
-    public class EncodeStatic<T> : IEncode<StaticDataFormat<T>, T>
+    public class EncodeStatic<T> : IEncode<T, StaticDataFormat<T>>
     {
-        public IObservable<T> Subscribe(StaticDataFormat<T> input)
+        public IObservable<StaticDataFormat<T>> Subscribe(T input)
         {
-            return System.Reactive.Linq.Observable.Return(input.Value);
+            return System.Reactive.Linq.Observable.Return(new StaticDataFormat<T>
+            {
+                Value = input
+            });
         }
     }
 }

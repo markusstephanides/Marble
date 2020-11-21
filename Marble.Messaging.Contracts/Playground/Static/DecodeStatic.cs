@@ -2,17 +2,14 @@
 
 namespace Marble.Messaging.Contracts.Playground.Static
 {
-    public class DecodeStatic<T> : IDecode<T, StaticDataFormat<T>>
+    public class DecodeStatic<T> : IDecode<StaticDataFormat<T>, T>
     {
-        public StaticDataFormat<T> Instanciate(T input)
+        public T Instanciate(StaticDataFormat<T> input)
         {
-            return new StaticDataFormat<T>
-            {
-                Value = input
-            };
+            return input.Value;
         }
 
-        public void Next(T input)
+        public void Next(StaticDataFormat<T> input)
         {
             throw new System.Exception("Contract miss-used");
         }
