@@ -32,6 +32,22 @@ namespace Marble.SandboxAPI.Controllers
             }
             catch (Exception e)
             {
+                this.logger.LogError(e,"Failed to send addition request");
+                return this.StatusCode(500, new {message = e.Message});
+            }
+        }
+        
+        [HttpGet("addMathResult")]
+        public async Task<ActionResult<int>> GetAdditionMathResultAsync([FromQuery] int a, [FromQuery] int b)
+        {
+            try
+            {
+                var result = await this.mathService.AddToMathResult(new MathResult{SomeInt = a}, b).ConfigureAwait(false);
+                return this.Ok(new {result});
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError(e,"Failed to send addition request");
                 return this.StatusCode(500, new {message = e.Message});
             }
         }

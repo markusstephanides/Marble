@@ -2,6 +2,6 @@
 {
     public interface IMessageHandler
     {
-        
+        void Initialize();
     }
 }

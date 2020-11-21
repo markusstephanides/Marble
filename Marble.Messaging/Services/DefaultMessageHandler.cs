@@ -1,39 +1,37 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reactive.Linq;
-using Marble.Core.Abstractions;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models;
 using Marble.Messaging.Contracts.Models.Stream;
 using Marble.Messaging.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Marble.Messaging.Services
 {
-    public class DefaultMessageHandler : IMessageHandler, IServiceProviderAvailable
+    public class DefaultMessageHandler : IMessageHandler
     {
         private readonly IMessagingAdapter messagingAdapter;
         private readonly IControllerRegistry controllerRegistry;
         private readonly IStreamManager streamManager;
         private readonly ISerializationAdapter serializationAdapter;
-        private ILogger<DefaultMessageHandler> logger;
+        private readonly ILogger<DefaultMessageHandler> logger;
 
-        public DefaultMessageHandler(IMessagingAdapter messagingAdapter, IControllerRegistry controllerRegistry, IStreamManager streamManager, ISerializationAdapter serializationAdapter)
+        public DefaultMessageHandler(IMessagingAdapter messagingAdapter, IControllerRegistry controllerRegistry, IStreamManager streamManager, ISerializationAdapter serializationAdapter, ILogger<DefaultMessageHandler> logger)
         {
             this.messagingAdapter = messagingAdapter;
             this.controllerRegistry = controllerRegistry;
             this.streamManager = streamManager;
             this.serializationAdapter = serializationAdapter;
+            this.logger = logger;
         }
         
-        public void OnServiceProviderAvailable(IServiceProvider serviceProvider)
+        public void Initialize()
         {
-            this.logger = serviceProvider.GetService<ILogger<DefaultMessageHandler>>();
             this.InitializeMessageReceivingChain();
         }
-
+        
         private void InitializeMessageReceivingChain()
         {
             this.messagingAdapter.MessageFeed
@@ -64,7 +62,7 @@ namespace Marble.Messaging.Services
                         responseMessage.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
                     
                     this.logger.LogInformation(
-                        $"Handled request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms with result of {result.GetType()}.");
+                        $"Handled request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms with result of {result.GetType().Name}.");
                 }
                 else
                 {

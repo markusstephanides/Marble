@@ -2,6 +2,9 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Nullable>enable</Nullable>
+        <PackageLicenseUrl>https://github.com/markusstephanides/Marble/blob/main/LICENSE</PackageLicenseUrl>
     </PropertyGroup>
 
     <ItemGroup>

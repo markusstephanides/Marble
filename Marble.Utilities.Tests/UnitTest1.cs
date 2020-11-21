@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Marble.Utilities.Test
+namespace Marble.Utilities.Tests
 {
     public class Tests
     {

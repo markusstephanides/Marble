@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models;
-using Marble.Messaging.Models;
 using Marble.Messaging.Rabbit.Models;
-using Marble.Messaging.Services;
-using Marble.Messaging.Transformers;
-using Marble.Utilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
@@ -18,60 +12,30 @@ using RabbitMQ.Client.Events;
 
 namespace Marble.Messaging.Rabbit
 {
-    public class RabbitMessagingAdapter : IConnectableMessagingAdapter
+    public class RabbitMessagingAdapter : IMessagingAdapter
     {
-        private readonly RabbitClientConfiguration configuration;
+        public IObservable<RemoteMessage> MessageFeed { get; }
+
+        private readonly RabbitConfiguration configuration;
+        private readonly ISerializationAdapter serializationAdapter;
         private readonly ILogger<RabbitMessagingAdapter> logger;
-        private readonly IDictionary<string, ResponseAwaitation> responseAwaitations;
+        private readonly ISubject<RemoteMessage> messageFeedsSubject;
 
         private IModel channel;
         private IConnection connection;
-        private DefaultMessagingFacade defaultMessagingFacade;
 
-        public RabbitMessagingAdapter(IOptions<RabbitClientConfiguration> configurationOption,
-            ILogger<RabbitMessagingAdapter> logger)
+        public RabbitMessagingAdapter(ILogger<RabbitMessagingAdapter> logger, IOptions<RabbitConfiguration> configuration,
+            ISerializationAdapter serializationAdapter)
         {
-            
             this.logger = logger;
-            this.responseAwaitations = new Dictionary<string, ResponseAwaitation>();
-            this.configuration = configurationOption.Value;
+            this.configuration = configuration.Value;
+            this.serializationAdapter = serializationAdapter;
+            this.messageFeedsSubject = new Subject<RemoteMessage>();
+            this.MessageFeed = this.messageFeedsSubject;
         }
 
-        public async Task<TResult> SendAsync<TResult>(RequestMessage requestMessage)
+        public void Connect()
         {
-            return (TResult) await this.SendRoutedMessage(new RabbitRoutedMessage
-            {
-                Exchange = Utilities.AmqDirectExchange,
-                MessageType = MessageType.RpcRequest,
-                Target = ProcedurePath.FromRequestMessage(requestMessage),
-                CorrelationId = Guid.NewGuid().ToString(),
-                Payload = requestMessage.Arguments,
-                Headers = new Dictionary<string, object>
-                {
-                    {"Controller", requestMessage.Controller},
-                    {"Procedure", requestMessage.Procedure}
-                }
-            });
-        }
-
-        public Task SendAndForgetAsync(RequestMessage requestMessage)
-        {
-            return this.SendRoutedMessage(new RabbitRoutedMessage
-            {
-                Exchange = Utilities.AmqDirectExchange,
-                Target = ProcedurePath.FromRequestMessage(requestMessage),
-                Headers = new Dictionary<string, object>
-                {
-                    {"Controller", requestMessage.Controller},
-                    {"Procedure", requestMessage.Procedure}
-                },
-                Payload = requestMessage.Arguments
-            });
-        }
-
-        public void Connect(DefaultMessagingFacade defaultMessagingFacade, IEnumerable<ControllerDescriptor> controllerDescriptors)
-        {
-            this.defaultMessagingFacade = defaultMessagingFacade;
             this.logger.LogInformation($"Connecting to {this.configuration.ConnectionString}");
 
             if (this.connection != null)
@@ -89,68 +53,38 @@ namespace Marble.Messaging.Rabbit
 
             this.logger.LogInformation("Connected to RabbitMQ Broker");
             this.SetUpQos();
-            this.RegisterQueues(controllerDescriptors);
+            this.RegisterQueues();
         }
 
-        private Task<object?> SendRoutedMessage(RabbitRoutedMessage message)
+        public Task SendRemoteMessage(RemoteMessage remoteMessage)
         {
-            return Task.Run(() =>
+             return Task.Run(() =>
             {
-                var props = this.channel.CreateBasicProperties();
-                props.CorrelationId = message.CorrelationId;
-                props.Headers = message.Headers;
-                props.Headers["MessageType"] = (int) message.MessageType;
-
-                if (message.MessageType == MessageType.RpcRequest)
+                try
                 {
-                    this.responseAwaitations[message.CorrelationId] = new ResponseAwaitation
-                    {
-                        TaskCompletionSource = new TaskCompletionSource<object>(),
-                        StartTicks = DateTime.Now.Ticks
-                    };
-                    props.ReplyTo = Utilities.AmqDirectReplyToQueue;
+                    var props = this.channel.CreateBasicProperties();
+                    props.Headers = this.SerializeHeaderValues(remoteMessage.Headers);
+                    props.ReplyTo = remoteMessage.ReplyTo ?? Utilities.AmqDirectReplyToQueue;
+                    props.Type = remoteMessage.MessageType.ToString();
+
+                    var routingKey = remoteMessage.Target;
+                    var exchange = Utilities.AmqDirectExchange;
+
+                    this.channel.BasicPublish(exchange, routingKey, props, remoteMessage.Payload);
                 }
-
-                var routingKey = message.Target;
-                var exchange = message.Exchange;
-
-                var payloadString = Serialization.Serialize(message.Payload);
-                var payloadType = message.Payload.GetType().FullName;
-                var messageBytes = Encoding.UTF8.GetBytes(payloadString);
-
-                props.Type = payloadType;
-
-                this.channel.BasicPublish(exchange, routingKey, props, messageBytes);
-
-                if (message.MessageType == MessageType.RpcRequest)
+                catch (Exception e)
                 {
-                    var awaitation = this.responseAwaitations[message.CorrelationId];
-                    var task = awaitation.TaskCompletionSource.Task;
-
-                    task.Wait(Utilities.DefaultTimeout);
-                    this.responseAwaitations.Remove(message.CorrelationId);
-
-                    var duration = (DateTime.Now.Ticks - awaitation.StartTicks) / TimeSpan.TicksPerMillisecond;
-                    if (!task.IsCompletedSuccessfully)
-                    {
-                        throw new TimeoutException(
-                            $"Timeout after {duration}ms while waiting for a response when calling {message.Target}");
-                    }
-
-
-                    this.logger.LogInformation(
-                        $"Successfully processed request to {message.Target} in {duration}ms");
-                    return task;
+                    Console.WriteLine(e);
+                    throw;
                 }
-
-                return Task.FromResult<object>(null);
             });
         }
 
         private void SetUpQos()
         {
             this.logger.LogInformation("Setting Qos properties");
-            this.channel.BasicQos(0, 1, false);
+            // TODO: Change prefetch count
+            this.channel.BasicQos(0, 10, false);
         }
 
         private void SetUpConsumer(string queue, bool autoAck = false)
@@ -163,67 +97,62 @@ namespace Marble.Messaging.Rabbit
 
         private void OnMessageReceived(object? sender, BasicDeliverEventArgs e)
         {
-            Task.Run(() =>
-            {
-                var payloadBytes = e.Body.ToArray();
-                var properties = e.BasicProperties;
-                var headers = properties.Headers;
-                var messageType = (MessageType) headers["MessageType"];
-
-                var payloadType = Serialization.GetTypeFromString(properties.Type);
-                var payloadString = Encoding.UTF8.GetString(payloadBytes);
-                var payload = Serialization.Deserialize(payloadString, payloadType);
-
-                if (messageType == MessageType.RpcRequest)
-                {
-                    this.ProcessRpcRequest(properties, e.DeliveryTag, payload);
-                }
-                else if (messageType == MessageType.RpcResponse)
-                {
-                    this.responseAwaitations[properties.CorrelationId].TaskCompletionSource.SetResult(payload);
-                }
-            });
-        }
-
-        private async Task ProcessRpcRequest(IBasicProperties properties, ulong deliveryTag, object payload)
-        {
-            var stopwatch = Stopwatch.StartNew();
-            var headers = properties.Headers;
-            var controller = Encoding.UTF8.GetString(headers["Controller"] as byte[]);
-            var procedure = Encoding.UTF8.GetString(headers["Procedure"] as byte[]);
-
             try
             {
-                var result = this.defaultMessagingFacade.InvokeProcedure(controller, procedure, (object[]) payload);
-                this.channel.BasicAck(deliveryTag, false);
-
-                await this.SendRoutedMessage(new RabbitRoutedMessage
+                var properties = e.BasicProperties;
+                var remoteMessage = new RemoteMessage
                 {
-                    Exchange = Utilities.AmqDirectExchange,
-                    Target = properties.ReplyTo,
-                    CorrelationId = properties.CorrelationId,
-                    Payload = result,
-                    MessageType = MessageType.RpcResponse
-                }).ConfigureAwait(false);
+                    Payload = e.Body.ToArray(),
+                    Headers = this.DeserializeHeaderValues(properties.Headers),
+                    ReplyTo = properties.ReplyTo,
+                    MessageType = Enum.Parse<MessageType>(properties.Type)
+                };
+                // TODO is this really best practise? Maybe we want to have a Marble level ack-system
+                if (remoteMessage.MessageType == MessageType.RequestMessage)
+                {
+                    this.channel.BasicAck(e.DeliveryTag, false);
+                }
+                
+                this.messageFeedsSubject.OnNext(remoteMessage);
             }
             catch (Exception exception)
             {
-                this.logger.LogError(exception, "Failed to execute " + controller + ":" + procedure + "!");
+                Console.WriteLine(exception);
                 throw;
             }
-
-            this.logger.LogInformation(
-                $"Responded to {ProcedurePath.FromStrings(controller, procedure)} in {stopwatch.ElapsedMilliseconds} ms");
         }
 
-        private void RegisterQueues(IEnumerable<ControllerDescriptor> descriptors)
+        private IDictionary<string, object> SerializeHeaderValues(IDictionary<string, object> dictionary)
         {
-            foreach (var controllerDescriptor in descriptors)
-            foreach (var procedureDescriptor in controllerDescriptor.ProcedureDescriptors)
+            var resultingDictionary = new Dictionary<string, object>();
+            
+            foreach (var (key, value) in dictionary)
             {
-                var queueName = ProcedurePath.FromProcedureDescriptor(procedureDescriptor);
-                this.channel.QueueDeclare(queueName, false, false);
-                this.SetUpConsumer(queueName);
+                resultingDictionary[key] = this.serializationAdapter.Serialize(value);
+            }
+
+            return resultingDictionary;
+        }
+
+        private IDictionary<string, object> DeserializeHeaderValues(IDictionary<string, object> dictionary)
+        {
+            var resultingDictionary = new Dictionary<string, object>();
+ 
+            foreach (var (key, value) in dictionary)
+            {
+                resultingDictionary[key] = this.serializationAdapter.Deserialize((byte[]) value, typeof(object));
+            }
+
+            return resultingDictionary;
+        }
+
+
+        private void RegisterQueues()
+        {
+            foreach (var procedurePath in this.configuration.KnownProcedurePaths)
+            {
+                this.channel.QueueDeclare(procedurePath, false, false);
+                this.SetUpConsumer(procedurePath);
             }
 
             this.SetUpConsumer(Utilities.AmqDirectReplyToQueue, true);

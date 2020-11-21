@@ -1,5 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Marble.Messaging.Contracts.Declaration;
+using Marble.Sandbox.Contracts;
 using Microsoft.Extensions.Logging;
 
 namespace Marble.Sandbox
@@ -41,6 +44,25 @@ namespace Marble.Sandbox
         public void VoidAdd(int a, int b)
         {
             var result = a + b;
+        }
+        
+        [MarbleProcedure]
+        public MathResult AddToMathResult(MathResult a, int b)
+        {
+            return new MathResult
+            {
+                SomeInt = a.SomeInt + b
+            };
+        }
+
+        public IObservable<int> StartMathStream(int start)
+        {
+            return Observable.Timer(TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(1000)).Select(
+                (t, index) =>
+                {
+                    Console.WriteLine($"t {t}, index {index}");
+                    return start + index;
+                });
         }
 
         // [MarbleProcedure]

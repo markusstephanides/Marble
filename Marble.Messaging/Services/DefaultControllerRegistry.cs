@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Explorer;
 using Marble.Messaging.Models;
+using Marble.Messaging.Transformers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -15,21 +16,31 @@ namespace Marble.Messaging.Services
 {
     public class DefaultControllerRegistry : IControllerRegistry
     {
+        public List<string> AvailableProcedurePaths { get; set; }
+
         private ILogger<DefaultControllerRegistry> logger;
         private IDictionary<ControllerDescriptor, object> controllers;
 
         public DefaultControllerRegistry()
         {
-        }
-
-        public void ConfigureServices(IServiceCollection serviceCollection)
-        {
+            this.AvailableProcedurePaths = new List<string>();
             this.controllers = new ConcurrentDictionary<ControllerDescriptor, object>(
                 new ControllerExplorer().ScanAssembly(Assembly.GetEntryAssembly()).Select(
                     controller => new KeyValuePair<ControllerDescriptor, object>(controller, null)
                 )
             );
 
+            foreach (var controllerDescriptor in this.controllers.Keys)
+            {
+                foreach (var procedureDescriptor in controllerDescriptor.ProcedureDescriptors)
+                {
+                    this.AvailableProcedurePaths.Add(ProcedurePath.FromProcedureDescriptor(procedureDescriptor));
+                }
+            }
+        }
+        
+        public void ConfigureServices(IServiceCollection serviceCollection)
+        {
             foreach (var entry in this.controllers)
             {
                 serviceCollection.AddSingleton(entry.Key.Type);
@@ -47,7 +58,7 @@ namespace Marble.Messaging.Services
                     $"Found controller instance for {descriptor.Name} containing {descriptor.ProcedureDescriptors.Count()} procedures");
             }
         }
-
+        
         public object? InvokeProcedure(string controllerName, string procedureName, object[]? parameters)
         {
             var (key, value) = this.controllers.First(controllerDescriptor =>
@@ -70,19 +81,13 @@ namespace Marble.Messaging.Services
                     }
                 }
             }
-
-            var sw = Stopwatch.StartNew();
-
+            
 
             var rawReturnValue = procedureMethodInfo.Invoke(value, parameters);
-            Console.WriteLine(sw.ElapsedMilliseconds);
-
-            sw.Restart();
 
             if (procedureMethodInfo.ReturnType.IsGenericType &&
                 procedureMethodInfo.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
             {
-                Console.WriteLine(sw.ElapsedMilliseconds);
                 return ((dynamic) rawReturnValue).Result;
             }
 
