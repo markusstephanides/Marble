@@ -82,7 +82,7 @@ namespace Marble.Messaging.Rabbit
 
         private void SetUpQos()
         {
-            this.logger.LogInformation("Setting Qos properties");
+            this.logger.LogInformation("Setting QoS properties");
             // TODO: Change prefetch count
             this.channel.BasicQos(0, 10, false);
         }

@@ -44,7 +44,8 @@ namespace Marble.Messaging.Explorer
                     {
                         Name = controllerAttribute.Name ?? ProcedureName.FromMethodInfo(method),
                         MethodInfo = method,
-                        ControllerDescriptor = controllerDescriptor
+                        ControllerDescriptor = controllerDescriptor,
+                        ReturnType = method.ReturnType
                     };
                 });
         }

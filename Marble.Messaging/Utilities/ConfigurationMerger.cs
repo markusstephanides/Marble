@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Marble.Core.Serialization;
+using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Configuration;
+using Marble.Messaging.Converters;
 
 namespace Marble.Messaging.Utilities
 {
@@ -11,7 +14,15 @@ namespace Marble.Messaging.Utilities
         private static MessagingConfiguration defaultConfiguration = new MessagingConfiguration
         {
             SerializationAdapterType = typeof(DefaultJsonSerializationAdapter),
-            DefaultTimeoutInSeconds = 5
+            DefaultTimeoutInSeconds = 5,
+            TypeConverters = new List<IConverter>()
+            {
+                new GenericObservableConverter(),
+                new GenericTaskConverter(),
+                new ObjectConverter(),
+                new TaskConverter(),
+                new VoidConverter(),
+            }
         };
 
         public static void Merge<TConfiguration>(TConfiguration originalConfiguration,
@@ -21,12 +32,13 @@ namespace Marble.Messaging.Utilities
             var genericDefaultConfig = MapToGenericConfig<TConfiguration>(defaultConfiguration);
             if (originalConfiguration == null && codeConfiguration != null)
             {
-                MergeWith(codeConfiguration,genericDefaultConfig);
+                MergeWith(codeConfiguration, genericDefaultConfig);
                 return;
             }
+
             if (codeConfiguration == null)
             {
-                MergeWith(originalConfiguration,genericDefaultConfig);
+                MergeWith(originalConfiguration, genericDefaultConfig);
                 return;
             }
 

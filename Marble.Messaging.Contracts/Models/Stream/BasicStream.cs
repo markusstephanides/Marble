@@ -2,8 +2,16 @@
 
 namespace Marble.Messaging.Contracts.Models.Stream
 {
-    public class BasicStream: List<StreamEvent>
+    public class BasicStream : List<StreamEvent>
     {
+        public static BasicStream Completed => new BasicStream
+        {
+            new StreamEvent
+            {
+                EventType = StreamEventType.Completion
+            }
+        };
+
         public static BasicStream FromResult<T>(T result)
         {
             return new BasicStream
@@ -15,7 +23,7 @@ namespace Marble.Messaging.Contracts.Models.Stream
                 }
             };
         }
-        
+
         public static BasicStream FromError<T>(T result)
         {
             return new BasicStream
