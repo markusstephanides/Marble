@@ -14,17 +14,16 @@ namespace Marble.Messaging.Rabbit
 {
     public class RabbitMessagingAdapter : IMessagingAdapter
     {
-        public IObservable<RemoteMessage> MessageFeed { get; }
-
         private readonly RabbitConfiguration configuration;
-        private readonly ISerializationAdapter serializationAdapter;
         private readonly ILogger<RabbitMessagingAdapter> logger;
         private readonly ISubject<RemoteMessage> messageFeedsSubject;
+        private readonly ISerializationAdapter serializationAdapter;
 
         private IModel channel;
         private IConnection connection;
 
-        public RabbitMessagingAdapter(ILogger<RabbitMessagingAdapter> logger, IOptions<RabbitConfiguration> configuration,
+        public RabbitMessagingAdapter(ILogger<RabbitMessagingAdapter> logger,
+            IOptions<RabbitConfiguration> configuration,
             ISerializationAdapter serializationAdapter)
         {
             this.logger = logger;
@@ -33,6 +32,8 @@ namespace Marble.Messaging.Rabbit
             this.messageFeedsSubject = new Subject<RemoteMessage>();
             this.MessageFeed = this.messageFeedsSubject;
         }
+
+        public IObservable<RemoteMessage> MessageFeed { get; }
 
         public void Connect()
         {
@@ -58,7 +59,7 @@ namespace Marble.Messaging.Rabbit
 
         public Task SendRemoteMessage(RemoteMessage remoteMessage)
         {
-             return Task.Run(() =>
+            return Task.Run(() =>
             {
                 try
                 {
@@ -112,7 +113,7 @@ namespace Marble.Messaging.Rabbit
                 {
                     this.channel.BasicAck(e.DeliveryTag, false);
                 }
-                
+
                 this.messageFeedsSubject.OnNext(remoteMessage);
             }
             catch (Exception exception)
@@ -125,7 +126,7 @@ namespace Marble.Messaging.Rabbit
         private IDictionary<string, object> SerializeHeaderValues(IDictionary<string, object> dictionary)
         {
             var resultingDictionary = new Dictionary<string, object>();
-            
+
             foreach (var (key, value) in dictionary)
             {
                 resultingDictionary[key] = this.serializationAdapter.Serialize(value);
@@ -137,7 +138,7 @@ namespace Marble.Messaging.Rabbit
         private IDictionary<string, object> DeserializeHeaderValues(IDictionary<string, object> dictionary)
         {
             var resultingDictionary = new Dictionary<string, object>();
- 
+
             foreach (var (key, value) in dictionary)
             {
                 resultingDictionary[key] = this.serializationAdapter.Deserialize((byte[]) value, typeof(object));

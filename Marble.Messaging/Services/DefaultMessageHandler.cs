@@ -12,13 +12,15 @@ namespace Marble.Messaging.Services
 {
     public class DefaultMessageHandler : IMessageHandler
     {
-        private readonly IMessagingAdapter messagingAdapter;
         private readonly IControllerRegistry controllerRegistry;
-        private readonly IStreamManager streamManager;
-        private readonly ISerializationAdapter serializationAdapter;
         private readonly ILogger<DefaultMessageHandler> logger;
+        private readonly IMessagingAdapter messagingAdapter;
+        private readonly ISerializationAdapter serializationAdapter;
+        private readonly IStreamManager streamManager;
 
-        public DefaultMessageHandler(IMessagingAdapter messagingAdapter, IControllerRegistry controllerRegistry, IStreamManager streamManager, ISerializationAdapter serializationAdapter, ILogger<DefaultMessageHandler> logger)
+        public DefaultMessageHandler(IMessagingAdapter messagingAdapter, IControllerRegistry controllerRegistry,
+            IStreamManager streamManager, ISerializationAdapter serializationAdapter,
+            ILogger<DefaultMessageHandler> logger)
         {
             this.messagingAdapter = messagingAdapter;
             this.controllerRegistry = controllerRegistry;
@@ -26,12 +28,12 @@ namespace Marble.Messaging.Services
             this.serializationAdapter = serializationAdapter;
             this.logger = logger;
         }
-        
+
         public void Initialize()
         {
             this.InitializeMessageReceivingChain();
         }
-        
+
         private void InitializeMessageReceivingChain()
         {
             this.messagingAdapter.MessageFeed
@@ -57,10 +59,10 @@ namespace Marble.Messaging.Services
                         Correlation = requestMessage.Correlation,
                         Stream = BasicStream.FromResult(result)
                     };
-                    
+
                     this.messagingAdapter.SendRemoteMessage(
                         responseMessage.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
-                    
+
                     this.logger.LogInformation(
                         $"Handled request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms with result of {result.GetType().Name}.");
                 }
@@ -69,7 +71,6 @@ namespace Marble.Messaging.Services
                     this.logger.LogInformation(
                         $"Handled request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms with no result.");
                 }
-                
             }
             catch (Exception e)
             {
@@ -80,7 +81,7 @@ namespace Marble.Messaging.Services
                     Correlation = requestMessage.Correlation,
                     Stream = BasicStream.FromError(e)
                 };
-                    
+
                 this.messagingAdapter.SendRemoteMessage(
                     responseMessage.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
                 throw;

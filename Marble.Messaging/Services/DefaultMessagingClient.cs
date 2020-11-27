@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using akarnokd.reactive_extensions;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models;
@@ -15,12 +16,12 @@ namespace Marble.Messaging.Services
 {
     public class DefaultMessagingClient : IMessagingClient
     {
+        private readonly IControllerRegistry controllerRegistry;
+        private readonly ILogger<DefaultMessagingClient> logger;
+        private readonly IObservable<RemoteMessage> messageFeed;
         private readonly IMessagingAdapter messagingAdapter;
         private readonly ISerializationAdapter serializationAdapter;
-        private readonly IControllerRegistry controllerRegistry;
-        private readonly IObservable<RemoteMessage> messageFeed;
         private readonly IStreamManager streamManager;
-        private readonly ILogger<DefaultMessagingClient> logger;
 
         public DefaultMessagingClient(IMessagingAdapter messagingAdapter, ISerializationAdapter serializationAdapter,
             IControllerRegistry controllerRegistry, IStreamManager streamManager,
@@ -39,8 +40,9 @@ namespace Marble.Messaging.Services
             requestMessage.Correlation ??= Guid.NewGuid().ToString();
 
             var procedureResultStream = this.ConstructResponseStream<TResult>(requestMessage);
+            // TODO: Lets be 100% sure that this doesn't cause any memory-leaks
+            procedureResultStream.Subscribe();
             this.messagingAdapter.SendRemoteMessage(requestMessage.ToRemoteMessage(this.serializationAdapter));
-
             return procedureResultStream;
         }
 
@@ -92,7 +94,8 @@ namespace Marble.Messaging.Services
                 .Select(message => message.ToResponseMessage(this.serializationAdapter))
                 .Where(responseMessage => responseMessage.Correlation == requestMessage.Correlation)
                 .Select(responseMessage => this.streamManager.StreamToObservable<TResult>(responseMessage.Stream))
-                .Switch();
+                .Switch()
+                .Cache();
         }
     }
 }

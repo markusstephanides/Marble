@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -16,10 +15,9 @@ namespace Marble.Messaging.Services
 {
     public class DefaultControllerRegistry : IControllerRegistry
     {
-        public List<string> AvailableProcedurePaths { get; set; }
+        private readonly IDictionary<ControllerDescriptor, object> controllers;
 
         private ILogger<DefaultControllerRegistry> logger;
-        private IDictionary<ControllerDescriptor, object> controllers;
 
         public DefaultControllerRegistry()
         {
@@ -38,7 +36,9 @@ namespace Marble.Messaging.Services
                 }
             }
         }
-        
+
+        public List<string> AvailableProcedurePaths { get; set; }
+
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
             foreach (var entry in this.controllers)
@@ -50,7 +50,7 @@ namespace Marble.Messaging.Services
         public void OnServiceProviderAvailable(IServiceProvider serviceProvider)
         {
             this.logger = serviceProvider.GetService<ILogger<DefaultControllerRegistry>>();
-            
+
             foreach (var (descriptor, _) in this.controllers)
             {
                 this.controllers[descriptor] = serviceProvider.GetService(descriptor.Type);
@@ -58,7 +58,7 @@ namespace Marble.Messaging.Services
                     $"Found controller instance for {descriptor.Name} containing {descriptor.ProcedureDescriptors.Count()} procedures");
             }
         }
-        
+
         public object? InvokeProcedure(string controllerName, string procedureName, object[]? parameters)
         {
             var (key, value) = this.controllers.First(controllerDescriptor =>
@@ -77,11 +77,11 @@ namespace Marble.Messaging.Services
                     var parameterInfo = parameterInfos[i];
                     if (parameter.GetType() != parameterInfo.ParameterType)
                     {
+                        // TODO: Remove when we have a solution for the int/long deserialization issue
                         parameters[i] = Convert.ChangeType(parameter, parameterInfo.ParameterType);
                     }
                 }
             }
-            
 
             var rawReturnValue = procedureMethodInfo.Invoke(value, parameters);
 

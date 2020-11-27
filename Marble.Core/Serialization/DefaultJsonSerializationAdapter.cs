@@ -5,11 +5,16 @@ using Newtonsoft.Json;
 
 namespace Marble.Core.Serialization
 {
+    public class ValueWrapper<T>
+    {
+        public T Value { get; set; }
+    }
+
     public class DefaultJsonSerializationAdapter : ISerializationAdapter
     {
         private readonly Encoding defaultEncoding = Encoding.UTF8;
 
-        private readonly JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings()
+        private readonly JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
         {
             // TODO Provisional
             TypeNameHandling = TypeNameHandling.All
@@ -28,7 +33,7 @@ namespace Marble.Core.Serialization
 
         public T Deserialize<T>(byte[] bytes)
         {
-            return (T)Deserialize(bytes, typeof(T));
+            return (T) this.Deserialize(bytes, typeof(T));
         }
     }
 }

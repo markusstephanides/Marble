@@ -33,8 +33,4 @@
       <ProjectReference Include="..\Marble.Messaging.Contracts\Marble.Messaging.Contracts.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Utilities" />
-    </ItemGroup>
-
 </Project>

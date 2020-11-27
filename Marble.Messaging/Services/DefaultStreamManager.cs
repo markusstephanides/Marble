@@ -25,21 +25,27 @@ namespace Marble.Messaging.Services
                         case StreamEventType.Notification:
                             if (streamEvent.Payload != null)
                             {
-                                // TODO: This is a heavy workaround because Json serialization assumes Int64 for numbers
-                                var payload = (T) Convert.ChangeType(streamEvent.Payload, typeof(T), CultureInfo.InvariantCulture);
+                                // TODO: This is a heavy workaround because Json serialization assumes Int64 for numbers                        // TODO: Remove when we have a solution for the int/long deserialization issue
+                                // TODO: Remove when we have a solution for the int/long deserialization issue
+                                var payload = (T) Convert.ChangeType(streamEvent.Payload, typeof(T),
+                                    CultureInfo.InvariantCulture);
                                 observer.OnNext(payload);
                             }
+
                             break;
                         case StreamEventType.Completion:
                             if (streamEvent.Payload != null)
                             {
-                                var payload = (T) Convert.ChangeType(streamEvent.Payload, typeof(T), CultureInfo.InvariantCulture);
+                                // TODO: Remove when we have a solution for the int/long deserialization issue
+                                var payload = (T) Convert.ChangeType(streamEvent.Payload, typeof(T),
+                                    CultureInfo.InvariantCulture);
                                 observer.OnNext(payload);
                             }
+
                             observer.OnCompleted();
                             break;
                         case StreamEventType.Error:
-                            observer.OnError(new Exception("Sample error"));
+                            observer.OnError((Exception) streamEvent.Payload);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
