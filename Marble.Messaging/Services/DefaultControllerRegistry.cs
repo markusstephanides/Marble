@@ -9,6 +9,7 @@ using Marble.Messaging.Contracts.Models;
 using Marble.Messaging.Converters;
 using Marble.Messaging.Explorer;
 using Marble.Messaging.Extensions;
+using Marble.Messaging.Generation;
 using Marble.Messaging.Models;
 using Marble.Messaging.Transformers;
 using Marble.Messaging.Utilities;
@@ -31,8 +32,13 @@ namespace Marble.Messaging.Services
         public DefaultControllerRegistry()
         {
             this.AvailableProcedurePaths = new List<string>();
-            this.controllers = new ConcurrentDictionary<ControllerDescriptor, object>(this.LoadControllerDefinitions()
+            
+            var definitions = this.LoadControllerDefinitions();
+            
+            this.controllers = new ConcurrentDictionary<ControllerDescriptor, object>(definitions
                 .Select(definition => new KeyValuePair<ControllerDescriptor, object>(definition, null!)));
+
+            var generationModule = new GenerationModule(definitions);
 
             foreach (var controllerDescriptor in this.controllers.Keys)
             {
@@ -43,7 +49,7 @@ namespace Marble.Messaging.Services
             }
         }
 
-        private IEnumerable<ControllerDescriptor> LoadControllerDefinitions()
+        private IList<ControllerDescriptor> LoadControllerDefinitions()
         {
             var targetAssembly = Assembly.GetEntryAssembly();
             var allControllers = new ControllerExplorer().ScanAssembly(targetAssembly).ToList();

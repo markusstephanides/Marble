@@ -14,9 +14,15 @@
 
     <ItemGroup>
       <PackageReference Include="akarnokd.reactive_extensions" Version="0.0.27-alpha" />
+      <PackageReference Include="DotLiquid" Version="2.0.366" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
       <PackageReference Include="System.Reactive" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Generation\Templates\Client.liquid" />
+      <EmbeddedResource Include="Generation\Templates\Client.liquid" />
     </ItemGroup>
 
 </Project>

@@ -1,10 +1,28 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 
 namespace Marble.Messaging.Extensions
 {
     public static class TypeExtensions
     {
+        public static string GetReadableName(this Type t)
+        {
+            if (!t.IsGenericType)
+                return t.Name;
+
+            StringBuilder sb = new StringBuilder(t.Name.Substring(0, t.Name.IndexOf('`')));
+            sb.Append('<');
+            bool appendComma = false;
+            foreach (Type arg in t.GetGenericArguments())
+            {
+                if (appendComma) sb.Append(',');
+                sb.Append(GetReadableName(arg));
+                appendComma = true;
+            }
+            return sb.Append('>').ToString();
+        }
+        
         public static bool InheritsOrImplements(this Type child, Type parent)
         {
             if (child == parent)

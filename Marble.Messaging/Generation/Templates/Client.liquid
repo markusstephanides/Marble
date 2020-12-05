@@ -1,0 +1,20 @@
+﻿{% for usingDirective in UsingDirectives %} using {{ usingDirective }};
+{% endfor %}
+
+namespace {{ Namespace }}
+{
+    public interface I{{ ClassName }} : IControllerClient {
+{% for procedure in Procedures %}         {{ procedure.MethodReturnType }} {{  procedure.MethodName }}();
+{% endfor %}
+    }
+
+    public class Default{{ ClassName }}Client : I{{ ClassName }} {
+       
+        private readonly IMessagingClient messagingClient;
+        
+        public DefaultMathServiceClient(IMessagingClient messagingClient)
+        {
+            this.messagingClient = messagingClient;
+        }
+    }
+}
