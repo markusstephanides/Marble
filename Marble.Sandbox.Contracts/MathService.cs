@@ -2,19 +2,20 @@ using System;
 using System.Threading.Tasks;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models;
+using Marble.Sandbox.Contracts.Models;
 
 namespace Marble.Sandbox.Contracts
 {
     public interface IMathService
     {
-        Task<int> Add(int a, int b);
-        Task<int> ComplexAdd(int a, int b);
-        Task VoidAddTask(int a, int b);
-        Task VoidAdd(int a, int b);
-
-        Task<MathResult> AddToMathResult(MathResult mathResult, int a);
-
-        IObservable<int> StartMathStream(int start);
+        Task<int> AddReturnInt(int a, int b);
+        Task<int> AddReturnTaskInt(int a, int b);
+        Task AddReturnTask(int a, int b);
+        Task AddReturnVoid(int a, int b);
+        Task<MathResult> AddReturnObject(int a, int b);
+        Task<MathResult> AddReturnTaskObject(int a, int b);
+        IObservable<int> StartMathStreamReturnInt(int start);
+        IObservable<MathResult> StartMathStreamReturnObject(int start);
     }
 
     public class DefaultMathServiceClient : IMathService
@@ -26,34 +27,49 @@ namespace Marble.Sandbox.Contracts
             this.messagingClient = messagingClient;
         }
 
-        public Task<int> Add(int a, int b)
+        public IObservable<MathResult> StartMathStream(int start)
         {
-            return this.messagingClient.InvokeProcedureAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "Add", a, b));
-        }
-
-        public Task<int> ComplexAdd(int a, int b)
-        {
-            return this.messagingClient.InvokeProcedureAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "ComplexAdd", a, b));
-        }
-
-        public Task VoidAddTask(int a, int b)
-        {
-            return this.messagingClient.CallProcedureAsync(new RequestMessage("Marble.Sandbox.MathService", "VoidAddTask", a, b));
-        }
-
-        public Task VoidAdd(int a, int b)
-        {
-            return this.messagingClient.CallProcedureAsync(new RequestMessage("Marble.Sandbox.MathService", "VoidAdd", a, b));
+            return this.messagingClient.InvokeProcedureStream<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "StartMathStream", start));
         }
         
-        public Task<MathResult> AddToMathResult(MathResult mathResult, int a)
+        public Task<int> AddReturnInt(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "AddToMathResult", mathResult, a));
+            return this.messagingClient.InvokeProcedureAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "AddReturnInt", a, b));
+        }
+
+        public Task<int> AddReturnTaskInt(int a, int b)
+        {
+            return this.messagingClient.InvokeProcedureAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "AddReturnTaskInt", a, b));
+        }
+
+        public Task AddReturnTask(int a, int b)
+        {
+            return this.messagingClient.CallProcedureAsync(new RequestMessage("Marble.Sandbox.MathService", "AddReturnTask", a, b));
+        }
+
+        public Task AddReturnVoid(int a, int b)
+        {
+            return this.messagingClient.CallProcedureAsync(new RequestMessage("Marble.Sandbox.MathService", "AddReturnVoid", a, b));
         }
         
-        public IObservable<int> StartMathStream(int start)
+        public Task<MathResult> AddReturnObject(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureStream<int>(new RequestMessage("Marble.Sandbox.MathService", "StartMathStream", start));
+            return this.messagingClient.InvokeProcedureAsync<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "AddReturnObject", a, b));
+        }
+        
+        public Task<MathResult> AddReturnTaskObject(int a, int b)
+        {
+            return this.messagingClient.InvokeProcedureAsync<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "AddReturnTaskObject", a, b));
+        }
+        
+        public IObservable<int> StartMathStreamReturnInt(int start)
+        {
+            return this.messagingClient.InvokeProcedureStream<int>(new RequestMessage("Marble.Sandbox.MathService", "StartMathStreamReturnInt", start));
+        }
+        
+        public IObservable<MathResult> StartMathStreamReturnObject(int start)
+        {
+            return this.messagingClient.InvokeProcedureStream<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "StartMathStreamReturnObject", start));
         }
     }
 }

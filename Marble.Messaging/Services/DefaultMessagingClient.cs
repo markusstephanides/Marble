@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using Marble.Messaging.Abstractions;
@@ -89,13 +90,13 @@ namespace Marble.Messaging.Services
         private IObservable<TResult> ConstructResponseStream<TResult>(RequestMessage requestMessage)
         {
             return this.messageFeed
+                .Cache()
                 .Where(message =>
                     message.MessageType == MessageType.ResponseMessage)
                 .Select(message => message.ToResponseMessage(this.serializationAdapter))
                 .Where(responseMessage => responseMessage.Correlation == requestMessage.Correlation)
                 .Select(responseMessage => this.streamManager.StreamToObservable<TResult>(responseMessage.Stream))
-                .Switch()
-                .Cache();
+                .Switch();
         }
     }
 }

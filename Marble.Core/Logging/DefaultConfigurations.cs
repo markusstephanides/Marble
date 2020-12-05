@@ -5,7 +5,7 @@ using NLog.Layouts;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
 
-namespace Marble.Logging
+namespace Marble.Core.Logging
 {
     public class DefaultConfigurations
     {

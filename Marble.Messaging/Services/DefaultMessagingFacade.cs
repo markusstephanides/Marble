@@ -25,7 +25,7 @@ namespace Marble.Messaging.Services
         public DefaultMessagingFacade(Type messagingConfigurationType)
         {
             this.messagingConfigurationType = messagingConfigurationType;
-            this.controllerRegistry = new DefaultControllerRegistry();
+            this.controllerRegistry = new DefaultControllerRegistry<TMessagingConfiguration>();
         }
 
         public void ConfigureServices(IServiceCollection serviceCollection)

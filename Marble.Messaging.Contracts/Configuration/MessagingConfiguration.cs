@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Marble.Messaging.Abstractions;
+using Marble.Messaging.Contracts.Abstractions;
 
 namespace Marble.Messaging.Contracts.Configuration
 {
@@ -10,6 +10,6 @@ namespace Marble.Messaging.Contracts.Configuration
         public int DefaultTimeoutInSeconds { get; set; }
         public Type SerializationAdapterType { get; set; }
         public List<string> KnownProcedurePaths { get; set; }
-        public List<IConverter> TypeConverters { get; set; }
+        public List<IResultConverter> TypeConverters { get; set; }
     }
 }

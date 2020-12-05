@@ -1,7 +1,7 @@
 ﻿using Marble.Core.Builder;
 using Marble.Core.Builder.Abstractions;
 using Marble.Messaging.Extensions;
-using Marble.Messaging.Rabbit.Models;
+using Marble.Messaging.Rabbit.Configuration;
 
 namespace Marble.Messaging.Rabbit.Extensions
 {

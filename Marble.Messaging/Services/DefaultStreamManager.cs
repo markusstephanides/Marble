@@ -16,6 +16,8 @@ namespace Marble.Messaging.Services
 
         public IObservable<T> StreamToObservable<T>(BasicStream stream)
         {
+            var itemType = typeof(T);
+
             return Observable.Create<T>(observer =>
             {
                 foreach (var streamEvent in stream)
@@ -27,8 +29,10 @@ namespace Marble.Messaging.Services
                             {
                                 // TODO: This is a heavy workaround because Json serialization assumes Int64 for numbers                        // TODO: Remove when we have a solution for the int/long deserialization issue
                                 // TODO: Remove when we have a solution for the int/long deserialization issue
-                                var payload = (T) Convert.ChangeType(streamEvent.Payload, typeof(T),
-                                    CultureInfo.InvariantCulture);
+                                var payload = itemType.IsPrimitive
+                                    ? (T) Convert.ChangeType(streamEvent.Payload, typeof(T),
+                                        CultureInfo.InvariantCulture)
+                                    : (T) streamEvent.Payload;
                                 observer.OnNext(payload);
                             }
 
@@ -37,8 +41,12 @@ namespace Marble.Messaging.Services
                             if (streamEvent.Payload != null)
                             {
                                 // TODO: Remove when we have a solution for the int/long deserialization issue
-                                var payload = (T) Convert.ChangeType(streamEvent.Payload, typeof(T),
-                                    CultureInfo.InvariantCulture);
+                                // var payload = (T) Convert.ChangeType(streamEvent.Payload, typeof(T),
+                                //     CultureInfo.InvariantCulture);
+                                var payload = itemType.IsPrimitive
+                                    ? (T) Convert.ChangeType(streamEvent.Payload, typeof(T),
+                                        CultureInfo.InvariantCulture)
+                                    : (T) streamEvent.Payload;
                                 observer.OnNext(payload);
                             }
 

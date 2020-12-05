@@ -23,6 +23,18 @@ namespace Marble.Messaging.Contracts.Models.Stream
                 }
             };
         }
+        
+        public static BasicStream FromNotification<T>(T item)
+        {
+            return new BasicStream
+            {
+                new StreamEvent
+                {
+                    EventType = StreamEventType.Notification,
+                    Payload = item
+                }
+            };
+        }
 
         public static BasicStream FromError<T>(T result)
         {

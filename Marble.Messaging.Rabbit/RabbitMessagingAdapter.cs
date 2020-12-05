@@ -4,7 +4,7 @@ using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models;
-using Marble.Messaging.Rabbit.Models;
+using Marble.Messaging.Rabbit.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;

@@ -6,6 +6,7 @@ using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models;
 using Marble.Messaging.Contracts.Models.Stream;
 using Marble.Messaging.Extensions;
+using Marble.Messaging.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Marble.Messaging.Services
@@ -49,33 +50,64 @@ namespace Marble.Messaging.Services
             var requestMessage = requestMessageContext.RequestMessage;
             try
             {
-                var result = this.controllerRegistry.InvokeProcedure(requestMessage.Controller,
+                var messageHandlingResult = this.controllerRegistry.InvokeProcedure(requestMessage.Controller,
                     requestMessage.Procedure, requestMessage.Arguments);
 
-                if (result != null)
+                switch (messageHandlingResult.Type)
                 {
-                    var responseMessage = new ResponseMessage
-                    {
-                        Correlation = requestMessage.Correlation,
-                        Stream = BasicStream.FromResult(result)
-                    };
-
-                    this.messagingAdapter.SendRemoteMessage(
-                        responseMessage.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
-
-                    this.logger.LogInformation(
-                        $"Handled request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms with result of {result.GetType().Name}.");
-                }
-                else
-                {
-                    this.logger.LogInformation(
-                        $"Handled request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms with no result.");
+                    case MessageHandlingResultType.Single:
+                        this.messagingAdapter.SendRemoteMessage(
+                            new ResponseMessage
+                            {
+                                Stream = BasicStream.FromResult(messageHandlingResult.Result),
+                                Correlation = requestMessage.Correlation
+                            }.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
+                        this.logger.LogInformation(
+                            $"Handled request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms with result of {messageHandlingResult.Result.GetType().Name}.");
+                        break;
+                    case MessageHandlingResultType.Stream:
+                        messageHandlingResult.ResultStream!.Subscribe(item =>
+                        {
+                            this.messagingAdapter.SendRemoteMessage(
+                                new ResponseMessage
+                                {
+                                    Stream = BasicStream.FromNotification(item),
+                                    Correlation = requestMessage.Correlation
+                                }.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
+                        }, error =>
+                        {
+                            this.messagingAdapter.SendRemoteMessage(
+                                new ResponseMessage
+                                {
+                                    Stream = BasicStream.FromError(messageHandlingResult.Result),
+                                    Correlation = requestMessage.Correlation
+                                }.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
+                        }, () =>
+                        {
+                            this.messagingAdapter.SendRemoteMessage(
+                                new ResponseMessage
+                                {
+                                    Stream = BasicStream.Completed,
+                                    Correlation = requestMessage.Correlation
+                                }.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
+                        });
+                        
+                        this.logger.LogInformation(
+                            $"Opened stream after request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms.");
+                        break;
+                    case MessageHandlingResultType.Void:
+                        this.logger.LogInformation(
+                            $"Handled request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms with no result.");
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
             catch (Exception e)
             {
                 this.logger.LogError(e,
                     $"Failed to handle request to {requestMessage.Controller}:{requestMessage.Procedure} within {stopwatch.ElapsedMilliseconds} ms.");
+
                 var responseMessage = new ResponseMessage
                 {
                     Correlation = requestMessage.Correlation,
@@ -84,7 +116,6 @@ namespace Marble.Messaging.Services
 
                 this.messagingAdapter.SendRemoteMessage(
                     responseMessage.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
-                throw;
             }
         }
     }

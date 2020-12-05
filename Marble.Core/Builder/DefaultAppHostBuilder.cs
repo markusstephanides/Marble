@@ -2,7 +2,7 @@
 using System.Linq;
 using Marble.Core.Builder.Abstractions;
 using Marble.Core.Builder.Models;
-using Marble.Logging;
+using Marble.Core.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

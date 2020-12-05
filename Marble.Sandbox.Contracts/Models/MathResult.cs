@@ -1,4 +1,4 @@
-﻿namespace Marble.Sandbox.Contracts
+﻿namespace Marble.Sandbox.Contracts.Models
 {
     public class MathResult
     {

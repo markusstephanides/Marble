@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Marble.Core.Serialization;
+using Marble.Core.Serialization.Json;
 using Marble.Messaging.Abstractions;
+using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Configuration;
 using Marble.Messaging.Converters;
 
@@ -14,13 +16,13 @@ namespace Marble.Messaging.Utilities
         {
             SerializationAdapterType = typeof(DefaultJsonSerializationAdapter),
             DefaultTimeoutInSeconds = 5,
-            TypeConverters = new List<IConverter>
+            TypeConverters = new List<IResultConverter>
             {
-                new GenericObservableConverter(),
-                new GenericTaskConverter(),
-                new ObjectConverter(),
-                new TaskConverter(),
-                new VoidConverter()
+                new GenericObservableResultConverter(),
+                new GenericTaskResultConverter(),
+                new ObjectResultConverter(),
+                new TaskResultConverter(),
+                new VoidResultConverter()
             }
         };
 
