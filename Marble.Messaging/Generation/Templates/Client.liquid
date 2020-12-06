@@ -1,10 +1,10 @@
-﻿{% for usingDirective in UsingDirectives %} using {{ usingDirective }};
+﻿{% for usingDirective in UsingDirectives %}using {{ usingDirective }};
 {% endfor %}
-
 namespace {{ Namespace }}
 {
     public interface I{{ ClassName }} : IControllerClient {
-{% for procedure in Procedures %}         {{ procedure.MethodReturnType }} {{  procedure.MethodName }}();
+{% for procedure in Procedures %}        
+        {{ procedure.MethodReturnType }} {{  procedure.MethodName }}({% for param in procedure.Parameters %}{{param.ReadableTypeName}} {{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %});
 {% endfor %}
     }
 
@@ -16,5 +16,11 @@ namespace {{ Namespace }}
         {
             this.messagingClient = messagingClient;
         }
+
+{% for procedure in Procedures %}        public {{ procedure.MethodReturnType }} {{  procedure.MethodName }}({% for param in procedure.Parameters %}{{param.ReadableTypeName}} {{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %}){
+            return this.messagingClient.{% if procedure.ReturnTypeVariant == "Stream" %}InvokeProcedureStream<{{ procedure.PureReturnType }}>{% elsif procedure.ReturnTypeVariant == "Single" %}InvokeProcedureAsync<{{ procedure.PureReturnType }}>{% elsif procedure.ReturnTypeVariant == "Void" %}CallProcedureAsync{% endif %}(new RequestMessage("{{ ServiceName }}", "{{ procedure.Name }}", {% for param in procedure.Parameters %}{{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %}));
+        }
+    
+{% endfor %}
     }
 }

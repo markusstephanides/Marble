@@ -1,20 +1,26 @@
- using System;
- using System.Threading.Tasks;
- using Marble.Messaging.Contracts.Abstractions;
- using Marble.Messaging.Contracts.Models;
- using Marble.Sandbox.Contracts.Models;
+using System;
+using System.Threading.Tasks;
+using Marble.Messaging.Contracts.Abstractions;
+using Marble.Messaging.Contracts.Models;
+using Marble.Sandbox.Contracts.Models;
 
-
- namespace Marble.Sandbox.Contracts
+namespace Marble.Sandbox.Contracts
 {
     public interface IMathService : IControllerClient {
-         Task<Int32> AddReturnInt();
-         Task<Int32> AddReturnTaskInt();
-         Task AddReturnTask();
-         Task AddReturnVoid();
-         Task<MathResult> AddReturnObject();
-         Task<MathResult> AddReturnTaskObject();
-         IObservable<MathResult> StartMathStreamReturnObject();
+        
+        Task<int> AddReturnInt(int a, int b);
+        
+        Task<int> AddReturnTaskInt(int a, int b);
+        
+        Task AddReturnTask(int a, int b);
+        
+        Task AddReturnVoid(int a, int b);
+        
+        Task<MathResult> AddReturnObject(int a, int b);
+        
+        Task<MathResult> AddReturnTaskObject(int a, int b);
+        
+        IObservable<MathResult> StartMathStreamReturnObject(int start);
 
     }
 
@@ -27,39 +33,34 @@
             this.messagingClient = messagingClient;
         }
 
-        public Task<int> AddReturnInt()
-        {
-            throw new NotImplementedException();
+        public Task<int> AddReturnInt(int a, int b){
+            return this.messagingClient.InvokeProcedureAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "AddReturnInt", a, b));
         }
+    
+        public Task<int> AddReturnTaskInt(int a, int b){
+            return this.messagingClient.InvokeProcedureAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "AddReturnTaskInt", a, b));
+        }
+    
+        public Task AddReturnTask(int a, int b){
+            return this.messagingClient.CallProcedureAsync(new RequestMessage("Marble.Sandbox.MathService", "AddReturnTask", a, b));
+        }
+    
+        public Task AddReturnVoid(int a, int b){
+            return this.messagingClient.CallProcedureAsync(new RequestMessage("Marble.Sandbox.MathService", "AddReturnVoid", a, b));
+        }
+    
+        public Task<MathResult> AddReturnObject(int a, int b){
+            return this.messagingClient.InvokeProcedureAsync<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "AddReturnObject", a, b));
+        }
+    
+        public Task<MathResult> AddReturnTaskObject(int a, int b){
+            return this.messagingClient.InvokeProcedureAsync<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "AddReturnTaskObject", a, b));
+        }
+    
+        public IObservable<MathResult> StartMathStreamReturnObject(int start){
+            return this.messagingClient.InvokeProcedureStream<MathResult>(new RequestMessage("Marble.Sandbox.MathService", "StartMathStreamReturnObject", start));
+        }
+    
 
-        public Task<int> AddReturnTaskInt()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task AddReturnTask()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task AddReturnVoid()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<MathResult> AddReturnObject()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<MathResult> AddReturnTaskObject()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IObservable<MathResult> StartMathStreamReturnObject()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

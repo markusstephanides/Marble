@@ -39,17 +39,53 @@ namespace Marble.Messaging.Generation
             foreach (var procedureDescriptor in descriptor.ProcedureDescriptors)
             {
                 var methodInfo = procedureDescriptor.MethodInfo;
+
+                // Add using directive for return type
+                if (!methodInfo.ReturnType.IsPrimitive && methodInfo.ReturnType.Namespace != null)
+                {
+                    if (!usingDirectives.Contains(methodInfo.ReturnType.Namespace))
+                    {
+                        usingDirectives.Add(methodInfo.ReturnType.Namespace);
+                    }
+                }
+                
+                var paramsList = new List<Hash>();
+                
+                // Add using directives for parameters
+                foreach (var parameterInfo in methodInfo.GetParameters())
+                {
+                    var tmpList = new List<string>();
+                    var parameterUsingDirectives = parameterInfo.ParameterType.GetUsedNamespaces(ref tmpList);
+                    
+                    foreach (var parameterUsingDirective in parameterUsingDirectives)
+                    {
+                        if (parameterUsingDirective != null && !usingDirectives.Contains(parameterUsingDirective))
+                        {
+                            usingDirectives.Add(parameterUsingDirective);
+                        }
+                        
+                        paramsList.Add(Hash.FromAnonymousObject(new ParameterDescriptor{
+                            Name = parameterInfo.Name,
+                            ReadableTypeName = parameterInfo.ParameterType.GetReadableName()
+                        }));
+                    }
+                }
+                
                 procedureModels.Add(Hash.FromAnonymousObject(new ProcedureTemplateModel
                 {
                     MethodName = methodInfo.Name,
-                    MethodReturnType = this.GetReturnTypeString(methodInfo)
+                    Name = procedureDescriptor.Name,
+                    MethodReturnType = this.GetReturnTypeString(methodInfo),
+                    ReturnTypeVariant = procedureDescriptor.ReturnTypeVariant.ToString(),
+                    PureReturnType = procedureDescriptor.PureReturnType.GetReadableName(),
+                    Parameters = paramsList
                 }));
             }
 
             var templateModel = new ClientTemplateModel
             {
                 UsingDirectives = usingDirectives,
-                Namespace = descriptor.Type.Namespace!,
+                Namespace = this.generationSettings.TargetNamespace ?? descriptor.Type.Namespace ?? "Clients",
                 ClassName = serviceName,
                 ServiceName = descriptor.Name,
                 Procedures = procedureModels

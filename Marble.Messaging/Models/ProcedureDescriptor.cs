@@ -10,6 +10,10 @@ namespace Marble.Messaging.Models
 
         public Type ReturnType { get; set; }
 
+        public Type PureReturnType { get; set; }
+
+        public ReturnTypeVariant ReturnTypeVariant { get; set; }
+
         public ControllerDescriptor ControllerDescriptor { get; set; }
     }
 }

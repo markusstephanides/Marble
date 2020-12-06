@@ -13,7 +13,8 @@ namespace Marble.Messaging.Generation
     public class GenerationModule
     {
         private const string LaunchModeEnvironmentVariableName = "APPLICATION_LAUNCH_MODE";
-        private const string OutputDirectoryEnvironmentVariableName = "GENERATION_OUTPUT_DIR";
+        private const string OutputDirectoryEnvironmentVariableName = "GENERATION_TARGET_DIR";
+        private const string TargetNamespaceEnvironmentVariableName = "GENERATION_TARGET_NAMESPACE";
         private const string TemplatesBasePath = "Marble.Messaging.Generation.Templates.";
         
         private const ApplicationLaunchMode DefaultApplicationLaunchMode = ApplicationLaunchMode.GenerateAndHost;
@@ -44,7 +45,8 @@ namespace Marble.Messaging.Generation
             {
                 OutputDirectory =
                     Environment.GetEnvironmentVariable(OutputDirectoryEnvironmentVariableName,
-                        EnvironmentVariableTarget.Process) ?? Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Generated")
+                        EnvironmentVariableTarget.Process) ?? Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Generated"),
+                TargetNamespace = Environment.GetEnvironmentVariable(TargetNamespaceEnvironmentVariableName)
             };
             
             if (!Directory.Exists(this.generationSettings.OutputDirectory))

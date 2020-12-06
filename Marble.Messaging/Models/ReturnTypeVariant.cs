@@ -2,6 +2,6 @@
 {
     public enum ReturnTypeVariant
     {
-        
+        Stream, Single, Void
     }
 }

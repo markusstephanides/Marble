@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using DotLiquid;
+using Marble.Messaging.Models;
 
 namespace Marble.Messaging.Generation.Models
 {
@@ -6,9 +8,11 @@ namespace Marble.Messaging.Generation.Models
     {
         public string MethodName { get; set; }
         public string MethodReturnType { get; set; }
-        public string GenericType { get; set; }
+        public string PureReturnType { get; set; }
         public bool IsGeneric { get; set; }
         public string CallingMethodName { get; set; }
-        public Dictionary<string, string> Parameters { get; set; }
+        public List<Hash> Parameters { get; set; }
+        public string ReturnTypeVariant { get; set; }
+        public string Name { get; set; }
     }
 }
