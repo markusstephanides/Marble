@@ -11,7 +11,7 @@ namespace Marble.Messaging.Converters
     {
         public Type ConversionInType { get; set; } = typeof(Task<>);
         
-        public MessageHandlingResult ConvertResult(object result)
+        public MessageHandlingResult ConvertResult(object result, Type? genericTypeArgument = null!)
         {
             return new MessageHandlingResult
             {

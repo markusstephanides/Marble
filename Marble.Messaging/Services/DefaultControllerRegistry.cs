@@ -48,32 +48,36 @@ namespace Marble.Messaging.Services
             var targetAssembly = Assembly.GetEntryAssembly();
             var allControllers = new ControllerExplorer().ScanAssembly(targetAssembly).ToList();
             var containsErrors = false;
-            
+
             foreach (var controllerDescriptor in allControllers)
             {
                 var controllerNameCount = allControllers.Count(d => d.Name == controllerDescriptor.Name);
 
                 if (controllerNameCount > 1)
                 {
-                    Console.WriteLine($"Error while loading controller definitions! The controller name {controllerDescriptor.Name} is not unique and currently exists {controllerNameCount} times!");
+                    Console.WriteLine(
+                        $"Error while loading controller definitions! The controller name {controllerDescriptor.Name} is not unique and currently exists {controllerNameCount} times!");
                     containsErrors = true;
                 }
-                
+
                 foreach (var procedureDescriptor in controllerDescriptor.ProcedureDescriptors)
                 {
                     var procedureNameCount = allControllers.Count(d => d.Name == procedureDescriptor.Name);
-        
+
                     if (procedureNameCount > 1)
                     {
-                        Console.WriteLine($"Error while loading procedure definitions of {controllerDescriptor.Name}! The procedure name {procedureDescriptor.Name} is not unique and currently exists {procedureNameCount} times!");
+                        Console.WriteLine(
+                            $"Error while loading procedure definitions of {controllerDescriptor.Name}! The procedure name {procedureDescriptor.Name} is not unique and currently exists {procedureNameCount} times!");
                         containsErrors = true;
                     }
 
-                    if (procedureDescriptor.ReturnType.InheritsOrImplements(typeof(IObservable<>)) && procedureDescriptor.ReturnType.GetGenericArguments()[0].IsValueType)
-                    {
-                        Console.WriteLine($"Error while loading procedure definition {procedureDescriptor.Name} of {controllerDescriptor.Name}! IObservables of value types are currently not supported. Please pack the value type into a model.");
-                        containsErrors = true;
-                    }
+                    // if (procedureDescriptor.ReturnType.InheritsOrImplements(typeof(IObservable<>)) &&
+                    //     procedureDescriptor.ReturnType.GetGenericArguments()[0].IsValueType)
+                    // {
+                    //     Console.WriteLine(
+                    //         $"Error while loading procedure definition {procedureDescriptor.Name} of {controllerDescriptor.Name}! IObservables of value types are currently not supported. Please pack the value type into a model.");
+                    //     containsErrors = true;
+                    // }
                 }
             }
 
@@ -139,7 +143,10 @@ namespace Marble.Messaging.Services
                     procedureDescriptor.ReturnType.InheritsOrImplements(c.ConversionInType)
                 ) ?? this.configuration.TypeConverters.Find(c => c.GetType() == typeof(ObjectResultConverter));
 
-                return converter!.ConvertResult(rawReturnValue!);
+                return converter!.ConvertResult(rawReturnValue!,
+                    procedureDescriptor.ReturnType.IsGenericType
+                        ? procedureDescriptor.ReturnType.GenericTypeArguments[0]
+                        : null);
             }
             catch (Exception e)
             {

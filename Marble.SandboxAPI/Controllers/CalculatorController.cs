@@ -112,30 +112,30 @@ namespace Marble.SandboxAPI.Controllers
             }
         }
         
-        // [HttpGet("startMathStreamReturnInt")]
-        // public async Task<ActionResult> StartMathStreamReturnInt([FromQuery] int start)
-        // {
-        //     try
-        //     {
-        //         this.mathService.StartMathStreamReturnInt(start).Subscribe(
-        //                 value =>
-        //                 {
-        //                     this.logger.LogInformation($"Received value {value} from StartMathStreamReturnInt");
-        //                 }, error =>
-        //             {
-        //                 this.logger.LogError($"StartMathStreamReturnInt-Stream ERROR: {error}");
-        //             }, () =>
-        //             {
-        //                 this.logger.LogInformation("StartMathStreamReturnInt-Stream completed!");
-        //             });
-        //         return this.Ok(new {status = "Sent!"});
-        //     }
-        //     catch (Exception e)
-        //     {
-        //         this.logger.LogError(e,"Failed to send StartMathStreamReturnInt request");
-        //         return this.StatusCode(500, new {message = e.Message});
-        //     }
-        // }
+        [HttpGet("startMathStreamReturnInt")]
+        public async Task<ActionResult> StartMathStreamReturnInt([FromQuery] int start)
+        {
+            try
+            {
+                this.mathService.StartMathStreamReturnInt(start).Subscribe(
+                        value =>
+                        {
+                            this.logger.LogInformation($"Received value {value} from StartMathStreamReturnInt");
+                        }, error =>
+                    {
+                        this.logger.LogError($"StartMathStreamReturnInt-Stream ERROR: {error}");
+                    }, () =>
+                    {
+                        this.logger.LogInformation("StartMathStreamReturnInt-Stream completed!");
+                    });
+                return this.Ok(new {status = "Sent!"});
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError(e,"Failed to send StartMathStreamReturnInt request");
+                return this.StatusCode(500, new {message = e.Message});
+            }
+        }
         
         [HttpGet("startMathStreamReturnObject")]
         public async Task<ActionResult> StartMathStreamReturnObject([FromQuery] int start)

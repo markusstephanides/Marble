@@ -68,16 +68,16 @@ namespace Marble.Sandbox
             });
         }
         
-        // [MarbleProcedure]
-        // public IObservable<int> StartMathStreamReturnInt(int start)
-        // {
-        //     return Observable.Timer(TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(1000)).Select(
-        //         (t, index) =>
-        //         {
-        //             Console.WriteLine($"t {t}, index {index}");
-        //             return start + index;
-        //         }).Take(5);
-        // }
+        [MarbleProcedure]
+        public IObservable<int> StartMathStreamReturnInt(int start)
+        {
+            return Observable.Timer(TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(1000)).Select(
+                (t, index) =>
+                {
+                    Console.WriteLine($"t {t}, index {index}");
+                    return start + index;
+                }).Take(5);
+        }
         
         [MarbleProcedure]
         public IObservable<MathResult> StartMathStreamReturnObject(int start)

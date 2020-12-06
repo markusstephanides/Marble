@@ -7,6 +7,6 @@ namespace Marble.Messaging.Contracts.Abstractions
     {
         public Type ConversionInType { get; set; }
 
-        MessageHandlingResult ConvertResult(object result);
+        MessageHandlingResult ConvertResult(object result, Type? genericTypeArgument = null!);
     }
 }
