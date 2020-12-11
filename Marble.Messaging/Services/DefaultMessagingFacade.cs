@@ -3,6 +3,7 @@ using Marble.Core.Serialization;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Configuration;
+using Marble.Messaging.Explorer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,7 @@ namespace Marble.Messaging.Services
     {
         private readonly Type messagingConfigurationType;
         private readonly IControllerRegistry controllerRegistry;
+        private readonly ClientExplorer clientExplorer;
 
         // Resolved when service provider is available
         private IMessagingAdapter messagingAdapter;
@@ -26,6 +28,7 @@ namespace Marble.Messaging.Services
         {
             this.messagingConfigurationType = messagingConfigurationType;
             this.controllerRegistry = new DefaultControllerRegistry<TMessagingConfiguration>();
+            this.clientExplorer = new ClientExplorer();
         }
 
         public void ConfigureServices(IServiceCollection serviceCollection)
@@ -44,6 +47,7 @@ namespace Marble.Messaging.Services
             serviceCollection.AddSingleton<IMessageHandler, DefaultMessageHandler>();
             serviceCollection.AddSingleton<IStreamManager, DefaultStreamManager>();
 
+            this.clientExplorer.ConfigureServices(serviceCollection);
             this.controllerRegistry.ConfigureServices(serviceCollection);
         }
 

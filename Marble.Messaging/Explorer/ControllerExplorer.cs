@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Marble.Messaging.Contracts.Declaration;
+using Marble.Messaging.Extensions;
 using Marble.Messaging.Models;
 using Marble.Messaging.Transformers;
 
@@ -20,6 +22,7 @@ namespace Marble.Messaging.Explorer
                         var controllerAttribute =
                             (MarbleControllerAttribute) type.GetCustomAttributes(typeof(MarbleControllerAttribute),
                                 true)[0];
+                        
                         var descriptor = new ControllerDescriptor
                         {
                             Name = controllerAttribute.Name ?? ControllerName.FromType(type),
@@ -40,12 +43,32 @@ namespace Marble.Messaging.Explorer
                     var controllerAttribute =
                         (MarbleControllerAttribute) type.GetCustomAttributes(typeof(MarbleControllerAttribute),
                             true)[0];
+
+                    var variant = ReturnTypeVariant.Single;
+                    var pureType = method.ReturnType;
+                    
+                    if (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition().InheritsOrImplements(typeof(IObservable<>)))
+                    {
+                        variant = ReturnTypeVariant.Stream;
+                        pureType = method.ReturnType.GenericTypeArguments[0];
+                    }
+                    else if (method.ReturnType == typeof(Task) || method.ReturnType == typeof(void))
+                    {
+                        variant = ReturnTypeVariant.Void;
+                    }
+                    else if (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition().InheritsOrImplements(typeof(Task<>)))
+                    {
+                        pureType = method.ReturnType.GenericTypeArguments[0];
+                    }
+                    
                     return new ProcedureDescriptor
                     {
                         Name = controllerAttribute.Name ?? ProcedureName.FromMethodInfo(method),
                         MethodInfo = method,
                         ControllerDescriptor = controllerDescriptor,
-                        ReturnType = method.ReturnType
+                        ReturnType = method.ReturnType,
+                        ReturnTypeVariant = variant,
+                        PureReturnType = pureType
                     };
                 });
         }
