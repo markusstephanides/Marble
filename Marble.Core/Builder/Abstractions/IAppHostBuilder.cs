@@ -7,6 +7,7 @@ namespace Marble.Core.Builder.Abstractions
 {
     public interface IAppHostBuilder
     {
+        IAppHostBuilder AddClients();
         IAppHostBuilder ConfigureServices(Action<IServiceCollection> configurationAction);
 
         IAppHostBuilder Configure<TOption>(Func<IConfiguration, IConfiguration> configurationAction)

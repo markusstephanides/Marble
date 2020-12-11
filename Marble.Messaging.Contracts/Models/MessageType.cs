@@ -2,8 +2,6 @@
 {
     public enum MessageType
     {
-        Default,
-        RpcRequest,
-        RpcResponse
+        RequestMessage, ResponseMessage
     }
 }

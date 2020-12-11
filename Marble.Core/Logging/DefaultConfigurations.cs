@@ -5,7 +5,7 @@ using NLog.Layouts;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
 
-namespace Marble.Logging
+namespace Marble.Core.Logging
 {
     public class DefaultConfigurations
     {
@@ -16,7 +16,7 @@ namespace Marble.Logging
             var consoleTarget = new ColoredConsoleTarget("Console")
             {
                 Layout = new SimpleLayout(
-                    "[${time}][${logger}] ${level:uppercase=true}: ${message} ${exception} ${all-event-properties}")
+                    "[${time}] ${level:uppercase=true}: ${message} ${exception} ${all-event-properties}")
             };
 
             foreach (var loggingLevel in LogLevel.AllLoggingLevels)
