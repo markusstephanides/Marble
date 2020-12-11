@@ -2,7 +2,6 @@
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Marble.Messaging.Contracts.Declaration;
-using Marble.Sandbox.Contracts;
 using Marble.Sandbox.Contracts.Models;
 using Microsoft.Extensions.Logging;
 
@@ -49,7 +48,7 @@ namespace Marble.Sandbox
             this.logger.LogInformation($"AddReturnVoid request incoming with params {a}+{b}!");
             var result = a + b;
         }
-        
+
         [MarbleProcedure]
         public MathResult AddReturnObject(int a, int b)
         {
@@ -58,7 +57,7 @@ namespace Marble.Sandbox
                 SomeInt = a + b
             };
         }
-        
+
         [MarbleProcedure]
         public Task<MathResult> AddReturnTaskObject(int a, int b)
         {
@@ -67,7 +66,7 @@ namespace Marble.Sandbox
                 SomeInt = a + b
             });
         }
-        
+
         [MarbleProcedure]
         public IObservable<int> StartMathStreamReturnInt(int start)
         {
@@ -78,7 +77,7 @@ namespace Marble.Sandbox
                     return start + index;
                 }).Take(5);
         }
-        
+
         [MarbleProcedure]
         public IObservable<MathResult> StartMathStreamReturnObject(int start)
         {
@@ -86,7 +85,7 @@ namespace Marble.Sandbox
                 (t, index) =>
                 {
                     Console.WriteLine($"t {t}, index {index}");
-                    return new MathResult() {SomeInt = start + index};
+                    return new MathResult {SomeInt = start + index};
                 }).Take(5);
         }
     }

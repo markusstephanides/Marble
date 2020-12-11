@@ -37,7 +37,7 @@ namespace Marble.Sandbox.Contracts
         public Task<int> AddReturnInt(int a, int b)
         {
             return this.messagingClient.InvokeProcedureAsync<int>(new RequestMessage("Marble.Sandbox.MathService",
-                "AddReturnInt", a, b));
+                "add", a, b));
         }
 
         public Task<int> AddReturnTaskInt(int a, int b)
