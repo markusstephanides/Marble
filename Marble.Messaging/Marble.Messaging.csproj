@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Nullable>enable</Nullable>
+        <PackageLicenseUrl>https://github.com/markusstephanides/Marble/blob/main/LICENSE</PackageLicenseUrl>
+        <PackageVersion>1.1.0</PackageVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Marble.Core\Marble.Core.csproj" />
+      <ProjectReference Include="..\Marble.Messaging.Contracts\Marble.Messaging.Contracts.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="akarnokd.reactive_extensions" Version="0.0.27-alpha" />
+      <PackageReference Include="DotLiquid" Version="2.0.366" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+      <PackageReference Include="System.Reactive" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Generation\Templates\Client.liquid" />
+      <EmbeddedResource Include="Generation\Templates\Client.liquid" />
+    </ItemGroup>
+
+</Project>

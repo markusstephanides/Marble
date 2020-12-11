@@ -1,33 +1,36 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
-using Marble.Core.Messaging;
-using Marble.Core.Messaging.Abstractions;
-using Marble.Core.Messaging.Models;
+using Marble.Core.Builder.Abstractions;
+using Marble.Core.Builder.Models;
+using Marble.Core.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 
 namespace Marble.Core.Builder
 {
-    public class DefaultAppHostBuilder : IAppHostBuilder
+    public class DefaultAppHostBuilder : IAppHostBuilderWithExposedModel
     {
-        private readonly AppHostBuildingModel buildingModel = new AppHostBuildingModel();
+        public AppHostBuildingModel BuildingModel { get; } = new AppHostBuildingModel();
+
+        public DefaultAppHostBuilder()
+        {
+            // TODO: Move this to a defaults hook or something like that
+            this.ConfigureServices(collection =>
+            {
+                collection.AddLogging(loggingBuilder =>
+                {
+                    loggingBuilder.ClearProviders();
+                    loggingBuilder.SetMinimumLevel(LogLevel.Debug);
+                    loggingBuilder.AddNLog(DefaultConfigurations.ConsoleTargetConfiguration);
+                });
+            });
+        }
 
         public IAppHostBuilder ConfigureServices(Action<IServiceCollection> configurationAction)
         {
-            this.buildingModel.ServiceCollectionConfigurationActions.Add(configurationAction);
-            return this;
-        }
-
-        public IAppHostBuilder WithMessaging<TMessagingClient, TConfiguration>(
-            string configurationSection = "Messaging")
-            where TMessagingClient : class, IMessagingClient
-            where TConfiguration : MessagingClientConfiguration
-        {
-            this.buildingModel.MessagingFacade = new MessagingFacade();
-            this.Configure<TConfiguration>(configuration => configuration.GetSection(configurationSection));
-            this.ConfigureServices(this.buildingModel.MessagingFacade.ConfigureServices);
-            this.ConfigureServices(services => services.AddSingleton<IMessagingClient, TMessagingClient>());
+            this.BuildingModel.ServiceCollectionConfigurationActions.Add(configurationAction);
             return this;
         }
 
@@ -36,7 +39,7 @@ namespace Marble.Core.Builder
         {
             this.ConfigureServices(collection =>
             {
-                collection.Configure<TOption>(configurationAction(this.buildingModel.Configuration));
+                collection.Configure<TOption>(configurationAction(this.BuildingModel.Configuration));
             });
             return this;
         }
@@ -47,42 +50,35 @@ namespace Marble.Core.Builder
             return this;
         }
 
+        public IAppHostBuilder AddClients()
+        {
+            throw new NotImplementedException();
+        }
+
         public IAppHostBuilder ProvideServiceCollection(IServiceCollection serviceCollection)
         {
-            this.buildingModel.ServiceCollection = serviceCollection;
-            this.buildingModel.ServiceCollectionConfigurationActions.ToList()
-                .ForEach(action => action(this.buildingModel.ServiceCollection));
+            this.BuildingModel.ServiceCollection = serviceCollection;
+            this.BuildingModel.ServiceCollectionConfigurationActions.ToList()
+                .ForEach(action => action(this.BuildingModel.ServiceCollection));
             return this;
         }
 
         public IAppHostBuilder ProvideServiceProvider(IServiceProvider serviceProvider)
         {
-            this.buildingModel.ServiceProvider = serviceProvider;
+            this.BuildingModel.ServiceProvider = serviceProvider;
             return this;
         }
 
         public IAppHostBuilder ProvideConfiguration(IConfiguration configuration)
         {
-            this.buildingModel.Configuration = configuration;
+            this.BuildingModel.Configuration = configuration;
             return this;
         }
 
-        public AppHost BuildAndHost()
+        public AppHost BuildAndHost(bool keepRunning = true)
         {
-            return AppHostFactory.Create(this.buildingModel);
-        }
-
-        public IAppHostBuilder KeepRunning()
-        {
-            new Thread(() =>
-            {
-                while (true)
-                {
-                    Thread.Sleep(1000);
-                }
-            }).Start();
-
-            return this;
+            this.BuildingModel.KeepRunning = keepRunning;
+            return AppHostFactory.Create(this.BuildingModel);
         }
     }
 }

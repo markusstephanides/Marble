@@ -1,5 +1,5 @@
+using System;
 using Marble.Core;
-using Marble.Logging;
 using Marble.Messaging.Rabbit.Extensions;
 using Marble.Sandbox.Contracts;
 using Microsoft.AspNetCore.Builder;
@@ -12,13 +12,12 @@ namespace Marble.SandboxAPI
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
         public Startup(IConfiguration configuration)
         {
             this.Configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
-
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -28,7 +27,6 @@ namespace Marble.SandboxAPI
 
             MarbleCore.Builder
                 .WithRabbitMessaging()
-                .WithLogging()
                 .ProvideConfiguration(this.Configuration)
                 .ProvideServiceCollection(services);
         }
@@ -52,7 +50,7 @@ namespace Marble.SandboxAPI
             });
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-
+         
             MarbleCore.Builder
                 .ProvideServiceProvider(app.ApplicationServices)
                 .BuildAndHost();
