@@ -22,7 +22,7 @@ namespace Marble.Messaging.Explorer
                         var controllerAttribute =
                             (MarbleControllerAttribute) type.GetCustomAttributes(typeof(MarbleControllerAttribute),
                                 true)[0];
-                        
+
                         var descriptor = new ControllerDescriptor
                         {
                             Name = controllerAttribute.Name ?? ControllerName.FromType(type),
@@ -40,14 +40,15 @@ namespace Marble.Messaging.Explorer
                 .Where(method => method.GetCustomAttributes(typeof(MarbleProcedureAttribute), false).Any())
                 .Select(method =>
                 {
-                    var controllerAttribute =
-                        (MarbleControllerAttribute) type.GetCustomAttributes(typeof(MarbleControllerAttribute),
+                    var procedureAttribute =
+                        (MarbleProcedureAttribute) method.GetCustomAttributes(typeof(MarbleProcedureAttribute),
                             true)[0];
 
                     var variant = ReturnTypeVariant.Single;
                     var pureType = method.ReturnType;
-                    
-                    if (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition().InheritsOrImplements(typeof(IObservable<>)))
+
+                    if (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition()
+                        .InheritsOrImplements(typeof(IObservable<>)))
                     {
                         variant = ReturnTypeVariant.Stream;
                         pureType = method.ReturnType.GenericTypeArguments[0];
@@ -56,14 +57,15 @@ namespace Marble.Messaging.Explorer
                     {
                         variant = ReturnTypeVariant.Void;
                     }
-                    else if (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition().InheritsOrImplements(typeof(Task<>)))
+                    else if (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition()
+                        .InheritsOrImplements(typeof(Task<>)))
                     {
                         pureType = method.ReturnType.GenericTypeArguments[0];
                     }
-                    
+
                     return new ProcedureDescriptor
                     {
-                        Name = controllerAttribute.Name ?? ProcedureName.FromMethodInfo(method),
+                        Name = procedureAttribute.Name ?? ProcedureName.FromMethodInfo(method),
                         MethodInfo = method,
                         ControllerDescriptor = controllerDescriptor,
                         ReturnType = method.ReturnType,
