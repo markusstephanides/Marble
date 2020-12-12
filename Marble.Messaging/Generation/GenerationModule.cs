@@ -65,7 +65,7 @@ namespace Marble.Messaging.Generation
 
         private void StartGeneration()
         {
-            var rawClientTemplate = AssemblyResourceReader.ReadAllText(TemplatesBasePath + "Client.liquid");
+            var rawClientTemplate = AssemblyResourceReader.ReadAllText(TemplatesBasePath + "Client.template");
             var clientTemplate = Template.Parse(rawClientTemplate);
             var clientGenerator = new ClientGenerator(clientTemplate, this.generationSettings);
             

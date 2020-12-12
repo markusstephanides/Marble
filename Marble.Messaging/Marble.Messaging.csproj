@@ -22,8 +22,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Generation\Templates\Client.liquid" />
-      <EmbeddedResource Include="Generation\Templates\Client.liquid" />
+      <None Remove="Generation\Templates\Client.template" />
+      <EmbeddedResource Include="Generation\Templates\Client.template" />
     </ItemGroup>
-
+    
 </Project>
