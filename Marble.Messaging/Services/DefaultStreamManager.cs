@@ -41,8 +41,6 @@ namespace Marble.Messaging.Services
                             if (streamEvent.Payload != null)
                             {
                                 // TODO: Remove when we have a solution for the int/long deserialization issue
-                                // var payload = (T) Convert.ChangeType(streamEvent.Payload, typeof(T),
-                                //     CultureInfo.InvariantCulture);
                                 var payload = itemType.IsPrimitive
                                     ? (T) Convert.ChangeType(streamEvent.Payload, typeof(T),
                                         CultureInfo.InvariantCulture)
