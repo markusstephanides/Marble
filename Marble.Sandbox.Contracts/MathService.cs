@@ -36,7 +36,7 @@ namespace Marble.Sandbox.Contracts
         }
 
         public Task<int> AddReturnInt(int a, int b){
-            return this.messagingClient.InvokeProcedureAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "AddReturnInt", a, b));
+            return this.messagingClient.InvokeProcedureAsync<int>(new RequestMessage("Marble.Sandbox.MathService", "AddaReturnInt", a, b));
         }
     
         public Task<int> AddReturnTaskInt(int a, int b){
@@ -60,7 +60,7 @@ namespace Marble.Sandbox.Contracts
         }
     
         public IObservable<int> StartMathStreamReturnInt(int start){
-            return this.messagingClient.InvokeProcedureStream<int>(new RequestMessage("Marble.Sandbox.MathService", "StartMathStreamReturnInt", start));
+            return this.messagingClient.InvokeProcedureStream<int>(new RequestMessage("Marble.Sandbox.MathService", "StartMathStreamasdasdasdReturnInt", start));
         }
     
         public IObservable<MathResult> StartMathStreamReturnObject(int start){
