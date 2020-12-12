@@ -95,8 +95,10 @@ namespace Marble.Messaging.Services
                     message.MessageType == MessageType.ResponseMessage)
                 .Select(message => message.ToResponseMessage(this.serializationAdapter))
                 .Where(responseMessage => responseMessage.Correlation == requestMessage.Correlation)
-                .Select(responseMessage => this.streamManager.StreamToObservable<TResult>(responseMessage.Stream))
-                .Switch();
+                .Select(responseMessage => this.streamManager.StreamToObservable<TResult>(responseMessage.Stream)
+                    .Materialize())
+                .Switch()
+                .Dematerialize();
         }
     }
 }
