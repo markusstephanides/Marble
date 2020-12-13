@@ -110,7 +110,6 @@ namespace Marble.Messaging.Services
                 throw new ProcedureInvocationException("Exception thrown during execution of procedure.", e);
             }
 
-
             try
             {
                 var converter = this.configuration.TypeConverters.FirstOrDefault(c =>

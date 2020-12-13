@@ -12,8 +12,8 @@ namespace Marble.Messaging.Generation
 {
     public class ClientGenerator
     {
-        private readonly Template template;
         private readonly GenerationSettings generationSettings;
+        private readonly Template template;
 
         public ClientGenerator(Template template, GenerationSettings generationSettings)
         {
@@ -24,9 +24,9 @@ namespace Marble.Messaging.Generation
         public void Generate(ControllerDescriptor descriptor)
         {
             var serviceName = descriptor.Type.Name;
-            var outputFileName = $"{serviceName}.cs";
+            var outputFileName = $"{serviceName}Client.cs";
 
-            var usingDirectives = new List<string>()
+            var usingDirectives = new List<string>
             {
                 "System",
                 "System.Threading.Tasks",
@@ -48,29 +48,30 @@ namespace Marble.Messaging.Generation
                         usingDirectives.Add(methodInfo.ReturnType.Namespace);
                     }
                 }
-                
+
                 var paramsList = new List<Hash>();
-                
+
                 // Add using directives for parameters
                 foreach (var parameterInfo in methodInfo.GetParameters())
                 {
                     var tmpList = new List<string>();
                     var parameterUsingDirectives = parameterInfo.ParameterType.GetUsedNamespaces(ref tmpList);
-                    
+
                     foreach (var parameterUsingDirective in parameterUsingDirectives)
                     {
                         if (parameterUsingDirective != null && !usingDirectives.Contains(parameterUsingDirective))
                         {
                             usingDirectives.Add(parameterUsingDirective);
                         }
-                        
-                        paramsList.Add(Hash.FromAnonymousObject(new ParameterDescriptor{
+
+                        paramsList.Add(Hash.FromAnonymousObject(new ParameterDescriptor
+                        {
                             Name = parameterInfo.Name,
                             ReadableTypeName = parameterInfo.ParameterType.GetReadableName()
                         }));
                     }
                 }
-                
+
                 procedureModels.Add(Hash.FromAnonymousObject(new ProcedureTemplateModel
                 {
                     MethodName = methodInfo.Name,
@@ -97,8 +98,9 @@ namespace Marble.Messaging.Generation
 
         private string GetReturnTypeString(MethodInfo methodInfo)
         {
-            if (methodInfo.ReturnType.IsGenericType && (methodInfo.ReturnType.GetGenericTypeDefinition().InheritsOrImplements(typeof(Task<>)) || methodInfo
-                .ReturnType.GetGenericTypeDefinition().InheritsOrImplements(typeof(IObservable<>))))
+            if (methodInfo.ReturnType.IsGenericType &&
+                (methodInfo.ReturnType.GetGenericTypeDefinition().InheritsOrImplements(typeof(Task<>)) || methodInfo
+                    .ReturnType.GetGenericTypeDefinition().InheritsOrImplements(typeof(IObservable<>))))
             {
                 return methodInfo.ReturnType.GetReadableName();
             }

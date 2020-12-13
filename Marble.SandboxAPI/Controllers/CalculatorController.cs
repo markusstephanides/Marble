@@ -11,11 +11,11 @@ namespace Marble.SandboxAPI.Controllers
     public class CalculatorController : ControllerBase
     {
         private readonly ILogger<CalculatorController> logger;
-        private readonly IMathService mathService;
+        private readonly IMathServiceClient mathService;
 
         public CalculatorController(
             ILogger<CalculatorController> logger,
-            IMathService mathService
+            IMathServiceClient mathService
         )
         {
             this.logger = logger;
