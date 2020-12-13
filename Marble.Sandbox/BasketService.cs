@@ -13,12 +13,12 @@ namespace Marble.Sandbox
     [MarbleController]
     public class BasketService
     {
-        private readonly IWalletService walletService;
-
         private readonly BehaviorSubject<List<BasketItem>>
             basket = new BehaviorSubject<List<BasketItem>>(new List<BasketItem>());
 
-        public BasketService(IWalletService walletService)
+        private readonly IWalletServiceClient walletService;
+
+        public BasketService(IWalletServiceClient walletService)
         {
             this.walletService = walletService;
         }
