@@ -5,8 +5,8 @@ using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models;
 using Marble.Messaging.Contracts.Models.Stream;
+using Marble.Messaging.Exceptions;
 using Marble.Messaging.Extensions;
-using Marble.Messaging.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Marble.Messaging.Services
@@ -91,7 +91,7 @@ namespace Marble.Messaging.Services
                                     Correlation = requestMessage.Correlation
                                 }.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
                         });
-                        
+
                         this.logger.LogInformation(
                             $"Opened stream after request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms.");
                         break;
@@ -105,8 +105,23 @@ namespace Marble.Messaging.Services
             }
             catch (Exception e)
             {
-                this.logger.LogError(e,
-                    $"Failed to handle request to {requestMessage.Controller}:{requestMessage.Procedure} within {stopwatch.ElapsedMilliseconds} ms.");
+                switch (e)
+                {
+                    case ProcedureInvocationException _:
+                        this.logger.LogError(e,
+                            $"Procedure invocation to {requestMessage.Controller}:{requestMessage.Procedure} failed due to logic exception.");
+                        e = e.InnerException!;
+                        break;
+                    case ProcedureResultConversionException _:
+                        this.logger.LogError(e,
+                            $"Procedure invocation to {requestMessage.Controller}:{requestMessage.Procedure} failed because result conversion resulted in exception.");
+                        e = e.InnerException!;
+                        break;
+                    default:
+                        this.logger.LogError(e,
+                            $"Failed to handle request to {requestMessage.Controller}:{requestMessage.Procedure}.");
+                        break;
+                }
 
                 var responseMessage = new ResponseMessage
                 {

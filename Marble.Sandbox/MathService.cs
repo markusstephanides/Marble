@@ -29,6 +29,12 @@ namespace Marble.Sandbox
         }
 
         [MarbleProcedure]
+        public int AddReturnIntThrowException(int a, int b)
+        {
+            throw new ArgumentException("Some exception message", nameof(a));
+        }
+
+        [MarbleProcedure]
         public Task<int> AddReturnTaskInt(int a, int b)
         {
             this.logger.LogInformation($"AddReturnTaskInt request incoming with params {a}+{b}!");
@@ -68,23 +74,36 @@ namespace Marble.Sandbox
         }
 
         [MarbleProcedure]
+        public Task<MathResult> AddReturnTaskObjectThrowException(int a, int b)
+        {
+            throw new ApplicationException("Application exception");
+        }
+
+        [MarbleProcedure]
         public IObservable<int> StartMathStreamReturnInt(int start)
         {
             return Observable.Timer(TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(1000)).Select(
-                (t, index) =>
-                {
-                    Console.WriteLine($"t {t}, index {index}");
-                    return start + index;
-                }).Take(5);
+                (t, index) => start + index).Take(5);
         }
 
         [MarbleProcedure]
         public IObservable<MathResult> StartMathStreamReturnObject(int start)
         {
             return Observable.Timer(TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(1000)).Select(
+                (t, index) => new MathResult {SomeInt = start + index}).Take(5);
+        }
+
+        [MarbleProcedure]
+        public IObservable<MathResult> StartMathStreamReturnObjectThrowException(int start)
+        {
+            return Observable.Timer(TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(1000)).Select(
                 (t, index) =>
                 {
-                    Console.WriteLine($"t {t}, index {index}");
+                    if (t == 2)
+                    {
+                        throw new ArithmeticException("Some message");
+                    }
+
                     return new MathResult {SomeInt = start + index};
                 }).Take(5);
         }

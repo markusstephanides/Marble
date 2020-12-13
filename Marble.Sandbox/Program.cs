@@ -8,6 +8,14 @@ namespace Marble.Sandbox
     {
         public static void Main(string[] args)
         {
+            // var obs = Observable.Create<int>(observer =>
+            // {
+            //     observer.OnError(new ArgumentException());
+            //     return () => { };
+            // });
+            //
+            // obs.Subscribe();
+
             MarbleCore.Builder
                 .AddSingleton<StupidDependency>()
                 .WithRabbitMessaging()
