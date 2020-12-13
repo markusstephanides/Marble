@@ -74,8 +74,9 @@ namespace Marble.Sandbox
         }
 
         [MarbleProcedure]
-        public Task<MathResult> AddReturnTaskObjectThrowException(int a, int b)
+        public async Task<MathResult> AddReturnTaskObjectThrowException(int a, int b)
         {
+            await Task.Delay(30);
             throw new ApplicationException("Application exception");
         }
 
