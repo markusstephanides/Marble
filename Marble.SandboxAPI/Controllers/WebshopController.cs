@@ -7,14 +7,14 @@ using Microsoft.Extensions.Logging;
 namespace Marble.SandboxAPI.Controllers
 {
     [ApiController]
-    [Route("calculator")]
-    public class CalculatorController : ControllerBase
+    [Route("webshop")]
+    public class WebshopController : ControllerBase
     {
-        private readonly ILogger<CalculatorController> logger;
+        private readonly ILogger<WebshopController> logger;
         private readonly IMathService mathService;
 
-        public CalculatorController(
-            ILogger<CalculatorController> logger,
+        public WebshopController(
+            ILogger<WebshopController> logger,
             IMathService mathService
         )
         {
