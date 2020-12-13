@@ -12,10 +12,9 @@ namespace Marble.Core.Builder
 {
     public class DefaultAppHostBuilder : IAppHostBuilderWithExposedModel
     {
-        public AppHostBuildingModel BuildingModel { get; } = new AppHostBuildingModel();
-
         public DefaultAppHostBuilder()
         {
+            Console.WriteLine("Starting...");
             // TODO: Move this to a defaults hook or something like that
             this.ConfigureServices(collection =>
             {
@@ -27,6 +26,8 @@ namespace Marble.Core.Builder
                 });
             });
         }
+
+        public AppHostBuildingModel BuildingModel { get; } = new AppHostBuildingModel();
 
         public IAppHostBuilder ConfigureServices(Action<IServiceCollection> configurationAction)
         {

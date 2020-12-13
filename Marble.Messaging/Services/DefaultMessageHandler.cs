@@ -108,14 +108,15 @@ namespace Marble.Messaging.Services
                 switch (e)
                 {
                     case ProcedureInvocationException _:
-                        this.logger.LogError(e.InnerException,
+                        this.logger.LogWarning(e.InnerException,
                             $"Procedure invocation to {requestMessage.Controller}:{requestMessage.Procedure} failed due to logic exception.");
                         e = e.InnerException!;
                         break;
                     case ProcedureResultConversionException _:
                         this.logger.LogError(e.InnerException,
                             $"Procedure invocation to {requestMessage.Controller}:{requestMessage.Procedure} failed because result conversion resulted in exception.");
-                        e = e.InnerException is AggregateException aggregateException
+                        e = e.InnerException is AggregateException aggregateException &&
+                            aggregateException.InnerExceptions.Count == 1
                             ? aggregateException.InnerException!
                             : e.InnerException!;
                         break;
