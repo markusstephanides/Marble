@@ -5,7 +5,7 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Nullable>enable</Nullable>
         <PackageLicenseUrl>https://github.com/markusstephanides/Marble/blob/main/LICENSE</PackageLicenseUrl>
-        <PackageVersion>0.2.2</PackageVersion>
+        <PackageVersion>0.2.3</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
