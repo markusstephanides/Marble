@@ -23,7 +23,7 @@ namespace Marble.SandboxAPI
         {
             services.AddControllers();
             services.AddSwaggerGen();
-            services.AddTransient<IMathService, DefaultMathServiceClient>();
+            // services.AddTransient<IMathService, DefaultMathServiceClient>();
 
             MarbleCore.Builder
                 .WithRabbitMessaging()
@@ -45,7 +45,7 @@ namespace Marble.SandboxAPI
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("v1/swagger.json", "CalculatorAPI V1");
+                c.SwaggerEndpoint("v1/swagger.json", "WebshopAPI V1");
                 c.ConfigObject.DisplayRequestDuration = true;
             });
 

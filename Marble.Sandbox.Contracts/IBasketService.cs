@@ -8,7 +8,7 @@ namespace Marble.Sandbox.Contracts
     public interface IBasketService
     {
         IObservable<List<BasketItem>> GetBasket();
-        void UpdateBasket(List<BasketItem> items);
-        public Task<bool> Checkout();
+        Task UpdateBasket(List<BasketItem> items);
+        Task<bool> Checkout();
     }
 }

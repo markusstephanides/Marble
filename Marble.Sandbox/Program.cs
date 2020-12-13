@@ -9,7 +9,7 @@ namespace Marble.Sandbox
         public static void Main(string[] args)
         {
             MarbleCore.Builder
-                .AddSingleton<StupidDependency>()
+                // .AddSingleton<StupidDependency>()
                 .WithRabbitMessaging()
                 .BuildAndHost();
         }

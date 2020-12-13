@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Marble.Sandbox.Contracts;
+using Marble.Sandbox.Contracts.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 
 namespace Marble.SandboxAPI.Controllers
 {
@@ -11,155 +15,76 @@ namespace Marble.SandboxAPI.Controllers
     public class WebshopController : ControllerBase
     {
         private readonly ILogger<WebshopController> logger;
-        private readonly IMathService mathService;
+        private readonly IWalletService walletService;
+        private readonly IBasketService basketService;
 
         public WebshopController(
             ILogger<WebshopController> logger,
-            IMathService mathService
+            IWalletService walletService,
+            IBasketService basketService
         )
         {
             this.logger = logger;
-            this.mathService = mathService;
+            this.walletService = walletService;
+            this.basketService = basketService;
         }
 
-        [HttpGet("addReturnInt")]
-        public async Task<ActionResult> AddReturnInt([FromQuery] int a, [FromQuery] int b)
+        [HttpPost("updateBasket")]
+        public async Task<ActionResult> UpdateBasket(List<BasketItem> basketItems)
         {
             try
             {
-                var result = await this.mathService.AddReturnInt(a, b).ConfigureAwait(false);
+                await this.basketService.UpdateBasket(basketItems).ConfigureAwait(false);
+                return this.Ok();
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError(e, $"Failed to send {nameof(UpdateBasket)} request");
+                return this.StatusCode(500, new {message = e.Message});
+            }
+        }
+
+        [HttpGet("checkout")]
+        public async Task<ActionResult> Checkout()
+        {
+            try
+            {
+                var result = await this.basketService.Checkout().ConfigureAwait(false);
                 return this.Ok(new {result});
             }
             catch (Exception e)
             {
-                this.logger.LogError(e,"Failed to send AddReturnInt request");
+                this.logger.LogError(e, "Failed to send " + nameof(Checkout) + " request");
                 return this.StatusCode(500, new {message = e.Message});
             }
         }
-        
-        [HttpGet("addReturnObject")]
-        public async Task<ActionResult> AddReturnObject([FromQuery] int a, [FromQuery] int b)
+
+        [HttpGet("userBalance")]
+        public async Task<ActionResult> UserBalanceStream()
         {
-            try
-            {
-                var result = await this.mathService.AddReturnObject(a, b).ConfigureAwait(false);
-                return this.Ok(new {result});
-            }
-            catch (Exception e)
-            {
-                this.logger.LogError(e,"Failed to send AddReturnObject request");
-                return this.StatusCode(500, new {message = e.Message});
-            }
+            // TODO Stream Support for API
+            return this.Ok();
         }
-        
-        [HttpGet("addReturnTask")]
-        public async Task<ActionResult> AddReturnTask([FromQuery] int a, [FromQuery] int b)
+
+        public async Task WhyTheFuckUNotSupportStreamsDotNetCoreWebApi()
         {
-            try
+            const string filePath = @"C:\Users\mike\Downloads\dotnet-sdk-3.1.201-win-x64.exe";
+            this.Response.StatusCode = 200;
+            this.Response.Headers.Add(HeaderNames.ContentDisposition,
+                $"attachment; filename=\"{Path.GetFileName(filePath)}\"");
+            this.Response.Headers.Add(HeaderNames.ContentType, "application/octet-stream");
+            var inputStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            var outputStream = this.Response.Body;
+            const int bufferSize = 1 << 10;
+            var buffer = new byte[bufferSize];
+            while (true)
             {
-                await this.mathService.AddReturnTask(a, b).ConfigureAwait(false);
-                return this.Ok(new {status = "Sent!"});
+                var bytesRead = await inputStream.ReadAsync(buffer, 0, bufferSize);
+                if (bytesRead == 0) break;
+                await outputStream.WriteAsync(buffer, 0, bytesRead);
             }
-            catch (Exception e)
-            {
-                this.logger.LogError(e,"Failed to send AddReturnTask request");
-                return this.StatusCode(500, new {message = e.Message});
-            }
-        }
-        
-        [HttpGet("addReturnVoid")]
-        public async Task<ActionResult> AddReturnVoid([FromQuery] int a, [FromQuery] int b)
-        {
-            try
-            {
-                await this.mathService.AddReturnVoid(a, b).ConfigureAwait(false);
-                return this.Ok(new {status = "Sent!"});
-            }
-            catch (Exception e)
-            {
-                this.logger.LogError(e,"Failed to send AddReturnVoid request");
-                return this.StatusCode(500, new {message = e.Message});
-            }
-        }
-        
-        [HttpGet("addReturnTaskInt")]
-        public async Task<ActionResult> AddReturnTaskInt([FromQuery] int a, [FromQuery] int b)
-        {
-            try
-            {
-                var result = await this.mathService.AddReturnTaskInt(a, b).ConfigureAwait(false);
-                return this.Ok(new {result});
-            }
-            catch (Exception e)
-            {
-                this.logger.LogError(e,"Failed to send AddReturnTaskInt request");
-                return this.StatusCode(500, new {message = e.Message});
-            }
-        }
-        
-        [HttpGet("addReturnTaskObject")]
-        public async Task<ActionResult> AddReturnTaskObject([FromQuery] int a, [FromQuery] int b)
-        {
-            try
-            {
-                var result = await this.mathService.AddReturnTaskObject(a, b).ConfigureAwait(false);
-                return this.Ok(new {result});
-            }
-            catch (Exception e)
-            {
-                this.logger.LogError(e,"Failed to send AddReturnTaskObject request");
-                return this.StatusCode(500, new {message = e.Message});
-            }
-        }
-        
-        [HttpGet("startMathStreamReturnInt")]
-        public async Task<ActionResult> StartMathStreamReturnInt([FromQuery] int start)
-        {
-            try
-            {
-                this.mathService.StartMathStreamReturnInt(start).Subscribe(
-                        value =>
-                        {
-                            this.logger.LogInformation($"Received value {value} from StartMathStreamReturnInt");
-                        }, error =>
-                    {
-                        this.logger.LogError($"StartMathStreamReturnInt-Stream ERROR: {error}");
-                    }, () =>
-                    {
-                        this.logger.LogInformation("StartMathStreamReturnInt-Stream completed!");
-                    });
-                return this.Ok(new {status = "Sent!"});
-            }
-            catch (Exception e)
-            {
-                this.logger.LogError(e,"Failed to send StartMathStreamReturnInt request");
-                return this.StatusCode(500, new {message = e.Message});
-            }
-        }
-        
-        [HttpGet("startMathStreamReturnObject")]
-        public async Task<ActionResult> StartMathStreamReturnObject([FromQuery] int start)
-        {
-            try
-            {
-                this.mathService.StartMathStreamReturnObject(start).Subscribe(
-                    value =>
-                    {
-                        this.logger.LogInformation($"Received value {value.SomeInt} from StartMathStreamReturnObject");
-                    }, error =>
-                    {
-                        this.logger.LogError($"StartMathStreamReturnObject-Stream ERROR: {error}");
-                    }, () =>
-                    {
-                        this.logger.LogInformation("StartMathStreamReturnObject-Stream completed!");
-                    });
-                return this.Ok(new {status = "Sent!"});
-            }
-            catch (Exception e)
-            {
-                this.logger.LogError(e,"Failed to send StartMathStreamReturnObject request");
-                return this.StatusCode(500, new {message = e.Message});
-            }
+
+            await outputStream.FlushAsync();
         }
     }
 }

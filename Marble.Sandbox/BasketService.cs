@@ -30,9 +30,10 @@ namespace Marble.Sandbox
         }
 
         [MarbleProcedure]
-        public void UpdateBasket(List<BasketItem> items)
+        public Task UpdateBasket(List<BasketItem> items)
         {
             this.basket.OnNext(items);
+            return Task.CompletedTask;
         }
 
         [MarbleProcedure]
