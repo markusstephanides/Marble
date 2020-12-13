@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using Marble.Messaging.Abstractions;
@@ -42,8 +41,9 @@ namespace Marble.Messaging.Services
 
             var procedureResultStream = this.ConstructResponseStream<TResult>(requestMessage);
             // TODO: Lets be 100% sure that this doesn't cause any memory-leaks
-            procedureResultStream.Subscribe();
+            procedureResultStream.Subscribe(_ => { }, _ => { });
             this.messagingAdapter.SendRemoteMessage(requestMessage.ToRemoteMessage(this.serializationAdapter));
+
             return procedureResultStream;
         }
 

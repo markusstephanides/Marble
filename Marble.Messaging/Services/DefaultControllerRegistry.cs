@@ -7,12 +7,12 @@ using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Configuration;
 using Marble.Messaging.Contracts.Models;
 using Marble.Messaging.Converters;
+using Marble.Messaging.Exceptions;
 using Marble.Messaging.Explorer;
 using Marble.Messaging.Extensions;
 using Marble.Messaging.Generation;
 using Marble.Messaging.Models;
 using Marble.Messaging.Transformers;
-using Marble.Messaging.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -22,8 +22,6 @@ namespace Marble.Messaging.Services
     public class DefaultControllerRegistry<TConfiguration> : IControllerRegistry
         where TConfiguration : MessagingConfiguration
     {
-        public List<string> AvailableProcedurePaths { get; set; }
-
         private readonly IDictionary<ControllerDescriptor, object> controllers;
         private TConfiguration configuration;
 
@@ -32,9 +30,9 @@ namespace Marble.Messaging.Services
         public DefaultControllerRegistry()
         {
             this.AvailableProcedurePaths = new List<string>();
-            
+
             var definitions = this.LoadControllerDefinitions();
-            
+
             this.controllers = new ConcurrentDictionary<ControllerDescriptor, object>(definitions
                 .Select(definition => new KeyValuePair<ControllerDescriptor, object>(definition, null!)));
 
@@ -49,52 +47,7 @@ namespace Marble.Messaging.Services
             }
         }
 
-        private IList<ControllerDescriptor> LoadControllerDefinitions()
-        {
-            var targetAssembly = Assembly.GetEntryAssembly();
-            var allControllers = new ControllerExplorer().ScanAssembly(targetAssembly).ToList();
-            var containsErrors = false;
-
-            foreach (var controllerDescriptor in allControllers)
-            {
-                var controllerNameCount = allControllers.Count(d => d.Name == controllerDescriptor.Name);
-
-                if (controllerNameCount > 1)
-                {
-                    Console.WriteLine(
-                        $"Error while loading controller definitions! The controller name {controllerDescriptor.Name} is not unique and currently exists {controllerNameCount} times!");
-                    containsErrors = true;
-                }
-
-                foreach (var procedureDescriptor in controllerDescriptor.ProcedureDescriptors)
-                {
-                    var procedureNameCount = allControllers.Count(d => d.Name == procedureDescriptor.Name);
-
-                    if (procedureNameCount > 1)
-                    {
-                        Console.WriteLine(
-                            $"Error while loading procedure definitions of {controllerDescriptor.Name}! The procedure name {procedureDescriptor.Name} is not unique and currently exists {procedureNameCount} times!");
-                        containsErrors = true;
-                    }
-
-                    // if (procedureDescriptor.ReturnType.InheritsOrImplements(typeof(IObservable<>)) &&
-                    //     procedureDescriptor.ReturnType.GetGenericArguments()[0].IsValueType)
-                    // {
-                    //     Console.WriteLine(
-                    //         $"Error while loading procedure definition {procedureDescriptor.Name} of {controllerDescriptor.Name}! IObservables of value types are currently not supported. Please pack the value type into a model.");
-                    //     containsErrors = true;
-                    // }
-                }
-            }
-
-            if (containsErrors)
-            {
-                Console.WriteLine("Errors found while exploring controllers! Aborting startup.");
-                Environment.Exit(-1);
-            }
-
-            return allControllers;
-        }
+        public List<string> AvailableProcedurePaths { get; set; }
 
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
@@ -141,7 +94,22 @@ namespace Marble.Messaging.Services
                 }
             }
 
-            var rawReturnValue = procedureMethodInfo.Invoke(value, parameters);
+            object? rawReturnValue = null;
+
+            try
+            {
+                rawReturnValue = procedureMethodInfo.Invoke(value, parameters);
+            }
+            catch (TargetInvocationException e)
+            {
+                throw new ProcedureInvocationException(
+                    "Target invocation exception thrown during execution of procedure.", e.InnerException);
+            }
+            catch (Exception e)
+            {
+                throw new ProcedureInvocationException("Exception thrown during execution of procedure.", e);
+            }
+
 
             try
             {
@@ -149,16 +117,55 @@ namespace Marble.Messaging.Services
                     procedureDescriptor.ReturnType.InheritsOrImplements(c.ConversionInType)
                 ) ?? this.configuration.TypeConverters.Find(c => c.GetType() == typeof(ObjectResultConverter));
 
-                return converter!.ConvertResult(rawReturnValue!,
+                return converter!.ConvertResult(rawReturnValue,
                     procedureDescriptor.ReturnType.IsGenericType
                         ? procedureDescriptor.ReturnType.GenericTypeArguments[0]
                         : null);
             }
             catch (Exception e)
             {
-                this.logger.LogError(e, "Failed to convert procedure result!");
-                throw;
+                throw new ProcedureResultConversionException("Exception thrown during conversion of procedure result",
+                    e);
             }
+        }
+
+        private IList<ControllerDescriptor> LoadControllerDefinitions()
+        {
+            var targetAssembly = Assembly.GetEntryAssembly();
+            var allControllers = new ControllerExplorer().ScanAssembly(targetAssembly).ToList();
+            var containsErrors = false;
+
+            foreach (var controllerDescriptor in allControllers)
+            {
+                var controllerNameCount = allControllers.Count(d => d.Name == controllerDescriptor.Name);
+
+                if (controllerNameCount > 1)
+                {
+                    Console.WriteLine(
+                        $"Error while loading controller definitions! The controller name {controllerDescriptor.Name} is not unique and currently exists {controllerNameCount} times!");
+                    containsErrors = true;
+                }
+
+                foreach (var procedureDescriptor in controllerDescriptor.ProcedureDescriptors)
+                {
+                    var procedureNameCount = allControllers.Count(d => d.Name == procedureDescriptor.Name);
+
+                    if (procedureNameCount > 1)
+                    {
+                        Console.WriteLine(
+                            $"Error while loading procedure definitions of {controllerDescriptor.Name}! The procedure name {procedureDescriptor.Name} is not unique and currently exists {procedureNameCount} times!");
+                        containsErrors = true;
+                    }
+                }
+            }
+
+            if (containsErrors)
+            {
+                Console.WriteLine("Errors found while exploring controllers! Aborting startup.");
+                Environment.Exit(-1);
+            }
+
+            return allControllers;
         }
     }
 }
