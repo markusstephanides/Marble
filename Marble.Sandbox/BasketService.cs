@@ -11,7 +11,7 @@ using Marble.Sandbox.Contracts.Models;
 namespace Marble.Sandbox
 {
     [MarbleController]
-    public class BasketService: IBasketService
+    public class BasketService
     {
         private readonly IWalletService walletService;
 

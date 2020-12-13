@@ -10,7 +10,7 @@ using Marble.Sandbox.Contracts.Models;
 
 namespace Marble.Sandbox
 {
-    public class WalletService: IWalletService
+    public class WalletService
     {
         private readonly BehaviorSubject<int>
             userBalanceInCent = new BehaviorSubject<int>(1000);
