@@ -63,7 +63,9 @@ namespace Marble.Messaging.Services
                                 Correlation = requestMessage.Correlation
                             }.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
                         this.logger.LogInformation(
-                            $"Handled request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms with result of {messageHandlingResult.Result.GetType().Name}.");
+                            "Handled request to {controller}:{procedure} successfully in {elapsedMilliseconds} ms with result of {resultType}.",
+                            requestMessage.Controller, requestMessage.Procedure, stopwatch.ElapsedMilliseconds,
+                            messageHandlingResult.Result.GetType().Name);
                         break;
                     case MessageHandlingResultType.Stream:
                         messageHandlingResult.ResultStream!.Subscribe(item =>
@@ -93,11 +95,13 @@ namespace Marble.Messaging.Services
                         });
 
                         this.logger.LogInformation(
-                            $"Opened stream after request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms.");
+                            "Opened stream after request to {controller}:{procedure} successfully in {elapsedMilliseconds} ms.",
+                            requestMessage.Controller, requestMessage.Procedure, stopwatch.ElapsedMilliseconds);
                         break;
                     case MessageHandlingResultType.Void:
                         this.logger.LogInformation(
-                            $"Handled request to {requestMessage.Controller}:{requestMessage.Procedure} successfully in {stopwatch.ElapsedMilliseconds} ms with no result.");
+                            "Handled request to {controller}:{procedure} successfully in {elapsedMilliseconds} ms with no result.",
+                            requestMessage.Controller, requestMessage.Procedure, stopwatch.ElapsedMilliseconds);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -109,12 +113,14 @@ namespace Marble.Messaging.Services
                 {
                     case ProcedureInvocationException _:
                         this.logger.LogWarning(e.InnerException,
-                            $"Procedure invocation to {requestMessage.Controller}:{requestMessage.Procedure} failed due to logic exception.");
+                            "Procedure invocation to {controller}:{procedure} failed due to logic exception.",
+                            requestMessage.Controller, requestMessage.Procedure);
                         e = e.InnerException!;
                         break;
                     case ProcedureResultConversionException _:
                         this.logger.LogError(e.InnerException,
-                            $"Procedure invocation to {requestMessage.Controller}:{requestMessage.Procedure} failed because result conversion resulted in exception.");
+                            "Procedure invocation to {controller}:{procedure} failed because result conversion resulted in exception.",
+                            requestMessage.Controller, requestMessage.Procedure);
                         e = e.InnerException is AggregateException aggregateException &&
                             aggregateException.InnerExceptions.Count == 1
                             ? aggregateException.InnerException!
@@ -122,7 +128,8 @@ namespace Marble.Messaging.Services
                         break;
                     default:
                         this.logger.LogError(e,
-                            $"Failed to handle request to {requestMessage.Controller}:{requestMessage.Procedure}.");
+                            "Failed to handle request to {controller}:{procedure}.", requestMessage.Controller,
+                            requestMessage.Procedure);
                         break;
                 }
 

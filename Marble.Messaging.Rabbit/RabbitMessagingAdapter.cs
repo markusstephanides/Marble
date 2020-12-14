@@ -37,7 +37,7 @@ namespace Marble.Messaging.Rabbit
 
         public void Connect()
         {
-            this.logger.LogInformation($"Connecting to {this.configuration.ConnectionString}");
+            this.logger.LogInformation("Connecting to {Endpoint}", this.configuration.ConnectionString);
 
             if (this.connection != null)
             {
@@ -90,7 +90,7 @@ namespace Marble.Messaging.Rabbit
 
         private void SetUpConsumer(string queue, bool autoAck = false)
         {
-            this.logger.LogInformation($"Creating consumer for queue {queue}");
+            this.logger.LogInformation("Creating consumer for queue {queue}", queue);
             var consumer = new EventingBasicConsumer(this.channel);
             consumer.Received += this.OnMessageReceived;
             this.channel.BasicConsume(queue, autoAck, consumer);

@@ -56,11 +56,14 @@ namespace Marble.Messaging.Services
                 .Do(result =>
                 {
                     this.logger.LogInformation(
-                        $"Received response of type {result.GetType().Name} for procedure invocation {ProcedurePath.FromRequestMessage(requestMessage)} after {stopwatch.ElapsedMilliseconds} ms");
+                        "Received response of type {responseType} for procedure invocation {procedurePath} after {elapsedMilliseconds} ms",
+                        result.GetType().Name, ProcedurePath.FromRequestMessage(requestMessage),
+                        stopwatch.ElapsedMilliseconds);
                 }, error =>
                 {
                     this.logger.LogError(error,
-                        $"Error for procedure invocation {ProcedurePath.FromRequestMessage(requestMessage)} after {stopwatch.ElapsedMilliseconds} ms");
+                        "Error for procedure invocation {procedurePath} after {elapsedMilliseconds} ms",
+                        ProcedurePath.FromRequestMessage(requestMessage), stopwatch.ElapsedMilliseconds);
                 })
                 .ToTask();
         }

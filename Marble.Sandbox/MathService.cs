@@ -17,14 +17,11 @@ namespace Marble.Sandbox
         {
             this.stupidDependency = stupidDependency;
             this.logger = logger;
-
-            this.logger.LogInformation("MathService created!");
         }
 
         [MarbleProcedure]
         public int AddReturnInt(int a, int b)
         {
-            this.logger.LogInformation($"AddReturnInt request incoming with params {a}+{b}!");
             return this.stupidDependency.StupidAdd(a, b);
         }
 
@@ -37,21 +34,20 @@ namespace Marble.Sandbox
         [MarbleProcedure]
         public Task<int> AddReturnTaskInt(int a, int b)
         {
-            this.logger.LogInformation($"AddReturnTaskInt request incoming with params {a}+{b}!");
             return Task.FromResult(a + b);
         }
 
         [MarbleProcedure]
         public Task AddReturnTask(int a, int b)
         {
-            this.logger.LogInformation($"AddReturnTask request incoming with params {a}+{b}!");
+            this.logger.LogInformation("AddReturnTask request incoming with params {a}+{b}!", a, b);
             return Task.FromResult(a + b);
         }
 
         [MarbleProcedure]
         public void AddReturnVoid(int a, int b)
         {
-            this.logger.LogInformation($"AddReturnVoid request incoming with params {a}+{b}!");
+            this.logger.LogInformation($"AddReturnVoid request incoming with params {a}+{b}!", a, b);
             var result = a + b;
         }
 

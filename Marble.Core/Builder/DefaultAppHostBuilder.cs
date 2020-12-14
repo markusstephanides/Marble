@@ -2,11 +2,10 @@
 using System.Linq;
 using Marble.Core.Builder.Abstractions;
 using Marble.Core.Builder.Models;
-using Marble.Core.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
+using Serilog;
 
 namespace Marble.Core.Builder
 {
@@ -14,17 +13,7 @@ namespace Marble.Core.Builder
     {
         public DefaultAppHostBuilder()
         {
-            Console.WriteLine("Starting...");
-            // TODO: Move this to a defaults hook or something like that
-            this.ConfigureServices(collection =>
-            {
-                collection.AddLogging(loggingBuilder =>
-                {
-                    loggingBuilder.ClearProviders();
-                    loggingBuilder.SetMinimumLevel(LogLevel.Debug);
-                    loggingBuilder.AddNLog(DefaultConfigurations.ConsoleTargetConfiguration);
-                });
-            });
+            this.RunPreBuildSteps();
         }
 
         public AppHostBuildingModel BuildingModel { get; } = new AppHostBuildingModel();
@@ -80,6 +69,21 @@ namespace Marble.Core.Builder
         {
             this.BuildingModel.KeepRunning = keepRunning;
             return AppHostFactory.Create(this.BuildingModel);
+        }
+
+        private void RunPreBuildSteps()
+        {
+            Console.WriteLine("Starting...");
+
+            // Setup logging
+            this.ConfigureServices(collection =>
+            {
+                collection.AddLogging(loggingBuilder =>
+                {
+                    loggingBuilder.ClearProviders();
+                    loggingBuilder.AddSerilog(dispose: true);
+                });
+            });
         }
     }
 }
