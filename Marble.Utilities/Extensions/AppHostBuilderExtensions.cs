@@ -1,6 +1,5 @@
 ﻿using System;
-using Marble.Core.Builder;
-using Marble.Core.Builder.Abstractions;
+using Marble.Core.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Marble.Utilities.Extensions
@@ -19,7 +18,7 @@ namespace Marble.Utilities.Extensions
         {
             return builder.ConfigureServices(collection => collection.AddSingleton(instance));
         }
-        
+
         public static IAppHostBuilder AddSingleton<TAbstraction, TImplementation>(this IAppHostBuilder builder)
             where TAbstraction : class
             where TImplementation : class, TAbstraction
@@ -46,7 +45,7 @@ namespace Marble.Utilities.Extensions
         {
             return builder.ConfigureServices(collection => collection.AddTransient<TService>());
         }
-        
+
         public static IAppHostBuilder AddTransient<TAbstraction, TImplementation>(this IAppHostBuilder builder)
             where TAbstraction : class
             where TImplementation : class, TAbstraction

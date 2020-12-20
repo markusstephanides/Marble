@@ -57,7 +57,7 @@ namespace Marble.Messaging.Services
             }
         }
 
-        public void OnServiceProviderAvailable(IServiceProvider serviceProvider)
+        public void OnAppStarted(IServiceProvider serviceProvider)
         {
             this.logger = serviceProvider.GetService<ILogger<DefaultControllerRegistry<TConfiguration>>>();
             this.configuration = serviceProvider.GetService<IOptions<TConfiguration>>().Value;
@@ -65,7 +65,8 @@ namespace Marble.Messaging.Services
             {
                 this.controllers[descriptor] = serviceProvider.GetService(descriptor.Type);
                 this.logger.LogInformation(
-                    $"Found controller instance for {descriptor.Name} containing {descriptor.ProcedureDescriptors.Count()} procedures");
+                    "Found controller instance for {DescriptorName} containing {ProcedureCount} procedures",
+                    descriptor.Name, descriptor.ProcedureDescriptors.Count());
             }
         }
 

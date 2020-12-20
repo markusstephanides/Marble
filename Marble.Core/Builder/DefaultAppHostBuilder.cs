@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Linq;
-using Marble.Core.Builder.Abstractions;
-using Marble.Core.Builder.Models;
-using Marble.Core.Logging;
+using System.Threading;
+using Marble.Core.Abstractions;
+using Marble.Core.Hooks;
+using Marble.Core.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
+using Serilog;
 
 namespace Marble.Core.Builder
 {
@@ -14,17 +15,7 @@ namespace Marble.Core.Builder
     {
         public DefaultAppHostBuilder()
         {
-            Console.WriteLine("Starting...");
-            // TODO: Move this to a defaults hook or something like that
-            this.ConfigureServices(collection =>
-            {
-                collection.AddLogging(loggingBuilder =>
-                {
-                    loggingBuilder.ClearProviders();
-                    loggingBuilder.SetMinimumLevel(LogLevel.Debug);
-                    loggingBuilder.AddNLog(DefaultConfigurations.ConsoleTargetConfiguration);
-                });
-            });
+            this.RunPreBuildSteps();
         }
 
         public AppHostBuildingModel BuildingModel { get; } = new AppHostBuildingModel();
@@ -51,11 +42,6 @@ namespace Marble.Core.Builder
             return this;
         }
 
-        public IAppHostBuilder AddClients()
-        {
-            throw new NotImplementedException();
-        }
-
         public IAppHostBuilder ProvideServiceCollection(IServiceCollection serviceCollection)
         {
             this.BuildingModel.ServiceCollection = serviceCollection;
@@ -76,10 +62,45 @@ namespace Marble.Core.Builder
             return this;
         }
 
-        public AppHost BuildAndHost(bool keepRunning = true)
+        public AppHost BuildAndHost()
         {
-            this.BuildingModel.KeepRunning = keepRunning;
             return AppHostFactory.Create(this.BuildingModel);
+        }
+
+        public AppHost BuildAndHost<TEntryService>() where TEntryService : class, IEntryService
+        {
+            this.ConfigureServices(services => services.AddSingleton<IEntryService, TEntryService>());
+            return this.BuildAndHost();
+        }
+
+        public AppHost BuildExternallyHosted(CancellationToken appStoppingCancellationToken)
+        {
+            this.BuildingModel.ShouldBeHostedExternally = true;
+            this.BuildingModel.ProvidedCancellationToken = appStoppingCancellationToken;
+            return AppHostFactory.Create(this.BuildingModel);
+        }
+
+        public IAppHostBuilder AddHookListener<THookListener>() where THookListener : IHookListener
+        {
+            throw new NotImplementedException();
+        }
+
+        private void RunPreBuildSteps()
+        {
+            Console.WriteLine("Starting...");
+
+            this.ConfigureServices(collection =>
+            {
+                // Setup logging
+                collection.AddLogging(loggingBuilder =>
+                {
+                    loggingBuilder.ClearProviders();
+                    loggingBuilder.AddSerilog(dispose: true);
+                });
+
+                // Lifetime
+                collection.AddSingleton(this.BuildingModel.AppLifetime);
+            });
         }
     }
 }

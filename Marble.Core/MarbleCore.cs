@@ -1,5 +1,5 @@
-﻿using Marble.Core.Builder;
-using Marble.Core.Builder.Abstractions;
+﻿using Marble.Core.Abstractions;
+using Marble.Core.Builder;
 
 namespace Marble.Core
 {
