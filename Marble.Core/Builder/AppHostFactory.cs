@@ -48,7 +48,8 @@ namespace Marble.Core.Builder
 
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", true);
+                .AddJsonFile("appsettings.json", true)
+                .AddEnvironmentVariables();
 
             buildingModel.Configuration = configBuilder.Build();
         }
