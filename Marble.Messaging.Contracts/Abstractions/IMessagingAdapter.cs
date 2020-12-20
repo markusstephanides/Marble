@@ -8,6 +8,7 @@ namespace Marble.Messaging.Contracts.Abstractions
     {
         IObservable<RemoteMessage> MessageFeed { get; }
         void Connect();
+        void Destroy();
         Task SendRemoteMessage(RemoteMessage remoteMessage);
     }
 }

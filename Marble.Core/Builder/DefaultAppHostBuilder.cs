@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
-using Marble.Core.Builder.Abstractions;
-using Marble.Core.Builder.Models;
+using System.Threading;
+using Marble.Core.Abstractions;
+using Marble.Core.Hooks;
+using Marble.Core.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -40,11 +42,6 @@ namespace Marble.Core.Builder
             return this;
         }
 
-        public IAppHostBuilder AddClients()
-        {
-            throw new NotImplementedException();
-        }
-
         public IAppHostBuilder ProvideServiceCollection(IServiceCollection serviceCollection)
         {
             this.BuildingModel.ServiceCollection = serviceCollection;
@@ -65,24 +62,44 @@ namespace Marble.Core.Builder
             return this;
         }
 
-        public AppHost BuildAndHost(bool keepRunning = true)
+        public AppHost BuildAndHost()
         {
-            this.BuildingModel.KeepRunning = keepRunning;
             return AppHostFactory.Create(this.BuildingModel);
+        }
+
+        public AppHost BuildAndHost<TEntryService>() where TEntryService : class, IEntryService
+        {
+            this.ConfigureServices(services => services.AddSingleton<IEntryService, TEntryService>());
+            return this.BuildAndHost();
+        }
+
+        public AppHost BuildExternallyHosted(CancellationToken appStoppingCancellationToken)
+        {
+            this.BuildingModel.ShouldBeHostedExternally = true;
+            this.BuildingModel.ProvidedCancellationToken = appStoppingCancellationToken;
+            return AppHostFactory.Create(this.BuildingModel);
+        }
+
+        public IAppHostBuilder AddHookListener<THookListener>() where THookListener : IHookListener
+        {
+            throw new NotImplementedException();
         }
 
         private void RunPreBuildSteps()
         {
             Console.WriteLine("Starting...");
 
-            // Setup logging
             this.ConfigureServices(collection =>
             {
+                // Setup logging
                 collection.AddLogging(loggingBuilder =>
                 {
                     loggingBuilder.ClearProviders();
                     loggingBuilder.AddSerilog(dispose: true);
                 });
+
+                // Lifetime
+                collection.AddSingleton(this.BuildingModel.AppLifetime);
             });
         }
     }

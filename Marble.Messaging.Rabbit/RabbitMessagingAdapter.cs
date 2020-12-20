@@ -57,6 +57,12 @@ namespace Marble.Messaging.Rabbit
             this.RegisterQueues();
         }
 
+        public void Destroy()
+        {
+            this.channel.Dispose();
+            this.connection.Dispose();
+        }
+
         public Task SendRemoteMessage(RemoteMessage remoteMessage)
         {
             return Task.Run(() =>

@@ -1,11 +1,7 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using Marble.Core.Builder.Models;
+﻿using System.IO;
+using Marble.Core.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace Marble.Core.Builder
@@ -14,21 +10,15 @@ namespace Marble.Core.Builder
     {
         public static AppHost Create(AppHostBuildingModel model)
         {
-            RunPreBuildActions(model);
             SetupConfiguration(model);
             SetupLogging(model);
             ConfigureDependencyInjection(model);
-            RunPostBuildActions(model);
-            StartBackgroundThread(model);
 
-            var logger = model.ServiceProvider.GetService<ILogger<AppHostFactory>>();
-            var elapsedTimeMs = (int) (DateTime.Now - model.CreationTime).TotalMilliseconds;
-            logger.LogInformation("Startup completed in {elapsedTimeMs} ms", elapsedTimeMs);
+            var appHost = new AppHost(model);
 
-            return new AppHost
-            {
-                ServiceProvider = model.ServiceProvider
-            };
+            appHost.Run();
+
+            return appHost;
         }
 
         private static void SetupLogging(AppHostBuildingModel model)
@@ -47,32 +37,6 @@ namespace Marble.Core.Builder
                     .WriteTo.Console()
                     .CreateLogger();
             }
-        }
-
-        private static void RunPostBuildActions(AppHostBuildingModel model)
-        {
-            model.PostBuildActions.ToList().ForEach(action => action(model));
-        }
-
-        private static void RunPreBuildActions(AppHostBuildingModel model)
-        {
-            model.PreBuildActions.ToList().ForEach(action => action(model));
-        }
-
-        private static void StartBackgroundThread(AppHostBuildingModel model)
-        {
-            if (!model.KeepRunning)
-            {
-                return;
-            }
-
-            new Thread(() =>
-            {
-                while (true)
-                {
-                    Thread.Sleep(1000);
-                }
-            }).Start();
         }
 
         private static void SetupConfiguration(AppHostBuildingModel buildingModel)

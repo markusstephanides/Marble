@@ -1,4 +1,4 @@
-﻿namespace Marble.Core.Models
+﻿namespace Marble.Messaging.Models
 {
     public enum ApplicationLaunchMode
     {

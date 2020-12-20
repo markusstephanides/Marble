@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using DotLiquid;
-using Marble.Core.Models;
 using Marble.Messaging.Generation.Models;
 using Marble.Messaging.Models;
 using Marble.Messaging.Utilities;
@@ -16,20 +14,21 @@ namespace Marble.Messaging.Generation
         private const string OutputDirectoryEnvironmentVariableName = "GENERATION_TARGET_DIR";
         private const string TargetNamespaceEnvironmentVariableName = "GENERATION_TARGET_NAMESPACE";
         private const string TemplatesBasePath = "Marble.Messaging.Generation.Templates.";
-        
+
         private const ApplicationLaunchMode DefaultApplicationLaunchMode = ApplicationLaunchMode.GenerateAndHost;
+        private readonly ApplicationLaunchMode applicationLaunchMode;
 
         private readonly IEnumerable<ControllerDescriptor> descriptors;
-        private readonly ApplicationLaunchMode applicationLaunchMode;
         private readonly GenerationSettings generationSettings;
-        
+
         public GenerationModule(IEnumerable<ControllerDescriptor> descriptors)
         {
             this.descriptors = descriptors;
             this.applicationLaunchMode = DefaultApplicationLaunchMode;
 
             if (Enum.TryParse<ApplicationLaunchMode>(
-                Environment.GetEnvironmentVariable(OutputDirectoryEnvironmentVariableName, EnvironmentVariableTarget.Process),
+                Environment.GetEnvironmentVariable(OutputDirectoryEnvironmentVariableName,
+                    EnvironmentVariableTarget.Process),
                 out var userApplicationLaunchMode))
             {
                 this.applicationLaunchMode = userApplicationLaunchMode;
@@ -45,10 +44,11 @@ namespace Marble.Messaging.Generation
             {
                 OutputDirectory =
                     Environment.GetEnvironmentVariable(OutputDirectoryEnvironmentVariableName,
-                        EnvironmentVariableTarget.Process) ?? Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Generated"),
+                        EnvironmentVariableTarget.Process) ??
+                    Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Generated"),
                 TargetNamespace = Environment.GetEnvironmentVariable(TargetNamespaceEnvironmentVariableName)
             };
-            
+
             if (!Directory.Exists(this.generationSettings.OutputDirectory))
             {
                 Directory.CreateDirectory(this.generationSettings.OutputDirectory);
@@ -68,12 +68,11 @@ namespace Marble.Messaging.Generation
             var rawClientTemplate = AssemblyResourceReader.ReadAllText(TemplatesBasePath + "Client.template");
             var clientTemplate = Template.Parse(rawClientTemplate);
             var clientGenerator = new ClientGenerator(clientTemplate, this.generationSettings);
-            
+
             foreach (var controllerDescriptor in this.descriptors)
             {
                 clientGenerator.Generate(controllerDescriptor);
             }
         }
-        
     }
 }

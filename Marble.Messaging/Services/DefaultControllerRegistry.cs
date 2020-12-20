@@ -57,7 +57,7 @@ namespace Marble.Messaging.Services
             }
         }
 
-        public void OnServiceProviderAvailable(IServiceProvider serviceProvider)
+        public void OnAppStarted(IServiceProvider serviceProvider)
         {
             this.logger = serviceProvider.GetService<ILogger<DefaultControllerRegistry<TConfiguration>>>();
             this.configuration = serviceProvider.GetService<IOptions<TConfiguration>>().Value;
