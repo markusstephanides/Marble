@@ -2,7 +2,6 @@
 using Marble.Core.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 
 namespace Marble.Core.Builder
 {
@@ -11,7 +10,6 @@ namespace Marble.Core.Builder
         public static AppHost Create(AppHostBuildingModel model)
         {
             SetupConfiguration(model);
-            SetupLogging(model);
             ConfigureDependencyInjection(model);
 
             var appHost = new AppHost(model);
@@ -19,24 +17,6 @@ namespace Marble.Core.Builder
             appHost.Run();
 
             return appHost;
-        }
-
-        private static void SetupLogging(AppHostBuildingModel model)
-        {
-            const string sectionName = "Serilog";
-
-            if (model.Configuration!.GetSection(sectionName).Exists())
-            {
-                Log.Logger = new LoggerConfiguration()
-                    .ReadFrom.Configuration(model.Configuration, sectionName)
-                    .CreateLogger();
-            }
-            else
-            {
-                Log.Logger = new LoggerConfiguration()
-                    .WriteTo.Console()
-                    .CreateLogger();
-            }
         }
 
         private static void SetupConfiguration(AppHostBuildingModel buildingModel)
