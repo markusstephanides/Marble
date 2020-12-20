@@ -1,5 +1,6 @@
 ﻿using System;
-using Marble.Core.Serialization;
+using Marble.Core.Hooks;
+using Marble.Core.Models;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Configuration;
@@ -14,19 +15,21 @@ namespace Marble.Messaging.Services
         where TMessagingAdapter : class, IMessagingAdapter
         where TMessagingConfiguration : MessagingConfiguration
     {
-        private readonly Type messagingConfigurationType;
-        private readonly IControllerRegistry controllerRegistry;
         private readonly ClientExplorer clientExplorer;
+        private readonly IControllerRegistry controllerRegistry;
+        private readonly HookManager hookManager;
+        private readonly Type messagingConfigurationType;
+        private ILogger<DefaultMessagingFacade<TMessagingAdapter, TMessagingConfiguration>> logger;
+        private IMessageHandler messageHandler;
 
         // Resolved when service provider is available
         private IMessagingAdapter messagingAdapter;
-        private IMessageHandler messageHandler;
-        private ILogger<DefaultMessagingFacade<TMessagingAdapter, TMessagingConfiguration>> logger;
         private MessagingConfiguration messagingConfiguration;
 
-        public DefaultMessagingFacade(Type messagingConfigurationType)
+        public DefaultMessagingFacade(Type messagingConfigurationType, HookManager hookManager)
         {
             this.messagingConfigurationType = messagingConfigurationType;
+            this.hookManager = hookManager;
             this.controllerRegistry = new DefaultControllerRegistry<TMessagingConfiguration>();
             this.clientExplorer = new ClientExplorer();
         }
@@ -51,19 +54,28 @@ namespace Marble.Messaging.Services
             this.controllerRegistry.ConfigureServices(serviceCollection);
         }
 
-        public void OnServiceProviderAvailable(IServiceProvider serviceProvider)
+        public void OnAppStarted(IServiceProvider serviceProvider)
         {
-            this.controllerRegistry.OnServiceProviderAvailable(serviceProvider);
+            this.controllerRegistry.OnAppStarted(serviceProvider);
 
             this.logger = serviceProvider
-                .GetService<ILogger<DefaultMessagingFacade<TMessagingAdapter, TMessagingConfiguration>>>();
+                .GetService<ILogger<DefaultMessagingFacade<TMessagingAdapter, TMessagingConfiguration>>>()!;
             this.messagingConfiguration =
                 (MessagingConfiguration) serviceProvider.GetService(this.messagingConfigurationType);
-            this.messagingAdapter = serviceProvider.GetService<IMessagingAdapter>();
-            this.messageHandler = serviceProvider.GetService<IMessageHandler>();
+            this.messagingAdapter = serviceProvider.GetService<IMessagingAdapter>()!;
+            this.messageHandler = serviceProvider.GetService<IMessageHandler>()!;
 
             this.messageHandler.Initialize();
+            this.hookManager.OnBeforeMessagingAdapterConnect(typeof(TMessagingAdapter), this.messagingConfiguration);
             this.messagingAdapter.Connect();
+            this.hookManager.OnMessagingAdapterConnected(typeof(TMessagingAdapter), this.messagingConfiguration);
+        }
+
+        public void OnAppStopping(StopReason stopReason)
+        {
+            this.hookManager.OnBeforeMessagingAdapterDisconnect(stopReason);
+            this.messagingAdapter.Destroy();
+            this.hookManager.OnMessagingAdapterDisconnected(stopReason);
         }
     }
 }

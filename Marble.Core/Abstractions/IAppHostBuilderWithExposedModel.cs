@@ -1,6 +1,6 @@
-﻿using Marble.Core.Builder.Models;
+﻿using Marble.Core.Models;
 
-namespace Marble.Core.Builder.Abstractions
+namespace Marble.Core.Abstractions
 {
     public interface IAppHostBuilderWithExposedModel : IAppHostBuilder
     {

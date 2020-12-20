@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using IApplicationLifetime = Microsoft.Extensions.Hosting.IHostApplicationLifetime;
 
 namespace Marble.SandboxAPI
 {
@@ -29,7 +30,7 @@ namespace Marble.SandboxAPI
                 .ProvideServiceCollection(services);
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApplicationLifetime lifetime)
         {
             if (env.IsDevelopment())
             {
@@ -48,10 +49,10 @@ namespace Marble.SandboxAPI
             });
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-
+            ;
             MarbleCore.Builder
                 .ProvideServiceProvider(app.ApplicationServices)
-                .BuildAndHost();
+                .BuildExternallyHosted(lifetime.ApplicationStopping);
         }
     }
 }
