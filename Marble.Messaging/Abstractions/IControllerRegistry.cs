@@ -7,6 +7,8 @@ namespace Marble.Messaging.Abstractions
     public interface IControllerRegistry : IServicesConfigurable, IAppLifetimeCallbacks
     {
         public List<string> AvailableProcedurePaths { get; set; }
-        public MessageHandlingResult InvokeProcedure(string controllerName, string procedureName, object[]? parameters);
+
+        public MessageHandlingResult InvokeProcedure(string controllerName, string procedureName,
+            ParametersModel? parameters);
     }
 }

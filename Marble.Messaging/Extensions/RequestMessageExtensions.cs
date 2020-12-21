@@ -8,7 +8,8 @@ namespace Marble.Messaging.Extensions
 {
     public static class RequestMessageExtensions
     {
-        public static RemoteMessage ToRemoteMessage(this RequestMessage requestMessage, ISerializationAdapter serializationAdapter)
+        public static RemoteMessage ToRemoteMessage(this RequestMessage requestMessage,
+            ISerializationAdapter serializationAdapter)
         {
             return new RemoteMessage
             {
@@ -17,11 +18,12 @@ namespace Marble.Messaging.Extensions
                     {Constants.ControllerHeaderField, requestMessage.Controller},
                     {Constants.ProcedureHeaderField, requestMessage.Procedure},
                     {Constants.CorrelationHeaderField, requestMessage.Correlation},
+                    {Constants.ArgumentsModelType, requestMessage.ArgumentsModelType}
                 },
-                Payload = serializationAdapter.Serialize(requestMessage.Arguments),
-                MessageType = MessageType.RequestMessage, 
+                Payload = requestMessage.ArgumentsBytes,
+                MessageType = MessageType.RequestMessage,
                 Target = ProcedurePath.FromRequestMessage(requestMessage)
             };
-        } 
+        }
     }
 }

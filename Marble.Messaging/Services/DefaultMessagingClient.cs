@@ -36,6 +36,32 @@ namespace Marble.Messaging.Services
             this.messageFeed = this.messagingAdapter.MessageFeed;
         }
 
+        public Task CallProcedureAsync(RequestMessage requestMessage)
+        {
+            return this.messagingAdapter.SendRemoteMessage(requestMessage.ToRemoteMessage(this.serializationAdapter));
+        }
+
+        public IObservable<TResult> InvokeProcedureStream<TResult>(string controller, string procedure,
+            ParametersModel? messageParameters = null)
+        {
+            return this.InvokeProcedureStream<TResult>(RequestMessage.Create(controller, procedure, messageParameters,
+                this.serializationAdapter));
+        }
+
+        public Task<TResult> InvokeProcedureAsync<TResult>(string controller, string procedure,
+            ParametersModel? messageParameters = null)
+        {
+            return this.InvokeProcedureAsync<TResult>(RequestMessage.Create(controller, procedure, messageParameters,
+                this.serializationAdapter));
+        }
+
+        public Task CallProcedureAsync(string controller, string procedure,
+            ParametersModel? messageParameters = null)
+        {
+            return this.CallProcedureAsync(RequestMessage.Create(controller, procedure, messageParameters,
+                this.serializationAdapter));
+        }
+
         public IObservable<TResult> InvokeProcedureStream<TResult>(RequestMessage requestMessage)
         {
             requestMessage.Correlation ??= Guid.NewGuid().ToString();
@@ -67,28 +93,6 @@ namespace Marble.Messaging.Services
                         ProcedurePath.FromRequestMessage(requestMessage), stopwatch.ElapsedMilliseconds);
                 })
                 .ToTask();
-        }
-
-        public Task CallProcedureAsync(RequestMessage requestMessage)
-        {
-            return this.messagingAdapter.SendRemoteMessage(requestMessage.ToRemoteMessage(this.serializationAdapter));
-        }
-
-        public IObservable<TResult> InvokeProcedureStream<TResult>(string controller, string procedure,
-            params object[] parameters)
-        {
-            return this.InvokeProcedureStream<TResult>(new RequestMessage(controller, procedure, parameters));
-        }
-
-        public Task<TResult> InvokeProcedureAsync<TResult>(string controller, string procedure,
-            params object[] parameters)
-        {
-            return this.InvokeProcedureAsync<TResult>(new RequestMessage(controller, procedure, parameters));
-        }
-
-        public Task CallProcedureAsync(string controller, string procedure, params object[] parameters)
-        {
-            return this.CallProcedureAsync(new RequestMessage(controller, procedure, parameters));
         }
 
         private IObservable<TResult> ConstructResponseStream<TResult>(RequestMessage requestMessage)

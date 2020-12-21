@@ -70,7 +70,8 @@ namespace Marble.Messaging.Services
             }
         }
 
-        public MessageHandlingResult InvokeProcedure(string controllerName, string procedureName, object[]? parameters)
+        public MessageHandlingResult InvokeProcedure(string controllerName, string procedureName,
+            ParametersModel? parameters)
         {
             var (key, value) = this.controllers.First(controllerDescriptor =>
                 controllerDescriptor.Key.Name == controllerName);
@@ -80,26 +81,18 @@ namespace Marble.Messaging.Services
             var procedureMethodInfo = procedureDescriptor.MethodInfo;
             // TODO: do all this logic when the controllers load and not everytime a procedure needs to be invoked
 
-            if (parameters != null)
-            {
-                var parameterInfos = procedureMethodInfo.GetParameters();
-                for (var i = 0; i < parameters.Length; i++)
-                {
-                    var parameter = parameters[i];
-                    var parameterInfo = parameterInfos[i];
-                    if (parameter.GetType() != parameterInfo.ParameterType)
-                    {
-                        // TODO: Remove when we have a solution for the int/long deserialization issue
-                        parameters[i] = Convert.ChangeType(parameter, parameterInfo.ParameterType);
-                    }
-                }
-            }
-
             object? rawReturnValue = null;
 
             try
             {
-                rawReturnValue = procedureMethodInfo.Invoke(value, parameters);
+                if (parameters is null)
+                {
+                    rawReturnValue = procedureMethodInfo.Invoke(value, null);
+                }
+                else
+                {
+                    rawReturnValue = procedureMethodInfo.Invoke(value, parameters.ToObjectArray());
+                }
             }
             catch (TargetInvocationException e)
             {

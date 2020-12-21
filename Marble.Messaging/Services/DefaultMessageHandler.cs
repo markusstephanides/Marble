@@ -51,7 +51,7 @@ namespace Marble.Messaging.Services
             try
             {
                 var messageHandlingResult = this.controllerRegistry.InvokeProcedure(requestMessage.Controller,
-                    requestMessage.Procedure, requestMessage.Arguments);
+                    requestMessage.Procedure, requestMessage.GetParameterModel(this.serializationAdapter));
 
                 switch (messageHandlingResult.Type)
                 {

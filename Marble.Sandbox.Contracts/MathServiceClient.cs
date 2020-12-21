@@ -48,7 +48,7 @@ namespace Marble.Sandbox.Contracts
         IObservable<MathResult> StartMathStreamReturnObjectThrowException(int start);
     }
 
-    public class DefaultMathServiceClient : IMathServiceClient
+    public sealed class DefaultMathServiceClient : IMathServiceClient
     {
         private readonly IMessagingClient messagingClient;
 
@@ -59,110 +59,554 @@ namespace Marble.Sandbox.Contracts
 
         public Task<int> AddReturnInt(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<int>(new RequestMessage("Marble.Sandbox.MathService",
-                "AddReturnInt", a, b));
+            return this.messagingClient.InvokeProcedureAsync<int>("Marble.Sandbox.MathService", "AddReturnInt",
+                new MathServiceAddReturnIntArgumentsModel(a, b));
         }
 
         public Task<int> AddReturnIntThrowException(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<int>(new RequestMessage("Marble.Sandbox.MathService",
-                "AddReturnIntThrowException", a, b));
+            return this.messagingClient.InvokeProcedureAsync<int>("Marble.Sandbox.MathService",
+                "AddReturnIntThrowException", new MathServiceAddReturnIntThrowExceptionArgumentsModel(a, b));
         }
 
         public Task<int> AddReturnTaskInt(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<int>(new RequestMessage("Marble.Sandbox.MathService",
-                "AddReturnTaskInt", a, b));
+            return this.messagingClient.InvokeProcedureAsync<int>("Marble.Sandbox.MathService", "AddReturnTaskInt",
+                new MathServiceAddReturnTaskIntArgumentsModel(a, b));
         }
 
         public Task AddReturnTask(int a, int b)
         {
-            return this.messagingClient.CallProcedureAsync(new RequestMessage("Marble.Sandbox.MathService",
-                "AddReturnTask", a, b));
+            return this.messagingClient.CallProcedureAsync("Marble.Sandbox.MathService", "AddReturnTask",
+                new MathServiceAddReturnTaskArgumentsModel(a, b));
         }
 
         public Task AddReturnVoid(int a, int b)
         {
-            return this.messagingClient.CallProcedureAsync(new RequestMessage("Marble.Sandbox.MathService",
-                "AddReturnVoid", a, b));
+            return this.messagingClient.CallProcedureAsync("Marble.Sandbox.MathService", "AddReturnVoid",
+                new MathServiceAddReturnVoidArgumentsModel(a, b));
         }
 
         public Task<MathResult> AddReturnObject(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<MathResult>(
-                new RequestMessage("Marble.Sandbox.MathService", "AddReturnObject", a, b));
+            return this.messagingClient.InvokeProcedureAsync<MathResult>("Marble.Sandbox.MathService",
+                "AddReturnObject", new MathServiceAddReturnObjectArgumentsModel(a, b));
         }
 
         public Task<MathResult> AddReturnTaskObject(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<MathResult>(
-                new RequestMessage("Marble.Sandbox.MathService", "AddReturnTaskObject", a, b));
+            return this.messagingClient.InvokeProcedureAsync<MathResult>("Marble.Sandbox.MathService",
+                "AddReturnTaskObject", new MathServiceAddReturnTaskObjectArgumentsModel(a, b));
         }
 
         public Task<List<MathResult>> ReturnListTask(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<List<MathResult>>(
-                new RequestMessage("Marble.Sandbox.MathService", "ReturnListTask", a, b));
+            return this.messagingClient.InvokeProcedureAsync<List<MathResult>>("Marble.Sandbox.MathService",
+                "ReturnListTask", new MathServiceReturnListTaskArgumentsModel(a, b));
         }
 
         public Task<List<MathResult>> ReturnList(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<List<MathResult>>(
-                new RequestMessage("Marble.Sandbox.MathService", "ReturnList", a, b));
+            return this.messagingClient.InvokeProcedureAsync<List<MathResult>>("Marble.Sandbox.MathService",
+                "ReturnList", new MathServiceReturnListArgumentsModel(a, b));
         }
 
         public Task<List<int>> ReturnListIntTask(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<List<int>>(new RequestMessage("Marble.Sandbox.MathService",
-                "ReturnListIntTask", a, b));
+            return this.messagingClient.InvokeProcedureAsync<List<int>>("Marble.Sandbox.MathService",
+                "ReturnListIntTask", new MathServiceReturnListIntTaskArgumentsModel(a, b));
         }
 
         public Task<List<int>> ReturnListInt(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<List<int>>(new RequestMessage("Marble.Sandbox.MathService",
-                "ReturnListInt", a, b));
+            return this.messagingClient.InvokeProcedureAsync<List<int>>("Marble.Sandbox.MathService", "ReturnListInt",
+                new MathServiceReturnListIntArgumentsModel(a, b));
         }
 
         public Task<Guid> ReturnGuid(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<Guid>(new RequestMessage("Marble.Sandbox.MathService",
-                "ReturnGuid", a, b));
+            return this.messagingClient.InvokeProcedureAsync<Guid>("Marble.Sandbox.MathService", "ReturnGuid",
+                new MathServiceReturnGuidArgumentsModel(a, b));
         }
 
         public Task<Guid?> ReturnNullGuid(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<Guid?>(new RequestMessage("Marble.Sandbox.MathService",
-                "ReturnNullGuid", a, b));
+            return this.messagingClient.InvokeProcedureAsync<Guid?>("Marble.Sandbox.MathService", "ReturnNullGuid",
+                new MathServiceReturnNullGuidArgumentsModel(a, b));
         }
 
         public Task<MathResult> ReturnNull(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<MathResult>(
-                new RequestMessage("Marble.Sandbox.MathService", "ReturnNull", a, b));
+            return this.messagingClient.InvokeProcedureAsync<MathResult>("Marble.Sandbox.MathService", "ReturnNull",
+                new MathServiceReturnNullArgumentsModel(a, b));
         }
 
         public Task<MathResult> AddReturnTaskObjectThrowException(int a, int b)
         {
-            return this.messagingClient.InvokeProcedureAsync<MathResult>(
-                new RequestMessage("Marble.Sandbox.MathService", "AddReturnTaskObjectThrowException", a, b));
+            return this.messagingClient.InvokeProcedureAsync<MathResult>("Marble.Sandbox.MathService",
+                "AddReturnTaskObjectThrowException",
+                new MathServiceAddReturnTaskObjectThrowExceptionArgumentsModel(a, b));
         }
 
         public IObservable<int> StartMathStreamReturnInt(int start)
         {
-            return this.messagingClient.InvokeProcedureStream<int>(new RequestMessage("Marble.Sandbox.MathService",
-                "StartMathStreamReturnInt", start));
+            return this.messagingClient.InvokeProcedureStream<int>("Marble.Sandbox.MathService",
+                "StartMathStreamReturnInt", new MathServiceStartMathStreamReturnIntArgumentsModel(start));
         }
 
         public IObservable<MathResult> StartMathStreamReturnObject(int start)
         {
-            return this.messagingClient.InvokeProcedureStream<MathResult>(
-                new RequestMessage("Marble.Sandbox.MathService", "StartMathStreamReturnObject", start));
+            return this.messagingClient.InvokeProcedureStream<MathResult>("Marble.Sandbox.MathService",
+                "StartMathStreamReturnObject", new MathServiceStartMathStreamReturnObjectArgumentsModel(start));
         }
 
         public IObservable<MathResult> StartMathStreamReturnObjectThrowException(int start)
         {
-            return this.messagingClient.InvokeProcedureStream<MathResult>(
-                new RequestMessage("Marble.Sandbox.MathService", "StartMathStreamReturnObjectThrowException", start));
+            return this.messagingClient.InvokeProcedureStream<MathResult>("Marble.Sandbox.MathService",
+                "StartMathStreamReturnObjectThrowException",
+                new MathServiceStartMathStreamReturnObjectThrowExceptionArgumentsModel(start));
+        }
+    }
+
+
+    public sealed class MathServiceAddReturnIntArgumentsModel : ParametersModel
+    {
+        public MathServiceAddReturnIntArgumentsModel()
+        {
+        }
+
+        public MathServiceAddReturnIntArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceAddReturnIntThrowExceptionArgumentsModel : ParametersModel
+    {
+        public MathServiceAddReturnIntThrowExceptionArgumentsModel()
+        {
+        }
+
+        public MathServiceAddReturnIntThrowExceptionArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceAddReturnTaskIntArgumentsModel : ParametersModel
+    {
+        public MathServiceAddReturnTaskIntArgumentsModel()
+        {
+        }
+
+        public MathServiceAddReturnTaskIntArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceAddReturnTaskArgumentsModel : ParametersModel
+    {
+        public MathServiceAddReturnTaskArgumentsModel()
+        {
+        }
+
+        public MathServiceAddReturnTaskArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceAddReturnVoidArgumentsModel : ParametersModel
+    {
+        public MathServiceAddReturnVoidArgumentsModel()
+        {
+        }
+
+        public MathServiceAddReturnVoidArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceAddReturnObjectArgumentsModel : ParametersModel
+    {
+        public MathServiceAddReturnObjectArgumentsModel()
+        {
+        }
+
+        public MathServiceAddReturnObjectArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceAddReturnTaskObjectArgumentsModel : ParametersModel
+    {
+        public MathServiceAddReturnTaskObjectArgumentsModel()
+        {
+        }
+
+        public MathServiceAddReturnTaskObjectArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceReturnListTaskArgumentsModel : ParametersModel
+    {
+        public MathServiceReturnListTaskArgumentsModel()
+        {
+        }
+
+        public MathServiceReturnListTaskArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceReturnListArgumentsModel : ParametersModel
+    {
+        public MathServiceReturnListArgumentsModel()
+        {
+        }
+
+        public MathServiceReturnListArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceReturnListIntTaskArgumentsModel : ParametersModel
+    {
+        public MathServiceReturnListIntTaskArgumentsModel()
+        {
+        }
+
+        public MathServiceReturnListIntTaskArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceReturnListIntArgumentsModel : ParametersModel
+    {
+        public MathServiceReturnListIntArgumentsModel()
+        {
+        }
+
+        public MathServiceReturnListIntArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceReturnGuidArgumentsModel : ParametersModel
+    {
+        public MathServiceReturnGuidArgumentsModel()
+        {
+        }
+
+        public MathServiceReturnGuidArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceReturnNullGuidArgumentsModel : ParametersModel
+    {
+        public MathServiceReturnNullGuidArgumentsModel()
+        {
+        }
+
+        public MathServiceReturnNullGuidArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceReturnNullArgumentsModel : ParametersModel
+    {
+        public MathServiceReturnNullArgumentsModel()
+        {
+        }
+
+        public MathServiceReturnNullArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceAddReturnTaskObjectThrowExceptionArgumentsModel : ParametersModel
+    {
+        public MathServiceAddReturnTaskObjectThrowExceptionArgumentsModel()
+        {
+        }
+
+        public MathServiceAddReturnTaskObjectThrowExceptionArgumentsModel(int a, int b)
+        {
+            this.A = a;
+            this.B = b;
+        }
+
+        public int A { get; set; }
+        public int B { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.A,
+                this.B
+            };
+        }
+    }
+
+    public sealed class MathServiceStartMathStreamReturnIntArgumentsModel : ParametersModel
+    {
+        public MathServiceStartMathStreamReturnIntArgumentsModel()
+        {
+        }
+
+        public MathServiceStartMathStreamReturnIntArgumentsModel(int start)
+        {
+            this.Start = start;
+        }
+
+        public int Start { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.Start
+            };
+        }
+    }
+
+    public sealed class MathServiceStartMathStreamReturnObjectArgumentsModel : ParametersModel
+    {
+        public MathServiceStartMathStreamReturnObjectArgumentsModel()
+        {
+        }
+
+        public MathServiceStartMathStreamReturnObjectArgumentsModel(int start)
+        {
+            this.Start = start;
+        }
+
+        public int Start { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.Start
+            };
+        }
+    }
+
+    public sealed class MathServiceStartMathStreamReturnObjectThrowExceptionArgumentsModel : ParametersModel
+    {
+        public MathServiceStartMathStreamReturnObjectThrowExceptionArgumentsModel()
+        {
+        }
+
+        public MathServiceStartMathStreamReturnObjectThrowExceptionArgumentsModel(int start)
+        {
+            this.Start = start;
+        }
+
+        public int Start { get; set; }
+
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                this.Start
+            };
         }
     }
 }
