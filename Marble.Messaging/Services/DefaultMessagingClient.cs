@@ -7,6 +7,7 @@ using akarnokd.reactive_extensions;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Stream;
 using Marble.Messaging.Extensions;
 using Marble.Messaging.Transformers;
 using Marble.Messaging.Utilities;
@@ -98,7 +99,9 @@ namespace Marble.Messaging.Services
                     message.MessageType == MessageType.ResponseMessage)
                 .Select(message => message.ToResponseMessage(this.serializationAdapter))
                 .Where(responseMessage => responseMessage.Correlation == requestMessage.Correlation)
-                .Select(responseMessage => this.streamManager.StreamToObservable<TResult>(responseMessage.Stream)
+                .Select(responseMessage => this.streamManager
+                    .TypedStreamToObservable(
+                        NetworkStream.ToTypedStream<TResult>(responseMessage.Stream, this.serializationAdapter))
                     .Materialize())
                 .Switch()
                 .Dematerialize();

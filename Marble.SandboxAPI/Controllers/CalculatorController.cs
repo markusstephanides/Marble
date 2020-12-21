@@ -127,6 +127,20 @@ namespace Marble.SandboxAPI.Controllers
             }
         }
 
+        [HttpGet("addReturnTaskGuid")]
+        public async Task<ActionResult> AddReturnTaskGuid()
+        {
+            try
+            {
+                var result = await this.mathService.ReturnGuid(1, 1).ConfigureAwait(false);
+                return this.Ok(new {result});
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError(e, "Failed to send ReturnGuid request");
+                return this.StatusCode(500, new {message = e.Message});
+            }
+        }
 
         [HttpGet("addReturnTaskObjectThrowException")]
         public async Task<ActionResult> AddReturnTaskObjectThrowException([FromQuery] int a, [FromQuery] int b)

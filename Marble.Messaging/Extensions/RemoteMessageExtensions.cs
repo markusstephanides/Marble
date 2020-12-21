@@ -12,7 +12,7 @@ namespace Marble.Messaging.Extensions
         {
             return new ResponseMessage
             {
-                Stream = serializationAdapter.Deserialize<BasicStream>(remoteMessage.Payload),
+                Stream = serializationAdapter.Deserialize<NetworkStream>(remoteMessage.Payload),
                 Correlation = remoteMessage.Headers[Constants.CorrelationHeaderField] as string
             };
         }
@@ -22,7 +22,7 @@ namespace Marble.Messaging.Extensions
         {
             return new RequestMessageContext
             {
-                RequestMessage = new RequestMessage()
+                RequestMessage = new RequestMessage
                 {
                     Controller = remoteMessage.Headers[Constants.ControllerHeaderField] as string,
                     Procedure = remoteMessage.Headers[Constants.ProcedureHeaderField] as string,

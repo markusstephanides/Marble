@@ -59,7 +59,8 @@ namespace Marble.Messaging.Services
                         this.messagingAdapter.SendRemoteMessage(
                             new ResponseMessage
                             {
-                                Stream = BasicStream.FromResult(messageHandlingResult.Result),
+                                Stream = NetworkStream.FromResult(messageHandlingResult.Result,
+                                    this.serializationAdapter),
                                 Correlation = requestMessage.Correlation
                             }.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
                         this.logger.LogInformation(
@@ -73,7 +74,7 @@ namespace Marble.Messaging.Services
                             this.messagingAdapter.SendRemoteMessage(
                                 new ResponseMessage
                                 {
-                                    Stream = BasicStream.FromNotification(item),
+                                    Stream = NetworkStream.FromNotification(item, this.serializationAdapter),
                                     Correlation = requestMessage.Correlation
                                 }.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
                         }, error =>
@@ -81,7 +82,7 @@ namespace Marble.Messaging.Services
                             this.messagingAdapter.SendRemoteMessage(
                                 new ResponseMessage
                                 {
-                                    Stream = BasicStream.FromError(messageHandlingResult.Result),
+                                    Stream = NetworkStream.FromError(error, this.serializationAdapter),
                                     Correlation = requestMessage.Correlation
                                 }.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
                         }, () =>
@@ -89,7 +90,7 @@ namespace Marble.Messaging.Services
                             this.messagingAdapter.SendRemoteMessage(
                                 new ResponseMessage
                                 {
-                                    Stream = BasicStream.Completed,
+                                    Stream = NetworkStream.Completed,
                                     Correlation = requestMessage.Correlation
                                 }.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
                         });
@@ -136,7 +137,7 @@ namespace Marble.Messaging.Services
                 var responseMessage = new ResponseMessage
                 {
                     Correlation = requestMessage.Correlation,
-                    Stream = BasicStream.FromError(e)
+                    Stream = NetworkStream.FromError(e, this.serializationAdapter)
                 };
 
                 this.messagingAdapter.SendRemoteMessage(

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Marble.Messaging.Contracts.Models.Stream;
 
 namespace Marble.Messaging.Abstractions
@@ -7,6 +8,6 @@ namespace Marble.Messaging.Abstractions
     {
         object[] RegisterStreams(object[] input);
 
-        IObservable<T> StreamToObservable<T>(BasicStream stream);
+        IObservable<T> TypedStreamToObservable<T>(IEnumerable<TypedStreamEvent<T>> stream);
     }
 }

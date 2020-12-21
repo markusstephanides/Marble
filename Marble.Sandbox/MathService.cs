@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Marble.Messaging.Contracts.Declaration;
@@ -67,6 +68,49 @@ namespace Marble.Sandbox
             {
                 SomeInt = a + b
             });
+        }
+
+        [MarbleProcedure]
+        public Task<List<MathResult>> ReturnListTask(int a, int b)
+        {
+            return Task.FromResult(new List<MathResult> {new MathResult {SomeInt = a}, new MathResult {SomeInt = b}});
+        }
+
+        [MarbleProcedure]
+        public List<MathResult> ReturnList(int a, int b)
+        {
+            return new List<MathResult> {new MathResult {SomeInt = a}, new MathResult {SomeInt = b}};
+        }
+
+
+        [MarbleProcedure]
+        public Task<List<int>> ReturnListIntTask(int a, int b)
+        {
+            return Task.FromResult(new List<int> {a, b});
+        }
+
+        [MarbleProcedure]
+        public List<int> ReturnListInt(int a, int b)
+        {
+            return new List<int> {a, b};
+        }
+
+        [MarbleProcedure]
+        public Guid ReturnGuid(int a, int b)
+        {
+            return Guid.NewGuid();
+        }
+
+        [MarbleProcedure]
+        public Guid? ReturnNullGuid(int a, int b)
+        {
+            return null;
+        }
+
+        [MarbleProcedure]
+        public MathResult ReturnNull(int a, int b)
+        {
+            return null;
         }
 
         [MarbleProcedure]
