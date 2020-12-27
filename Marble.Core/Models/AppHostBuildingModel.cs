@@ -4,6 +4,7 @@ using System.Threading;
 using Marble.Core.Hooks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Marble.Core.Models
 {
@@ -21,6 +22,8 @@ namespace Marble.Core.Models
         public IList<Action<AppHostBuildingModel>> PreBuildActions { get; } = new List<Action<AppHostBuildingModel>>();
 
         public IList<Action<AppHostBuildingModel>> PostBuildActions { get; } = new List<Action<AppHostBuildingModel>>();
+
+        public ILogger? Logger { get; set; }
 
         public bool ShouldBeHostedExternally { get; set; }
 

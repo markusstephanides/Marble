@@ -45,6 +45,7 @@ namespace Marble.Core.Builder
         public IAppHostBuilder ProvideServiceCollection(IServiceCollection serviceCollection)
         {
             this.BuildingModel.ServiceCollection = serviceCollection;
+
             this.BuildingModel.ServiceCollectionConfigurationActions.ToList()
                 .ForEach(action => action(this.BuildingModel.ServiceCollection));
             return this;
@@ -94,13 +95,36 @@ namespace Marble.Core.Builder
                 // Setup logging
                 collection.AddLogging(loggingBuilder =>
                 {
+                    Log.Logger = new LoggerConfiguration()
+                        .ReadFrom.Configuration(this.BuildingModel.Configuration)
+                        .CreateLogger();
+
+                    const string sectionName = "Serilog";
+
+                    if (this.BuildingModel.Configuration!.GetSection(sectionName).Exists())
+                    {
+                        Log.Logger = new LoggerConfiguration()
+                            .ReadFrom.Configuration(this.BuildingModel.Configuration, sectionName)
+                            .CreateLogger();
+                    }
+                    else
+                    {
+                        Log.Logger = new LoggerConfiguration()
+                            .WriteTo.Console()
+                            .CreateLogger();
+                    }
+
                     loggingBuilder.ClearProviders();
-                    loggingBuilder.AddSerilog(dispose: true);
+                    loggingBuilder.AddSerilog();
                 });
 
                 // Lifetime
                 collection.AddSingleton(this.BuildingModel.AppLifetime);
             });
+        }
+
+        private void ConfigureLogging(bool serviceCollectionProvided = false)
+        {
         }
     }
 }
