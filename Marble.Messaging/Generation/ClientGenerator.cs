@@ -32,7 +32,8 @@ namespace Marble.Messaging.Generation
                 "System",
                 "System.Threading.Tasks",
                 "Marble.Messaging.Contracts.Abstractions",
-                "Marble.Messaging.Contracts.Models"
+                "Marble.Messaging.Contracts.Models",
+                "Marble.Messaging.Contracts.Models.Message"
             };
 
             var procedureModels = new List<Hash>();
