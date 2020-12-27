@@ -1,6 +1,6 @@
 ﻿using Marble.Messaging.Contracts.Models.Stream;
 
-namespace Marble.Messaging.Contracts.Models
+namespace Marble.Messaging.Contracts.Models.Message
 {
     public class ResponseMessage
     {

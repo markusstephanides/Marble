@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using Marble.Messaging.Contracts.Abstractions;
-using Marble.Messaging.Models;
-using Marble.Messaging.Utilities;
+using Marble.Messaging.Contracts.Exceptions;
+using Marble.Messaging.Contracts.Utilities;
 
 namespace Marble.Messaging.Contracts.Models.Stream
 {
     public class NetworkStream
     {
+        private static readonly List<Type> unserializableExceptionTypes = new List<Type>();
+
         public string? ExceptionType { get; set; }
         public List<NetworkedStreamEvent> Events { get; set; }
 
@@ -52,15 +54,44 @@ namespace Marble.Messaging.Contracts.Models.Stream
 
         public static NetworkStream FromError(Exception exception, ISerializationAdapter serializationAdapter)
         {
+            var exceptionType = exception.GetType();
+            var exceptionTypeName = exceptionType.FullName;
+
+            byte[]? serializedException = null;
+
+            void UseExceptionContainer()
+            {
+                exceptionTypeName = typeof(ExceptionContainer).FullName;
+                serializedException = serializationAdapter.Serialize(new ExceptionContainer(exception.Message,
+                    exception.GetType().FullName!));
+            }
+
+            if (unserializableExceptionTypes.Contains(exceptionType))
+            {
+                UseExceptionContainer();
+            }
+            else
+            {
+                try
+                {
+                    serializedException = serializationAdapter.Serialize(exception);
+                }
+                catch (Exception)
+                {
+                    unserializableExceptionTypes.Add(exceptionType);
+                    UseExceptionContainer();
+                }
+            }
+
             return new NetworkStream
             {
-                ExceptionType = exception.GetType().FullName,
+                ExceptionType = exceptionTypeName,
                 Events = new List<NetworkedStreamEvent>
                 {
                     new NetworkedStreamEvent
                     {
                         EventType = StreamEventType.Error,
-                        Payload = serializationAdapter.Serialize(exception)
+                        Payload = serializedException
                     }
                 }
             };

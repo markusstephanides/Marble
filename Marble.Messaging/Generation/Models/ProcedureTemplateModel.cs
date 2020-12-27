@@ -14,6 +14,6 @@ namespace Marble.Messaging.Generation.Models
         public string ReturnTypeVariant { get; set; }
         public string Name { get; set; }
 
-        public string ProcedureParamsModelTypeName { get; set; }
+        public string ProcedureParametersModelTypeName { get; set; }
     }
 }

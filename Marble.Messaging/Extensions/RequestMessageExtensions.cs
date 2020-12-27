@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Marble.Messaging.Contracts.Abstractions;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message;
 using Marble.Messaging.Transformers;
 using Marble.Messaging.Utilities;
 
@@ -18,9 +18,9 @@ namespace Marble.Messaging.Extensions
                     {Constants.ControllerHeaderField, requestMessage.Controller},
                     {Constants.ProcedureHeaderField, requestMessage.Procedure},
                     {Constants.CorrelationHeaderField, requestMessage.Correlation},
-                    {Constants.ArgumentsModelType, requestMessage.ArgumentsModelType}
+                    {Constants.ParametersModelType, requestMessage.ParametersModelType}
                 },
-                Payload = requestMessage.ArgumentsBytes,
+                Payload = requestMessage.ParametersBytes,
                 MessageType = MessageType.RequestMessage,
                 Target = ProcedurePath.FromRequestMessage(requestMessage)
             };

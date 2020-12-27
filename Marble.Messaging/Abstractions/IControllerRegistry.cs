@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Marble.Core.Abstractions;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message;
+using Marble.Messaging.Contracts.Models.Message.Handling;
 
 namespace Marble.Messaging.Abstractions
 {

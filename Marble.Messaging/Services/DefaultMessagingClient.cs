@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message;
 using Marble.Messaging.Contracts.Models.Stream;
 using Marble.Messaging.Extensions;
 using Marble.Messaging.Transformers;
@@ -82,6 +82,11 @@ namespace Marble.Messaging.Services
                 .Timeout(TimeSpan.FromSeconds(Constants.DefaultTimeoutSeconds))
                 .Do(result =>
                 {
+                    if (result is null)
+                    {
+                        return;
+                    }
+
                     this.logger.LogInformation(
                         "Received response of type {responseType} for procedure invocation {procedurePath} after {elapsedMilliseconds} ms",
                         result.GetType().Name, ProcedurePath.FromRequestMessage(requestMessage),

@@ -5,7 +5,8 @@ using System.Linq;
 using System.Reflection;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Configuration;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message;
+using Marble.Messaging.Contracts.Models.Message.Handling;
 using Marble.Messaging.Converters;
 using Marble.Messaging.Exceptions;
 using Marble.Messaging.Explorer;
@@ -27,11 +28,11 @@ namespace Marble.Messaging.Services
 
         private ILogger<DefaultControllerRegistry<TConfiguration>> logger;
 
-        public DefaultControllerRegistry()
+        public DefaultControllerRegistry(List<Assembly>? additionalAssemblies)
         {
             this.AvailableProcedurePaths = new List<string>();
 
-            var definitions = this.LoadControllerDefinitions();
+            var definitions = this.LoadControllerDefinitions(additionalAssemblies);
 
             this.controllers = new ConcurrentDictionary<ControllerDescriptor, object>(definitions
                 .Select(definition => new KeyValuePair<ControllerDescriptor, object>(definition, null!)));
@@ -122,9 +123,28 @@ namespace Marble.Messaging.Services
             }
         }
 
-        private IList<ControllerDescriptor> LoadControllerDefinitions()
+        private IList<ControllerDescriptor> LoadControllerDefinitions(List<Assembly>? additionalAssemblies)
         {
             var targetAssembly = Assembly.GetEntryAssembly();
+            var assembliesToScan = new List<Assembly> {targetAssembly!};
+
+            if (additionalAssemblies != null)
+            {
+                assembliesToScan.AddRange(additionalAssemblies);
+            }
+
+            var foundControllers = new List<ControllerDescriptor>();
+
+            foreach (var assembly in assembliesToScan)
+            {
+                foundControllers.AddRange(this.ScanAssembly(assembly));
+            }
+
+            return foundControllers;
+        }
+
+        private IList<ControllerDescriptor> ScanAssembly(Assembly targetAssembly)
+        {
             var allControllers = new ControllerExplorer().ScanAssembly(targetAssembly).ToList();
             var containsErrors = false;
 

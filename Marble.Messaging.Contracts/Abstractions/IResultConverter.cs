@@ -1,5 +1,5 @@
 ﻿using System;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message.Handling;
 
 namespace Marble.Messaging.Contracts.Abstractions
 {

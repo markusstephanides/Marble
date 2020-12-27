@@ -1,6 +1,4 @@
-﻿using Marble.Messaging.Contracts.Models.Stream;
-
-namespace Marble.Messaging.Models
+﻿namespace Marble.Messaging.Contracts.Models.Stream
 {
     public class NetworkedStreamEvent
     {

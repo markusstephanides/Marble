@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Marble.Messaging.Contracts.Abstractions;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message;
 using Marble.Sandbox.Contracts.Models;
 
 namespace Marble.Sandbox.Contracts
@@ -35,9 +35,9 @@ namespace Marble.Sandbox.Contracts
 
         Task<Guid> ReturnGuid(int a, int b);
 
-        Task<Guid?> ReturnNullGuid(int a, int b);
+        Task<Guid?> ReturnNullGuid();
 
-        Task<MathResult> ReturnNull(int a, int b);
+        Task<MathResult> ReturnNull();
 
         Task<MathResult> AddReturnTaskObjectThrowException(int a, int b);
 
@@ -60,122 +60,120 @@ namespace Marble.Sandbox.Contracts
         public Task<int> AddReturnInt(int a, int b)
         {
             return this.messagingClient.InvokeProcedureAsync<int>("Marble.Sandbox.MathService", "AddReturnInt",
-                new MathServiceAddReturnIntArgumentsModel(a, b));
+                new MathServiceAddReturnIntParametersModel(a, b));
         }
 
         public Task<int> AddReturnIntThrowException(int a, int b)
         {
             return this.messagingClient.InvokeProcedureAsync<int>("Marble.Sandbox.MathService",
-                "AddReturnIntThrowException", new MathServiceAddReturnIntThrowExceptionArgumentsModel(a, b));
+                "AddReturnIntThrowException", new MathServiceAddReturnIntThrowExceptionParametersModel(a, b));
         }
 
         public Task<int> AddReturnTaskInt(int a, int b)
         {
             return this.messagingClient.InvokeProcedureAsync<int>("Marble.Sandbox.MathService", "AddReturnTaskInt",
-                new MathServiceAddReturnTaskIntArgumentsModel(a, b));
+                new MathServiceAddReturnTaskIntParametersModel(a, b));
         }
 
         public Task AddReturnTask(int a, int b)
         {
             return this.messagingClient.CallProcedureAsync("Marble.Sandbox.MathService", "AddReturnTask",
-                new MathServiceAddReturnTaskArgumentsModel(a, b));
+                new MathServiceAddReturnTaskParametersModel(a, b));
         }
 
         public Task AddReturnVoid(int a, int b)
         {
             return this.messagingClient.CallProcedureAsync("Marble.Sandbox.MathService", "AddReturnVoid",
-                new MathServiceAddReturnVoidArgumentsModel(a, b));
+                new MathServiceAddReturnVoidParametersModel(a, b));
         }
 
         public Task<MathResult> AddReturnObject(int a, int b)
         {
             return this.messagingClient.InvokeProcedureAsync<MathResult>("Marble.Sandbox.MathService",
-                "AddReturnObject", new MathServiceAddReturnObjectArgumentsModel(a, b));
+                "AddReturnObject", new MathServiceAddReturnObjectParametersModel(a, b));
         }
 
         public Task<MathResult> AddReturnTaskObject(int a, int b)
         {
             return this.messagingClient.InvokeProcedureAsync<MathResult>("Marble.Sandbox.MathService",
-                "AddReturnTaskObject", new MathServiceAddReturnTaskObjectArgumentsModel(a, b));
+                "AddReturnTaskObject", new MathServiceAddReturnTaskObjectParametersModel(a, b));
         }
 
         public Task<List<MathResult>> ReturnListTask(int a, int b)
         {
             return this.messagingClient.InvokeProcedureAsync<List<MathResult>>("Marble.Sandbox.MathService",
-                "ReturnListTask", new MathServiceReturnListTaskArgumentsModel(a, b));
+                "ReturnListTask", new MathServiceReturnListTaskParametersModel(a, b));
         }
 
         public Task<List<MathResult>> ReturnList(int a, int b)
         {
             return this.messagingClient.InvokeProcedureAsync<List<MathResult>>("Marble.Sandbox.MathService",
-                "ReturnList", new MathServiceReturnListArgumentsModel(a, b));
+                "ReturnList", new MathServiceReturnListParametersModel(a, b));
         }
 
         public Task<List<int>> ReturnListIntTask(int a, int b)
         {
             return this.messagingClient.InvokeProcedureAsync<List<int>>("Marble.Sandbox.MathService",
-                "ReturnListIntTask", new MathServiceReturnListIntTaskArgumentsModel(a, b));
+                "ReturnListIntTask", new MathServiceReturnListIntTaskParametersModel(a, b));
         }
 
         public Task<List<int>> ReturnListInt(int a, int b)
         {
             return this.messagingClient.InvokeProcedureAsync<List<int>>("Marble.Sandbox.MathService", "ReturnListInt",
-                new MathServiceReturnListIntArgumentsModel(a, b));
+                new MathServiceReturnListIntParametersModel(a, b));
         }
 
         public Task<Guid> ReturnGuid(int a, int b)
         {
             return this.messagingClient.InvokeProcedureAsync<Guid>("Marble.Sandbox.MathService", "ReturnGuid",
-                new MathServiceReturnGuidArgumentsModel(a, b));
+                new MathServiceReturnGuidParametersModel(a, b));
         }
 
-        public Task<Guid?> ReturnNullGuid(int a, int b)
+        public Task<Guid?> ReturnNullGuid()
         {
-            return this.messagingClient.InvokeProcedureAsync<Guid?>("Marble.Sandbox.MathService", "ReturnNullGuid",
-                new MathServiceReturnNullGuidArgumentsModel(a, b));
+            return this.messagingClient.InvokeProcedureAsync<Guid?>("Marble.Sandbox.MathService", "ReturnNullGuid");
         }
 
-        public Task<MathResult> ReturnNull(int a, int b)
+        public Task<MathResult> ReturnNull()
         {
-            return this.messagingClient.InvokeProcedureAsync<MathResult>("Marble.Sandbox.MathService", "ReturnNull",
-                new MathServiceReturnNullArgumentsModel(a, b));
+            return this.messagingClient.InvokeProcedureAsync<MathResult>("Marble.Sandbox.MathService", "ReturnNull");
         }
 
         public Task<MathResult> AddReturnTaskObjectThrowException(int a, int b)
         {
             return this.messagingClient.InvokeProcedureAsync<MathResult>("Marble.Sandbox.MathService",
                 "AddReturnTaskObjectThrowException",
-                new MathServiceAddReturnTaskObjectThrowExceptionArgumentsModel(a, b));
+                new MathServiceAddReturnTaskObjectThrowExceptionParametersModel(a, b));
         }
 
         public IObservable<int> StartMathStreamReturnInt(int start)
         {
             return this.messagingClient.InvokeProcedureStream<int>("Marble.Sandbox.MathService",
-                "StartMathStreamReturnInt", new MathServiceStartMathStreamReturnIntArgumentsModel(start));
+                "StartMathStreamReturnInt", new MathServiceStartMathStreamReturnIntParametersModel(start));
         }
 
         public IObservable<MathResult> StartMathStreamReturnObject(int start)
         {
             return this.messagingClient.InvokeProcedureStream<MathResult>("Marble.Sandbox.MathService",
-                "StartMathStreamReturnObject", new MathServiceStartMathStreamReturnObjectArgumentsModel(start));
+                "StartMathStreamReturnObject", new MathServiceStartMathStreamReturnObjectParametersModel(start));
         }
 
         public IObservable<MathResult> StartMathStreamReturnObjectThrowException(int start)
         {
             return this.messagingClient.InvokeProcedureStream<MathResult>("Marble.Sandbox.MathService",
                 "StartMathStreamReturnObjectThrowException",
-                new MathServiceStartMathStreamReturnObjectThrowExceptionArgumentsModel(start));
+                new MathServiceStartMathStreamReturnObjectThrowExceptionParametersModel(start));
         }
     }
 
 
-    public sealed class MathServiceAddReturnIntArgumentsModel : ParametersModel
+    public sealed class MathServiceAddReturnIntParametersModel : ParametersModel
     {
-        public MathServiceAddReturnIntArgumentsModel()
+        public MathServiceAddReturnIntParametersModel()
         {
         }
 
-        public MathServiceAddReturnIntArgumentsModel(int a, int b)
+        public MathServiceAddReturnIntParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -194,13 +192,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceAddReturnIntThrowExceptionArgumentsModel : ParametersModel
+
+    public sealed class MathServiceAddReturnIntThrowExceptionParametersModel : ParametersModel
     {
-        public MathServiceAddReturnIntThrowExceptionArgumentsModel()
+        public MathServiceAddReturnIntThrowExceptionParametersModel()
         {
         }
 
-        public MathServiceAddReturnIntThrowExceptionArgumentsModel(int a, int b)
+        public MathServiceAddReturnIntThrowExceptionParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -219,13 +218,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceAddReturnTaskIntArgumentsModel : ParametersModel
+
+    public sealed class MathServiceAddReturnTaskIntParametersModel : ParametersModel
     {
-        public MathServiceAddReturnTaskIntArgumentsModel()
+        public MathServiceAddReturnTaskIntParametersModel()
         {
         }
 
-        public MathServiceAddReturnTaskIntArgumentsModel(int a, int b)
+        public MathServiceAddReturnTaskIntParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -244,13 +244,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceAddReturnTaskArgumentsModel : ParametersModel
+
+    public sealed class MathServiceAddReturnTaskParametersModel : ParametersModel
     {
-        public MathServiceAddReturnTaskArgumentsModel()
+        public MathServiceAddReturnTaskParametersModel()
         {
         }
 
-        public MathServiceAddReturnTaskArgumentsModel(int a, int b)
+        public MathServiceAddReturnTaskParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -269,13 +270,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceAddReturnVoidArgumentsModel : ParametersModel
+
+    public sealed class MathServiceAddReturnVoidParametersModel : ParametersModel
     {
-        public MathServiceAddReturnVoidArgumentsModel()
+        public MathServiceAddReturnVoidParametersModel()
         {
         }
 
-        public MathServiceAddReturnVoidArgumentsModel(int a, int b)
+        public MathServiceAddReturnVoidParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -294,13 +296,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceAddReturnObjectArgumentsModel : ParametersModel
+
+    public sealed class MathServiceAddReturnObjectParametersModel : ParametersModel
     {
-        public MathServiceAddReturnObjectArgumentsModel()
+        public MathServiceAddReturnObjectParametersModel()
         {
         }
 
-        public MathServiceAddReturnObjectArgumentsModel(int a, int b)
+        public MathServiceAddReturnObjectParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -319,13 +322,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceAddReturnTaskObjectArgumentsModel : ParametersModel
+
+    public sealed class MathServiceAddReturnTaskObjectParametersModel : ParametersModel
     {
-        public MathServiceAddReturnTaskObjectArgumentsModel()
+        public MathServiceAddReturnTaskObjectParametersModel()
         {
         }
 
-        public MathServiceAddReturnTaskObjectArgumentsModel(int a, int b)
+        public MathServiceAddReturnTaskObjectParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -344,13 +348,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceReturnListTaskArgumentsModel : ParametersModel
+
+    public sealed class MathServiceReturnListTaskParametersModel : ParametersModel
     {
-        public MathServiceReturnListTaskArgumentsModel()
+        public MathServiceReturnListTaskParametersModel()
         {
         }
 
-        public MathServiceReturnListTaskArgumentsModel(int a, int b)
+        public MathServiceReturnListTaskParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -369,13 +374,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceReturnListArgumentsModel : ParametersModel
+
+    public sealed class MathServiceReturnListParametersModel : ParametersModel
     {
-        public MathServiceReturnListArgumentsModel()
+        public MathServiceReturnListParametersModel()
         {
         }
 
-        public MathServiceReturnListArgumentsModel(int a, int b)
+        public MathServiceReturnListParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -394,13 +400,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceReturnListIntTaskArgumentsModel : ParametersModel
+
+    public sealed class MathServiceReturnListIntTaskParametersModel : ParametersModel
     {
-        public MathServiceReturnListIntTaskArgumentsModel()
+        public MathServiceReturnListIntTaskParametersModel()
         {
         }
 
-        public MathServiceReturnListIntTaskArgumentsModel(int a, int b)
+        public MathServiceReturnListIntTaskParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -419,13 +426,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceReturnListIntArgumentsModel : ParametersModel
+
+    public sealed class MathServiceReturnListIntParametersModel : ParametersModel
     {
-        public MathServiceReturnListIntArgumentsModel()
+        public MathServiceReturnListIntParametersModel()
         {
         }
 
-        public MathServiceReturnListIntArgumentsModel(int a, int b)
+        public MathServiceReturnListIntParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -444,13 +452,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceReturnGuidArgumentsModel : ParametersModel
+
+    public sealed class MathServiceReturnGuidParametersModel : ParametersModel
     {
-        public MathServiceReturnGuidArgumentsModel()
+        public MathServiceReturnGuidParametersModel()
         {
         }
 
-        public MathServiceReturnGuidArgumentsModel(int a, int b)
+        public MathServiceReturnGuidParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -469,13 +478,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceReturnNullGuidArgumentsModel : ParametersModel
+
+    public sealed class MathServiceAddReturnTaskObjectThrowExceptionParametersModel : ParametersModel
     {
-        public MathServiceReturnNullGuidArgumentsModel()
+        public MathServiceAddReturnTaskObjectThrowExceptionParametersModel()
         {
         }
 
-        public MathServiceReturnNullGuidArgumentsModel(int a, int b)
+        public MathServiceAddReturnTaskObjectThrowExceptionParametersModel(int a, int b)
         {
             this.A = a;
             this.B = b;
@@ -494,63 +504,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceReturnNullArgumentsModel : ParametersModel
+
+    public sealed class MathServiceStartMathStreamReturnIntParametersModel : ParametersModel
     {
-        public MathServiceReturnNullArgumentsModel()
+        public MathServiceStartMathStreamReturnIntParametersModel()
         {
         }
 
-        public MathServiceReturnNullArgumentsModel(int a, int b)
-        {
-            this.A = a;
-            this.B = b;
-        }
-
-        public int A { get; set; }
-        public int B { get; set; }
-
-        public override object[] ToObjectArray()
-        {
-            return new object[]
-            {
-                this.A,
-                this.B
-            };
-        }
-    }
-
-    public sealed class MathServiceAddReturnTaskObjectThrowExceptionArgumentsModel : ParametersModel
-    {
-        public MathServiceAddReturnTaskObjectThrowExceptionArgumentsModel()
-        {
-        }
-
-        public MathServiceAddReturnTaskObjectThrowExceptionArgumentsModel(int a, int b)
-        {
-            this.A = a;
-            this.B = b;
-        }
-
-        public int A { get; set; }
-        public int B { get; set; }
-
-        public override object[] ToObjectArray()
-        {
-            return new object[]
-            {
-                this.A,
-                this.B
-            };
-        }
-    }
-
-    public sealed class MathServiceStartMathStreamReturnIntArgumentsModel : ParametersModel
-    {
-        public MathServiceStartMathStreamReturnIntArgumentsModel()
-        {
-        }
-
-        public MathServiceStartMathStreamReturnIntArgumentsModel(int start)
+        public MathServiceStartMathStreamReturnIntParametersModel(int start)
         {
             this.Start = start;
         }
@@ -566,13 +527,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceStartMathStreamReturnObjectArgumentsModel : ParametersModel
+
+    public sealed class MathServiceStartMathStreamReturnObjectParametersModel : ParametersModel
     {
-        public MathServiceStartMathStreamReturnObjectArgumentsModel()
+        public MathServiceStartMathStreamReturnObjectParametersModel()
         {
         }
 
-        public MathServiceStartMathStreamReturnObjectArgumentsModel(int start)
+        public MathServiceStartMathStreamReturnObjectParametersModel(int start)
         {
             this.Start = start;
         }
@@ -588,13 +550,14 @@ namespace Marble.Sandbox.Contracts
         }
     }
 
-    public sealed class MathServiceStartMathStreamReturnObjectThrowExceptionArgumentsModel : ParametersModel
+
+    public sealed class MathServiceStartMathStreamReturnObjectThrowExceptionParametersModel : ParametersModel
     {
-        public MathServiceStartMathStreamReturnObjectThrowExceptionArgumentsModel()
+        public MathServiceStartMathStreamReturnObjectThrowExceptionParametersModel()
         {
         }
 
-        public MathServiceStartMathStreamReturnObjectThrowExceptionArgumentsModel(int start)
+        public MathServiceStartMathStreamReturnObjectThrowExceptionParametersModel(int start)
         {
             this.Start = start;
         }

@@ -3,7 +3,8 @@ using System.Diagnostics;
 using System.Reactive.Linq;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message;
+using Marble.Messaging.Contracts.Models.Message.Handling;
 using Marble.Messaging.Contracts.Models.Stream;
 using Marble.Messaging.Exceptions;
 using Marble.Messaging.Extensions;
@@ -102,6 +103,17 @@ namespace Marble.Messaging.Services
                     case MessageHandlingResultType.Void:
                         this.logger.LogInformation(
                             "Handled request to {controller}:{procedure} successfully in {elapsedMilliseconds} ms with no result.",
+                            requestMessage.Controller, requestMessage.Procedure, stopwatch.ElapsedMilliseconds);
+                        break;
+                    case MessageHandlingResultType.Empty:
+                        this.messagingAdapter.SendRemoteMessage(
+                            new ResponseMessage
+                            {
+                                Stream = NetworkStream.FromResult<object?>(null, this.serializationAdapter),
+                                Correlation = requestMessage.Correlation
+                            }.ToRemoteMessage(requestMessageContext, this.serializationAdapter));
+                        this.logger.LogInformation(
+                            "Handled request to {controller}:{procedure} successfully in {elapsedMilliseconds} ms with empty result.",
                             requestMessage.Controller, requestMessage.Procedure, stopwatch.ElapsedMilliseconds);
                         break;
                     default:

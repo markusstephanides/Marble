@@ -102,13 +102,13 @@ namespace Marble.Sandbox
         }
 
         [MarbleProcedure]
-        public Guid? ReturnNullGuid(int a, int b)
+        public Guid? ReturnNullGuid()
         {
             return null;
         }
 
         [MarbleProcedure]
-        public MathResult ReturnNull(int a, int b)
+        public MathResult ReturnNull()
         {
             return null;
         }

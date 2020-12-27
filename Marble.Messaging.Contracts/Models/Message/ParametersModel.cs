@@ -1,4 +1,4 @@
-﻿namespace Marble.Messaging.Contracts.Models
+﻿namespace Marble.Messaging.Contracts.Models.Message
 {
     public abstract class ParametersModel
     {

@@ -1,7 +1,7 @@
 ﻿using Marble.Messaging.Contracts.Abstractions;
-using Marble.Messaging.Utilities;
+using Marble.Messaging.Contracts.Utilities;
 
-namespace Marble.Messaging.Contracts.Models
+namespace Marble.Messaging.Contracts.Models.Message
 {
     public sealed class RequestMessage
     {
@@ -18,8 +18,8 @@ namespace Marble.Messaging.Contracts.Models
         public string? Correlation { get; set; }
         public string Controller { get; set; }
         public string Procedure { get; set; }
-        public byte[]? ArgumentsBytes { get; set; }
-        public string? ArgumentsModelType { get; set; }
+        public byte[]? ParametersBytes { get; set; }
+        public string? ParametersModelType { get; set; }
 
         public static RequestMessage Create(string controllerName, string procedureName,
             ParametersModel? messageParameters = null, ISerializationAdapter? serializationAdapter = null)
@@ -31,21 +31,21 @@ namespace Marble.Messaging.Contracts.Models
                 return requestMessage;
             }
 
-            requestMessage.ArgumentsBytes = serializationAdapter.Serialize(messageParameters);
-            requestMessage.ArgumentsModelType = messageParameters.GetType().FullName;
+            requestMessage.ParametersBytes = serializationAdapter.Serialize(messageParameters);
+            requestMessage.ParametersModelType = messageParameters.GetType().FullName;
 
             return requestMessage;
         }
 
         public ParametersModel? GetParameterModel(ISerializationAdapter serializationAdapter)
         {
-            if (this.ArgumentsBytes is null || this.ArgumentsModelType is null)
+            if (this.ParametersBytes is null || this.ParametersModelType is null)
             {
                 return null;
             }
 
-            return (ParametersModel) serializationAdapter.Deserialize(this.ArgumentsBytes,
-                TypeLoader.FromString(this.ArgumentsModelType))!;
+            return (ParametersModel) serializationAdapter.Deserialize(this.ParametersBytes,
+                TypeLoader.FromString(this.ParametersModelType))!;
         }
     }
 }

@@ -22,22 +22,23 @@ namespace {{ Namespace }}
 
 {% for procedure in Procedures %}        public {{ procedure.MethodReturnType }} {{  procedure.MethodName }}({% for param in procedure.Parameters %}{{param.ReadableTypeName}} {{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %})
         {
-            return this.messagingClient.{% if procedure.ReturnTypeVariant == "Stream" %}InvokeProcedureStream<{{ procedure.PureReturnType }}>{% elsif procedure.ReturnTypeVariant == "Single" %}InvokeProcedureAsync<{{ procedure.PureReturnType }}>{% elsif procedure.ReturnTypeVariant == "Void" %}CallProcedureAsync{% endif %}("{{ ServiceName }}", "{{ procedure.Name }}", new {{ procedure.ProcedureParamsModelTypeName }}({% for param in procedure.Parameters %}{{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %}));
+            return this.messagingClient.{% if procedure.ReturnTypeVariant == "Stream" %}InvokeProcedureStream<{{ procedure.PureReturnType }}>{% elsif procedure.ReturnTypeVariant == "Single" %}InvokeProcedureAsync<{{ procedure.PureReturnType }}>{% elsif procedure.ReturnTypeVariant == "Void" %}CallProcedureAsync{% endif %}("{{ ServiceName }}", "{{ procedure.Name }}"{% if procedure.Parameters.size > 0 %}, new {{ procedure.ProcedureParametersModelTypeName }}({% for param in procedure.Parameters %}{{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %}){% endif %});
         }
     
 {% endfor %}
     }
     
 {% for procedure in Procedures %}  
-    public sealed class {{ procedure.ProcedureParamsModelTypeName }} : ParametersModel
+{% if procedure.Parameters.size > 0 %}
+    public sealed class {{ procedure.ProcedureParametersModelTypeName }} : ParametersModel
     {
         {% for param in procedure.Parameters %}public {{ param.ReadableTypeName }} {{ param.Name | capitalize }} { get; set; }
         {% endfor %}
-        public {{ procedure.ProcedureParamsModelTypeName }}()
+        public {{ procedure.ProcedureParametersModelTypeName }}()
         {
         }
         
-        public {{ procedure.ProcedureParamsModelTypeName }}({% for param in procedure.Parameters %}{{param.ReadableTypeName}} {{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %})
+        public {{ procedure.ProcedureParametersModelTypeName }}({% for param in procedure.Parameters %}{{param.ReadableTypeName}} {{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %})
         {
             {% for param in procedure.Parameters %}this.{{ param.Name | capitalize }} = {{ param.Name }};
             {% endfor %}
@@ -52,5 +53,6 @@ namespace {{ Namespace }}
             };
         }
     }
+{% endif %}
 {% endfor %}
 }

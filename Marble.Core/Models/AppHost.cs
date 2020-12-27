@@ -14,26 +14,32 @@ namespace Marble.Core.Models
         private readonly DateTime initialCreationTime;
         private readonly ILogger<AppHost> logger;
         private readonly CancellationToken? providedCancellationToken;
-        private readonly IServiceProvider serviceProvider;
 
         public AppHost(AppHostBuildingModel buildingModel)
         {
-            this.serviceProvider = buildingModel.ServiceProvider!;
+            this.ServiceProvider = buildingModel.ServiceProvider!;
             this.appLifetime = buildingModel.AppLifetime;
             this.initialCreationTime = buildingModel.CreationTime;
             this.providedCancellationToken = buildingModel.ProvidedCancellationToken;
             this.externallyHosted = buildingModel.ShouldBeHostedExternally;
 
-            this.entryService = this.serviceProvider.GetService<IEntryService>();
-            this.logger = this.serviceProvider.GetService<ILogger<AppHost>>()!;
+            this.entryService = this.ServiceProvider.GetService<IEntryService>();
+            this.logger = this.ServiceProvider.GetService<ILogger<AppHost>>()!;
         }
 
-        public void Run()
+        public IServiceProvider ServiceProvider { get; }
+
+        public void Stop()
+        {
+            Environment.Exit(0);
+        }
+
+        internal void Run()
         {
             var elapsedTimeMs = (int) (DateTime.Now - this.initialCreationTime).TotalMilliseconds;
 
             this.logger.LogInformation("Startup completed in {elapsedTimeMs} ms", elapsedTimeMs);
-            this.appLifetime.OnAppStarted.Invoke(this.serviceProvider);
+            this.appLifetime.OnAppStarted.Invoke(this.ServiceProvider);
 
             if (this.externallyHosted)
             {
@@ -43,7 +49,7 @@ namespace Marble.Core.Models
                 return;
             }
 
-            this.entryService?.OnAppStarted(this.serviceProvider);
+            this.entryService?.OnAppStarted(this.ServiceProvider);
 
             var cancellationTokenSource = new CancellationTokenSource();
             var stopReason = StopReason.Unknown;
@@ -61,11 +67,18 @@ namespace Marble.Core.Models
                 cancellationTokenSource.Cancel();
             };
 
-            cancellationTokenSource.Token.WaitHandle.WaitOne();
+            new Thread(() =>
+            {
+                cancellationTokenSource.Token.WaitHandle.WaitOne();
+                this.ShutdownActions(stopReason);
+            }).Start();
+        }
 
+        private void ShutdownActions(StopReason stopReason)
+        {
             this.entryService?.OnAppStopping();
             this.appLifetime.OnAppStopping.Invoke(stopReason);
-            ((IDisposable) this.serviceProvider).Dispose();
+            ((IDisposable) this.ServiceProvider).Dispose();
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
-using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
-using Marble.Messaging.Contracts.Models;
-using Marble.Messaging.Models;
+using Marble.Messaging.Contracts.Models.Message.Handling;
 
 namespace Marble.Messaging.Converters
 {

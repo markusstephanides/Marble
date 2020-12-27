@@ -88,7 +88,8 @@ namespace Marble.Messaging.Generation
                     Parameters = paramsList
                 };
 
-                procedureModel.ProcedureParamsModelTypeName = $"{serviceName}{procedureModel.MethodName}ArgumentsModel";
+                procedureModel.ProcedureParametersModelTypeName =
+                    $"{serviceName}{procedureModel.MethodName}ParametersModel";
 
                 procedureModels.Add(Hash.FromAnonymousObject(procedureModel));
             }
