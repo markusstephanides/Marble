@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message;
 
 namespace Marble.Messaging.Contracts.Abstractions
 {

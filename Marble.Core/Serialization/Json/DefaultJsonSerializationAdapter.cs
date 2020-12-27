@@ -17,13 +17,12 @@ namespace Marble.Core.Serialization.Json
 
         public byte[] Serialize(object obj)
         {
-            return this.defaultEncoding.GetBytes(JsonConvert.SerializeObject(obj, this.jsonSerializerSettings));
+            return this.defaultEncoding.GetBytes(JsonConvert.SerializeObject(obj));
         }
 
         public object? Deserialize(byte[] bytes, Type type)
         {
-            return JsonConvert.DeserializeObject(this.defaultEncoding.GetString(bytes), type,
-                this.jsonSerializerSettings);
+            return JsonConvert.DeserializeObject(this.defaultEncoding.GetString(bytes), type);
         }
 
         public T Deserialize<T>(byte[] bytes)
@@ -44,14 +43,14 @@ namespace Marble.Core.Serialization.Json
                 _ => input
             };
         }
-        
+
         private object UnpackFromContainer(object input)
         {
             if (!(input is ValueContainerBase))
             {
                 return input;
             }
-            
+
             return input switch
             {
                 Int32Container container => container.Value,

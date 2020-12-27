@@ -1,5 +1,5 @@
 ﻿using Marble.Messaging.Contracts.Abstractions;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message;
 using Marble.Messaging.Contracts.Models.Stream;
 using Marble.Messaging.Utilities;
 
@@ -12,7 +12,7 @@ namespace Marble.Messaging.Extensions
         {
             return new ResponseMessage
             {
-                Stream = serializationAdapter.Deserialize<BasicStream>(remoteMessage.Payload),
+                Stream = serializationAdapter.Deserialize<NetworkStream>(remoteMessage.Payload),
                 Correlation = remoteMessage.Headers[Constants.CorrelationHeaderField] as string
             };
         }
@@ -22,12 +22,13 @@ namespace Marble.Messaging.Extensions
         {
             return new RequestMessageContext
             {
-                RequestMessage = new RequestMessage()
+                RequestMessage = new RequestMessage
                 {
                     Controller = remoteMessage.Headers[Constants.ControllerHeaderField] as string,
                     Procedure = remoteMessage.Headers[Constants.ProcedureHeaderField] as string,
                     Correlation = remoteMessage.Headers[Constants.CorrelationHeaderField] as string,
-                    Arguments = serializationAdapter.Deserialize<object[]>(remoteMessage.Payload)
+                    ParametersModelType = remoteMessage.Headers[Constants.ParametersModelType] as string,
+                    ParametersBytes = remoteMessage.Payload
                 },
                 ReplyTo = remoteMessage.ReplyTo
             };

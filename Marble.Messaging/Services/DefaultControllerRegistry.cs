@@ -5,7 +5,8 @@ using System.Linq;
 using System.Reflection;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Configuration;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message;
+using Marble.Messaging.Contracts.Models.Message.Handling;
 using Marble.Messaging.Converters;
 using Marble.Messaging.Exceptions;
 using Marble.Messaging.Explorer;
@@ -27,11 +28,11 @@ namespace Marble.Messaging.Services
 
         private ILogger<DefaultControllerRegistry<TConfiguration>> logger;
 
-        public DefaultControllerRegistry()
+        public DefaultControllerRegistry(List<Assembly>? additionalAssemblies)
         {
             this.AvailableProcedurePaths = new List<string>();
 
-            var definitions = this.LoadControllerDefinitions();
+            var definitions = this.LoadControllerDefinitions(additionalAssemblies);
 
             this.controllers = new ConcurrentDictionary<ControllerDescriptor, object>(definitions
                 .Select(definition => new KeyValuePair<ControllerDescriptor, object>(definition, null!)));
@@ -70,7 +71,8 @@ namespace Marble.Messaging.Services
             }
         }
 
-        public MessageHandlingResult InvokeProcedure(string controllerName, string procedureName, object[]? parameters)
+        public MessageHandlingResult InvokeProcedure(string controllerName, string procedureName,
+            ParametersModel? parameters)
         {
             var (key, value) = this.controllers.First(controllerDescriptor =>
                 controllerDescriptor.Key.Name == controllerName);
@@ -80,26 +82,18 @@ namespace Marble.Messaging.Services
             var procedureMethodInfo = procedureDescriptor.MethodInfo;
             // TODO: do all this logic when the controllers load and not everytime a procedure needs to be invoked
 
-            if (parameters != null)
-            {
-                var parameterInfos = procedureMethodInfo.GetParameters();
-                for (var i = 0; i < parameters.Length; i++)
-                {
-                    var parameter = parameters[i];
-                    var parameterInfo = parameterInfos[i];
-                    if (parameter.GetType() != parameterInfo.ParameterType)
-                    {
-                        // TODO: Remove when we have a solution for the int/long deserialization issue
-                        parameters[i] = Convert.ChangeType(parameter, parameterInfo.ParameterType);
-                    }
-                }
-            }
-
             object? rawReturnValue = null;
 
             try
             {
-                rawReturnValue = procedureMethodInfo.Invoke(value, parameters);
+                if (parameters is null)
+                {
+                    rawReturnValue = procedureMethodInfo.Invoke(value, null);
+                }
+                else
+                {
+                    rawReturnValue = procedureMethodInfo.Invoke(value, parameters.ToObjectArray());
+                }
             }
             catch (TargetInvocationException e)
             {
@@ -129,9 +123,28 @@ namespace Marble.Messaging.Services
             }
         }
 
-        private IList<ControllerDescriptor> LoadControllerDefinitions()
+        private IList<ControllerDescriptor> LoadControllerDefinitions(List<Assembly>? additionalAssemblies)
         {
             var targetAssembly = Assembly.GetEntryAssembly();
+            var assembliesToScan = new List<Assembly> {targetAssembly!};
+
+            if (additionalAssemblies != null)
+            {
+                assembliesToScan.AddRange(additionalAssemblies);
+            }
+
+            var foundControllers = new List<ControllerDescriptor>();
+
+            foreach (var assembly in assembliesToScan)
+            {
+                foundControllers.AddRange(this.ScanAssembly(assembly));
+            }
+
+            return foundControllers;
+        }
+
+        private IList<ControllerDescriptor> ScanAssembly(Assembly targetAssembly)
+        {
             var allControllers = new ControllerExplorer().ScanAssembly(targetAssembly).ToList();
             var containsErrors = false;
 

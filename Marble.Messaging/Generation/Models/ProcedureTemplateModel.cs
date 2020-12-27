@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using DotLiquid;
-using Marble.Messaging.Models;
 
 namespace Marble.Messaging.Generation.Models
 {
@@ -14,5 +13,7 @@ namespace Marble.Messaging.Generation.Models
         public List<Hash> Parameters { get; set; }
         public string ReturnTypeVariant { get; set; }
         public string Name { get; set; }
+
+        public string ProcedureParametersModelTypeName { get; set; }
     }
 }

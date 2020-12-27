@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Marble.Core.Hooks;
 using Marble.Core.Models;
 using Marble.Messaging.Abstractions;
@@ -26,11 +28,12 @@ namespace Marble.Messaging.Services
         private IMessagingAdapter messagingAdapter;
         private MessagingConfiguration messagingConfiguration;
 
-        public DefaultMessagingFacade(Type messagingConfigurationType, HookManager hookManager)
+        public DefaultMessagingFacade(Type messagingConfigurationType, HookManager hookManager,
+            List<Assembly>? additionalAssemblies)
         {
             this.messagingConfigurationType = messagingConfigurationType;
             this.hookManager = hookManager;
-            this.controllerRegistry = new DefaultControllerRegistry<TMessagingConfiguration>();
+            this.controllerRegistry = new DefaultControllerRegistry<TMessagingConfiguration>(additionalAssemblies);
             this.clientExplorer = new ClientExplorer();
         }
 

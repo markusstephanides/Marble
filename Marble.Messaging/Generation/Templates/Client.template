@@ -3,13 +3,15 @@
 {% endfor %}
 namespace {{ Namespace }}
 {
-    public interface I{{ ClassName }}Client : IControllerClient {
+    public interface I{{ ClassName }}Client : IControllerClient
+    {
 {% for procedure in Procedures %}        
         {{ procedure.MethodReturnType }} {{  procedure.MethodName }}({% for param in procedure.Parameters %}{{param.ReadableTypeName}} {{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %});
 {% endfor %}
     }
 
-    public class Default{{ ClassName }}Client : I{{ ClassName }}Client {
+    public sealed class Default{{ ClassName }}Client : I{{ ClassName }}Client
+    {
        
         private readonly IMessagingClient messagingClient;
         
@@ -18,10 +20,39 @@ namespace {{ Namespace }}
             this.messagingClient = messagingClient;
         }
 
-{% for procedure in Procedures %}        public {{ procedure.MethodReturnType }} {{  procedure.MethodName }}({% for param in procedure.Parameters %}{{param.ReadableTypeName}} {{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %}){
-            return this.messagingClient.{% if procedure.ReturnTypeVariant == "Stream" %}InvokeProcedureStream<{{ procedure.PureReturnType }}>{% elsif procedure.ReturnTypeVariant == "Single" %}InvokeProcedureAsync<{{ procedure.PureReturnType }}>{% elsif procedure.ReturnTypeVariant == "Void" %}CallProcedureAsync{% endif %}(new RequestMessage("{{ ServiceName }}", "{{ procedure.Name }}", {% for param in procedure.Parameters %}{{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %}));
+{% for procedure in Procedures %}        public {{ procedure.MethodReturnType }} {{  procedure.MethodName }}({% for param in procedure.Parameters %}{{param.ReadableTypeName}} {{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %})
+        {
+            return this.messagingClient.{% if procedure.ReturnTypeVariant == "Stream" %}InvokeProcedureStream<{{ procedure.PureReturnType }}>{% elsif procedure.ReturnTypeVariant == "Single" %}InvokeProcedureAsync<{{ procedure.PureReturnType }}>{% elsif procedure.ReturnTypeVariant == "Void" %}CallProcedureAsync{% endif %}("{{ ServiceName }}", "{{ procedure.Name }}"{% if procedure.Parameters.size > 0 %}, new {{ procedure.ProcedureParametersModelTypeName }}({% for param in procedure.Parameters %}{{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %}){% endif %});
         }
     
 {% endfor %}
     }
+    
+{% for procedure in Procedures %}  
+{% if procedure.Parameters.size > 0 %}
+    public sealed class {{ procedure.ProcedureParametersModelTypeName }} : ParametersModel
+    {
+        {% for param in procedure.Parameters %}public {{ param.ReadableTypeName }} {{ param.Name | capitalize }} { get; set; }
+        {% endfor %}
+        public {{ procedure.ProcedureParametersModelTypeName }}()
+        {
+        }
+        
+        public {{ procedure.ProcedureParametersModelTypeName }}({% for param in procedure.Parameters %}{{param.ReadableTypeName}} {{param.Name}}{% unless forloop.last %}, {% endunless %}{% endfor %})
+        {
+            {% for param in procedure.Parameters %}this.{{ param.Name | capitalize }} = {{ param.Name }};
+            {% endfor %}
+        }
+        
+        public override object[] ToObjectArray()
+        {
+            return new object[]
+            {
+                  {% for param in procedure.Parameters %}this.{{ param.Name | capitalize }}{% unless forloop.last %},{% endunless %}
+                  {% endfor %}
+            };
+        }
+    }
+{% endif %}
+{% endfor %}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DotLiquid;
@@ -31,7 +32,8 @@ namespace Marble.Messaging.Generation
                 "System",
                 "System.Threading.Tasks",
                 "Marble.Messaging.Contracts.Abstractions",
-                "Marble.Messaging.Contracts.Models"
+                "Marble.Messaging.Contracts.Models",
+                "Marble.Messaging.Contracts.Models.Message"
             };
 
             var procedureModels = new List<Hash>();
@@ -43,9 +45,14 @@ namespace Marble.Messaging.Generation
                 // Add using directive for return type
                 if (!methodInfo.ReturnType.IsPrimitive && methodInfo.ReturnType.Namespace != null)
                 {
-                    if (!usingDirectives.Contains(methodInfo.ReturnType.Namespace))
+                    var tmpList = new List<string>();
+                    var returnTypeUsingDirectives = methodInfo.ReturnType.GetUsedNamespaces(ref tmpList);
+
+                    foreach (var returnTypeUsingDirective in returnTypeUsingDirectives.Where(returnTypeUsingDirective =>
+                        returnTypeUsingDirective != null &&
+                        !usingDirectives.Contains(methodInfo.ReturnType.Namespace)))
                     {
-                        usingDirectives.Add(methodInfo.ReturnType.Namespace);
+                        usingDirectives.Add(returnTypeUsingDirective);
                     }
                 }
 
@@ -72,7 +79,7 @@ namespace Marble.Messaging.Generation
                     }
                 }
 
-                procedureModels.Add(Hash.FromAnonymousObject(new ProcedureTemplateModel
+                var procedureModel = new ProcedureTemplateModel
                 {
                     MethodName = methodInfo.Name,
                     Name = procedureDescriptor.Name,
@@ -80,7 +87,12 @@ namespace Marble.Messaging.Generation
                     ReturnTypeVariant = procedureDescriptor.ReturnTypeVariant.ToString(),
                     PureReturnType = procedureDescriptor.PureReturnType.GetReadableName(),
                     Parameters = paramsList
-                }));
+                };
+
+                procedureModel.ProcedureParametersModelTypeName =
+                    $"{serviceName}{procedureModel.MethodName}ParametersModel";
+
+                procedureModels.Add(Hash.FromAnonymousObject(procedureModel));
             }
 
             var templateModel = new ClientTemplateModel

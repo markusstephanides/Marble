@@ -1,4 +1,4 @@
-﻿using Marble.Messaging.Contracts.Models;
+﻿using Marble.Messaging.Contracts.Models.Message;
 using Marble.Messaging.Models;
 
 namespace Marble.Messaging.Transformers
