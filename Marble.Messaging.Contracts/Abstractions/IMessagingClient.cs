@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message;
 
 namespace Marble.Messaging.Contracts.Abstractions
 {
     public interface IMessagingClient
     {
-        IObservable<TResult> InvokeProcedureStream<TResult>(string controller, string procedure, params object[] parameters);
-        IObservable<TResult> InvokeProcedureStream<TResult>(RequestMessage requestMessage);
-        Task<TResult> InvokeProcedureAsync<TResult>(string controller, string procedure, params object[] parameters);
-        Task<TResult> InvokeProcedureAsync<TResult>(RequestMessage requestMessage);
-        Task CallProcedureAsync(string controller, string procedure, params object[] parameters);
+        IObservable<TResult> InvokeProcedureStream<TResult>(string controller, string procedure,
+            ParametersModel? messageParameters = null);
+
+        Task<TResult> InvokeProcedureAsync<TResult>(string controller, string procedure,
+            ParametersModel? messageParameters = null);
+
+        Task CallProcedureAsync(string controller, string procedure,
+            ParametersModel? messageParameters = null);
+
         Task CallProcedureAsync(RequestMessage requestMessage);
     }
 }

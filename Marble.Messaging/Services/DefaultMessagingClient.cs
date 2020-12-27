@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message;
+using Marble.Messaging.Contracts.Models.Stream;
 using Marble.Messaging.Extensions;
 using Marble.Messaging.Transformers;
 using Marble.Messaging.Utilities;
@@ -35,6 +36,32 @@ namespace Marble.Messaging.Services
             this.messageFeed = this.messagingAdapter.MessageFeed;
         }
 
+        public Task CallProcedureAsync(RequestMessage requestMessage)
+        {
+            return this.messagingAdapter.SendRemoteMessage(requestMessage.ToRemoteMessage(this.serializationAdapter));
+        }
+
+        public IObservable<TResult> InvokeProcedureStream<TResult>(string controller, string procedure,
+            ParametersModel? messageParameters = null)
+        {
+            return this.InvokeProcedureStream<TResult>(RequestMessage.Create(controller, procedure, messageParameters,
+                this.serializationAdapter));
+        }
+
+        public Task<TResult> InvokeProcedureAsync<TResult>(string controller, string procedure,
+            ParametersModel? messageParameters = null)
+        {
+            return this.InvokeProcedureAsync<TResult>(RequestMessage.Create(controller, procedure, messageParameters,
+                this.serializationAdapter));
+        }
+
+        public Task CallProcedureAsync(string controller, string procedure,
+            ParametersModel? messageParameters = null)
+        {
+            return this.CallProcedureAsync(RequestMessage.Create(controller, procedure, messageParameters,
+                this.serializationAdapter));
+        }
+
         public IObservable<TResult> InvokeProcedureStream<TResult>(RequestMessage requestMessage)
         {
             requestMessage.Correlation ??= Guid.NewGuid().ToString();
@@ -55,6 +82,11 @@ namespace Marble.Messaging.Services
                 .Timeout(TimeSpan.FromSeconds(Constants.DefaultTimeoutSeconds))
                 .Do(result =>
                 {
+                    if (result is null)
+                    {
+                        return;
+                    }
+
                     this.logger.LogInformation(
                         "Received response of type {responseType} for procedure invocation {procedurePath} after {elapsedMilliseconds} ms",
                         result.GetType().Name, ProcedurePath.FromRequestMessage(requestMessage),
@@ -68,28 +100,6 @@ namespace Marble.Messaging.Services
                 .ToTask();
         }
 
-        public Task CallProcedureAsync(RequestMessage requestMessage)
-        {
-            return this.messagingAdapter.SendRemoteMessage(requestMessage.ToRemoteMessage(this.serializationAdapter));
-        }
-
-        public IObservable<TResult> InvokeProcedureStream<TResult>(string controller, string procedure,
-            params object[] parameters)
-        {
-            return this.InvokeProcedureStream<TResult>(new RequestMessage(controller, procedure, parameters));
-        }
-
-        public Task<TResult> InvokeProcedureAsync<TResult>(string controller, string procedure,
-            params object[] parameters)
-        {
-            return this.InvokeProcedureAsync<TResult>(new RequestMessage(controller, procedure, parameters));
-        }
-
-        public Task CallProcedureAsync(string controller, string procedure, params object[] parameters)
-        {
-            return this.CallProcedureAsync(new RequestMessage(controller, procedure, parameters));
-        }
-
         private IObservable<TResult> ConstructResponseStream<TResult>(RequestMessage requestMessage)
         {
             return this.messageFeed
@@ -98,7 +108,9 @@ namespace Marble.Messaging.Services
                     message.MessageType == MessageType.ResponseMessage)
                 .Select(message => message.ToResponseMessage(this.serializationAdapter))
                 .Where(responseMessage => responseMessage.Correlation == requestMessage.Correlation)
-                .Select(responseMessage => this.streamManager.StreamToObservable<TResult>(responseMessage.Stream)
+                .Select(responseMessage => this.streamManager
+                    .TypedStreamToObservable(
+                        NetworkStream.ToTypedStream<TResult>(responseMessage.Stream, this.serializationAdapter))
                     .Materialize())
                 .Switch()
                 .Dematerialize();

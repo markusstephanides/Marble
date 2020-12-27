@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using Marble.Messaging.Contracts.Abstractions;
-using Marble.Messaging.Contracts.Models;
+using Marble.Messaging.Contracts.Models.Message.Handling;
 
 namespace Marble.Messaging.Converters
 {
@@ -13,16 +13,11 @@ namespace Marble.Messaging.Converters
         {
             if (!genericTypeArgument!.IsValueType)
             {
-                return new MessageHandlingResult
-                {
-                    ResultStream = (IObservable<object>) result
-                };
+                return new MessageHandlingResult((IObservable<object>) result);
             }
 
-            return new MessageHandlingResult
-            {
-                ResultStream = this.ConvertValueTypeBasedObservableToObjectObservable(result, genericTypeArgument)
-            };
+            return new MessageHandlingResult(
+                this.ConvertValueTypeBasedObservableToObjectObservable(result, genericTypeArgument));
         }
 
         private IObservable<object> ConvertValueTypeBasedObservableToObjectObservable(object result,

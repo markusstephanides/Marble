@@ -127,6 +127,51 @@ namespace Marble.SandboxAPI.Controllers
             }
         }
 
+        [HttpGet("addReturnTaskGuid")]
+        public async Task<ActionResult> AddReturnTaskGuid()
+        {
+            try
+            {
+                var result = await this.mathService.ReturnGuid(1, 1).ConfigureAwait(false);
+                return this.Ok(new {result});
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError(e, "Failed to send ReturnGuid request");
+                return this.StatusCode(500, new {message = e.Message});
+            }
+        }
+
+        [HttpGet("returnNull")]
+        public async Task<ActionResult> ReturnNull()
+        {
+            try
+            {
+                var result = await this.mathService.ReturnNull().ConfigureAwait(false);
+                return this.Ok(new {result});
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError(e, "Failed to send ReturnNull request");
+                return this.StatusCode(500, new {message = e.Message});
+            }
+        }
+
+
+        [HttpGet("returnGuidNull")]
+        public async Task<ActionResult> ReturnGuidNull()
+        {
+            try
+            {
+                var result = await this.mathService.ReturnNullGuid().ConfigureAwait(false);
+                return this.Ok(new {result});
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError(e, "Failed to send ReturnGuidNull request");
+                return this.StatusCode(500, new {message = e.Message});
+            }
+        }
 
         [HttpGet("addReturnTaskObjectThrowException")]
         public async Task<ActionResult> AddReturnTaskObjectThrowException([FromQuery] int a, [FromQuery] int b)

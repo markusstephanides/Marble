@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Marble.Messaging.Contracts.Models
+namespace Marble.Messaging.Contracts.Models.Message
 {
     public class RemoteMessage
     {
