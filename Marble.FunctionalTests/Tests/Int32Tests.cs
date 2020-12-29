@@ -12,6 +12,7 @@ using NUnit.Framework;
 
 namespace Marble.FunctionalTests.Tests
 {
+    [Ignore("Disabled until finished")]
     public class Int32Tests
     {
         private IInt32TestServiceClient client;
