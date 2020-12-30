@@ -103,7 +103,20 @@ namespace Marble.Messaging.Generation
             };
 
             var result = this.template.Render(Hash.FromAnonymousObject(templateModel));
-            File.WriteAllText(Path.Join(this.generationSettings.OutputDirectory, outputFileName), result);
+            var targetFileName = Path.Join(this.generationSettings.OutputDirectory, outputFileName);
+
+            if (File.Exists(targetFileName))
+            {
+                var currentContent = File.ReadAllText(targetFileName);
+
+                if (currentContent == result)
+                {
+                    return;
+                }
+            }
+
+            File.WriteAllText(targetFileName, result);
+            File.SetAttributes(targetFileName, FileAttributes.ReadOnly);
         }
 
         private string GetReturnTypeString(MethodInfo methodInfo)
