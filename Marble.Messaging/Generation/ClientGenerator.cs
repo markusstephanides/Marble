@@ -32,7 +32,6 @@ namespace Marble.Messaging.Generation
                 "System",
                 "System.Threading.Tasks",
                 "Marble.Messaging.Contracts.Abstractions",
-                "Marble.Messaging.Contracts.Models",
                 "Marble.Messaging.Contracts.Models.Message"
             };
 
@@ -45,12 +44,11 @@ namespace Marble.Messaging.Generation
                 // Add using directive for return type
                 if (!methodInfo.ReturnType.IsPrimitive && methodInfo.ReturnType.Namespace != null)
                 {
-                    var tmpList = new List<string>();
-                    var returnTypeUsingDirectives = methodInfo.ReturnType.GetUsedNamespaces(ref tmpList);
+                    var returnTypeUsingDirectives = methodInfo.ReturnType.GetUsedNamespaces();
 
                     foreach (var returnTypeUsingDirective in returnTypeUsingDirectives.Where(returnTypeUsingDirective =>
                         returnTypeUsingDirective != null &&
-                        !usingDirectives.Contains(methodInfo.ReturnType.Namespace)))
+                        !usingDirectives.Contains(returnTypeUsingDirective)))
                     {
                         usingDirectives.Add(returnTypeUsingDirective);
                     }
@@ -62,7 +60,7 @@ namespace Marble.Messaging.Generation
                 foreach (var parameterInfo in methodInfo.GetParameters())
                 {
                     var tmpList = new List<string>();
-                    var parameterUsingDirectives = parameterInfo.ParameterType.GetUsedNamespaces(ref tmpList);
+                    var parameterUsingDirectives = parameterInfo.ParameterType.GetUsedNamespaces();
 
                     foreach (var parameterUsingDirective in parameterUsingDirectives)
                     {

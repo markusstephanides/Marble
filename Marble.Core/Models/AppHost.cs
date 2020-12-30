@@ -38,8 +38,8 @@ namespace Marble.Core.Models
         {
             var elapsedTimeMs = (int) (DateTime.Now - this.initialCreationTime).TotalMilliseconds;
 
-            this.logger.LogInformation("Startup completed in {elapsedTimeMs} ms", elapsedTimeMs);
             this.appLifetime.OnAppStarted.Invoke(this.ServiceProvider);
+            this.logger.LogInformation("Startup completed in {elapsedTimeMs} ms", elapsedTimeMs);
 
             if (this.externallyHosted)
             {
