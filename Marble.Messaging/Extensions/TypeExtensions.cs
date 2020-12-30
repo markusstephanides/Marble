@@ -9,21 +9,21 @@ namespace Marble.Messaging.Extensions
     {
         private static readonly Dictionary<Type, string> PrimitiveTypeAliases = new Dictionary<Type, string>
         {
-            { typeof(bool), "bool" },
-            { typeof(byte), "byte" },
-            { typeof(char), "char" },
-            { typeof(decimal), "decimal" },
-            { typeof(double), "double" },
-            { typeof(float), "float" },
-            { typeof(int), "int" },
-            { typeof(long), "long" },
-            { typeof(object), "object" },
-            { typeof(sbyte), "sbyte" },
-            { typeof(short), "short" },
-            { typeof(string), "string" },
-            { typeof(uint), "uint" },
-            { typeof(ulong), "ulong" },
-            { typeof(void), "void" }
+            {typeof(bool), "bool"},
+            {typeof(byte), "byte"},
+            {typeof(char), "char"},
+            {typeof(decimal), "decimal"},
+            {typeof(double), "double"},
+            {typeof(float), "float"},
+            {typeof(int), "int"},
+            {typeof(long), "long"},
+            {typeof(object), "object"},
+            {typeof(sbyte), "sbyte"},
+            {typeof(short), "short"},
+            {typeof(string), "string"},
+            {typeof(uint), "uint"},
+            {typeof(ulong), "ulong"},
+            {typeof(void), "void"}
         };
 
         public static string GetPrimitiveAlias(this Type type)
@@ -45,18 +45,25 @@ namespace Marble.Messaging.Extensions
 
             StringBuilder sb = new StringBuilder(t.Name.Substring(0, t.GetPrimitiveAlias().IndexOf('`')));
             sb.Append('<');
-            bool appendComma = false;
+            var appendComma = false;
             foreach (Type arg in t.GetGenericArguments())
             {
-                if (appendComma) sb.Append(',');
+                if (appendComma)
+                {
+                    sb.Append(',');
+                }
+
                 sb.Append(GetReadableName(arg));
                 appendComma = true;
             }
+
             return sb.Append('>').ToString();
         }
 
-        public static List<string> GetUsedNamespaces(this Type type, ref List<string> list)
+        public static List<string> GetUsedNamespaces(this Type type)
         {
+            var list = new List<string>();
+
             if (type.Namespace != null)
             {
                 list.Add(type.Namespace);
@@ -66,32 +73,34 @@ namespace Marble.Messaging.Extensions
             {
                 return list;
             }
-            
+
             foreach (Type arg in type.GetGenericArguments())
             {
-               list.AddRange(GetUsedNamespaces(arg, ref list));
+                list.AddRange(GetUsedNamespaces(arg));
             }
 
             return list;
         }
-        
+
         public static bool InheritsOrImplements(this Type child, Type parent)
         {
             if (child == parent)
             {
                 return true;
             }
-            
+
             parent = ResolveGenericTypeDefinition(parent);
 
             var currentChild = child.IsGenericType
                 ? child.GetGenericTypeDefinition()
                 : child;
 
-            while (currentChild != typeof (object))
+            while (currentChild != typeof(object))
             {
                 if (parent == currentChild || HasAnyInterfaces(parent, currentChild))
+                {
                     return true;
+                }
 
                 currentChild = currentChild.BaseType != null
                                && currentChild.BaseType.IsGenericType
@@ -99,8 +108,11 @@ namespace Marble.Messaging.Extensions
                     : currentChild.BaseType;
 
                 if (currentChild == null)
+                {
                     return false;
+                }
             }
+
             return false;
         }
 
@@ -121,10 +133,15 @@ namespace Marble.Messaging.Extensions
         {
             var shouldUseGenericType = true;
             if (parent.IsGenericType && parent.GetGenericTypeDefinition() != parent)
+            {
                 shouldUseGenericType = false;
+            }
 
             if (parent.IsGenericType && shouldUseGenericType)
+            {
                 parent = parent.GetGenericTypeDefinition();
+            }
+
             return parent;
         }
     }
