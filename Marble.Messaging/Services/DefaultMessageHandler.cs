@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
 using Marble.Messaging.Contracts.Models.Message;
@@ -41,12 +42,11 @@ namespace Marble.Messaging.Services
             this.messagingAdapter.MessageFeed
                 .Where(remoteMessage => remoteMessage.MessageType == MessageType.RequestMessage)
                 .Select(remoteMessage => remoteMessage.ToRequestMessageContext(this.serializationAdapter))
-                .Subscribe(this.HandleRequestMessage);
+                .Subscribe(context => Task.Run(() => this.HandleRequestMessage(context)));
         }
 
         private void HandleRequestMessage(RequestMessageContext requestMessageContext)
         {
-            // TODO check which thread this is
             var stopwatch = Stopwatch.StartNew();
             var requestMessage = requestMessageContext.RequestMessage;
             try
