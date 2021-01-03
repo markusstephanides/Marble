@@ -4,7 +4,7 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageLicenseUrl>https://github.com/markusstephanides/Marble/blob/main/LICENSE</PackageLicenseUrl>
-        <PackageVersion>0.4.3</PackageVersion>
+        <PackageVersion>0.4.4</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
