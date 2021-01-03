@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <Nullable>enable</Nullable>
-        <PackageVersion>0.4.2</PackageVersion>
+        <PackageVersion>0.4.3</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
