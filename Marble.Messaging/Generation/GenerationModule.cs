@@ -27,7 +27,7 @@ namespace Marble.Messaging.Generation
             this.applicationLaunchMode = DefaultApplicationLaunchMode;
 
             if (Enum.TryParse<ApplicationLaunchMode>(
-                Environment.GetEnvironmentVariable(OutputDirectoryEnvironmentVariableName,
+                Environment.GetEnvironmentVariable(LaunchModeEnvironmentVariableName,
                     EnvironmentVariableTarget.Process),
                 out var userApplicationLaunchMode))
             {

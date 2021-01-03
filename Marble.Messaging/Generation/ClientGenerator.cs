@@ -113,9 +113,10 @@ namespace Marble.Messaging.Generation
                 {
                     return;
                 }
+
+                File.SetAttributes(targetFileName, File.GetAttributes(targetFileName) & ~FileAttributes.ReadOnly);
             }
 
-            File.SetAttributes(targetFileName, File.GetAttributes(targetFileName) & ~FileAttributes.ReadOnly);
             File.WriteAllText(targetFileName, result);
             File.SetAttributes(targetFileName, FileAttributes.ReadOnly);
         }
