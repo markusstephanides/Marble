@@ -49,7 +49,7 @@ namespace Marble.Messaging.Services
                 return (ISerializationAdapter) Activator.CreateInstance(config.SerializationAdapterType);
             });
             serviceCollection.AddSingleton<IMessagingAdapter, TMessagingAdapter>();
-            serviceCollection.AddSingleton<IMessagingClient, DefaultMessagingClient>();
+            serviceCollection.AddSingleton<IMessagingClient, DefaultMessagingClient<TMessagingConfiguration>>();
             serviceCollection.AddSingleton<IMessageHandler, DefaultMessageHandler>();
             serviceCollection.AddSingleton<IStreamManager, DefaultStreamManager>();
 

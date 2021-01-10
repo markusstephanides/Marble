@@ -9,28 +9,31 @@ namespace Marble.Messaging.Contracts.Utilities
 
         public static Type FromString(string fullTypeName)
         {
-            if (Cache.ContainsKey(fullTypeName))
+            lock (Cache)
             {
-                return Cache[fullTypeName];
-            }
-
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            foreach (var assembly in assemblies)
-            {
-                var t = assembly.GetType(fullTypeName, false);
-
-                if (t == null)
+                if (Cache.ContainsKey(fullTypeName))
                 {
-                    continue;
+                    return Cache[fullTypeName];
                 }
 
-                Cache.Add(fullTypeName, t);
-                return t;
-            }
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            throw new ArgumentException(
-                "Type " + fullTypeName + " doesn't exist in the current app domain");
+                foreach (var assembly in assemblies)
+                {
+                    var t = assembly.GetType(fullTypeName, false);
+
+                    if (t == null)
+                    {
+                        continue;
+                    }
+
+                    Cache.Add(fullTypeName, t);
+                    return t;
+                }
+
+                throw new ArgumentException(
+                    "Type " + fullTypeName + " doesn't exist in the current app domain");
+            }
         }
     }
 }
