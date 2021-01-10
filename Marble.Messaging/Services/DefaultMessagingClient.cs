@@ -6,19 +6,22 @@ using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using Marble.Messaging.Abstractions;
 using Marble.Messaging.Contracts.Abstractions;
+using Marble.Messaging.Contracts.Configuration;
 using Marble.Messaging.Contracts.Models.Message;
 using Marble.Messaging.Contracts.Models.Stream;
 using Marble.Messaging.Extensions;
 using Marble.Messaging.Transformers;
-using Marble.Messaging.Utilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Marble.Messaging.Services
 {
-    public class DefaultMessagingClient : IMessagingClient
+    public class DefaultMessagingClient<TConfiguration> : IMessagingClient
+        where TConfiguration : MessagingConfiguration
     {
+        private readonly TConfiguration configuration;
         private readonly IControllerRegistry controllerRegistry;
-        private readonly ILogger<DefaultMessagingClient> logger;
+        private readonly ILogger<DefaultMessagingClient<TConfiguration>> logger;
         private readonly IObservable<RemoteMessage> messageFeed;
         private readonly IMessagingAdapter messagingAdapter;
         private readonly ISerializationAdapter serializationAdapter;
@@ -26,13 +29,14 @@ namespace Marble.Messaging.Services
 
         public DefaultMessagingClient(IMessagingAdapter messagingAdapter, ISerializationAdapter serializationAdapter,
             IControllerRegistry controllerRegistry, IStreamManager streamManager,
-            ILogger<DefaultMessagingClient> logger)
+            ILogger<DefaultMessagingClient<TConfiguration>> logger, IOptions<TConfiguration> configuration)
         {
             this.messagingAdapter = messagingAdapter;
             this.serializationAdapter = serializationAdapter;
             this.controllerRegistry = controllerRegistry;
             this.streamManager = streamManager;
             this.logger = logger;
+            this.configuration = configuration.Value;
             this.messageFeed = this.messagingAdapter.MessageFeed;
         }
 
@@ -79,7 +83,7 @@ namespace Marble.Messaging.Services
             var stopwatch = Stopwatch.StartNew();
             return this.InvokeProcedureStream<TResult>(requestMessage)
                 .FirstAsync()
-                .Timeout(TimeSpan.FromSeconds(Constants.DefaultTimeoutSeconds))
+                .Timeout(TimeSpan.FromSeconds(this.configuration.DefaultTimeoutInSeconds))
                 .Do(result =>
                 {
                     if (result is null)
